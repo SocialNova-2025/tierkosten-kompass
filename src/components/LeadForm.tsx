@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { Pet, LeadFields, DesiredCover, ContactTime, PersistedLead } from '../types'
+import type { Pet, LeadFields, PersistedLead } from '../types'
 import { T, BTN } from '../styles/tokens'
 import { ConsentCheckbox } from './ConsentCheckbox'
 import { consentShareText, consentContactText } from '../data/copy'
@@ -14,7 +14,6 @@ interface LeadFormProps {
 
 const INITIAL_FIELDS: LeadFields = {
   firstName: '', lastName: '', phone: '', email: '',
-  desiredCover: '', contactTime: '',
 }
 
 export function LeadForm({ pet, onSubmit, onCancel }: LeadFormProps) {
@@ -50,43 +49,27 @@ export function LeadForm({ pet, onSubmit, onCancel }: LeadFormProps) {
     color: T.text, fontFamily: 'inherit', outline: 'none',
   }
 
-  const chipOpts = (opts: { v: string; label: string }[], current: string, key: keyof LeadFields) => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
-      {opts.map(o => (
-        <button
-          key={o.v}
-          style={{
-            width: '100%', padding: '12px 14px', borderRadius: 11, textAlign: 'left',
-            fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit',
-            border: `1.5px solid ${current === o.v ? T.primary : T.border}`,
-            background: '#fff', color: current === o.v ? T.primary : T.text,
-          }}
-          onClick={() => set(key, o.v)}
-        >
-          {o.label}
-        </button>
-      ))}
-    </div>
-  )
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+      {/* Header */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
         <h2 style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-.03em', color: T.text }}>
-          Lass deinen Schutz prüfen
+          Beratung per WhatsApp erhalten
         </h2>
         <p style={{ fontSize: 13, color: T.muted }}>
-          Ein lizenzierter Partner meldet sich bei dir. Unverbindlich.
+          Deine Angaben helfen dabei, dich einem passenden Beratungspartner zuzuordnen.
+          Dieser kontaktiert dich per WhatsApp und klärt mit dir, welcher Schutz zu
+          deinem Tier passen könnte.
         </p>
       </div>
 
       {/* Trust list */}
       <div className="card card-teal">
-        <div className="flbl">Wie es weitergeht</div>
+        <div className="flbl">So läuft es ab</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 }}>
           {[
-            ['Kein Abschluss in der App', 'Du gehst keine Verpflichtung ein.'],
-            ['Unverbindliche Prüfung', 'Du entscheidest selbst, ob du etwas abschließt.'],
+            ['Orientierung zuerst', 'Du entscheidest selbst – keine Sofortentscheidung nötig.'],
+            ['Beratung auf Wunsch', 'Der Beratungspartner erklärt dir deine Möglichkeiten – ohne Druck.'],
             ['Kontakt nur mit deiner Einwilligung', 'Deine Daten werden erst nach Bestätigung weitergegeben.'],
           ].map(([h, b]) => (
             <div key={h} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
@@ -122,7 +105,7 @@ export function LeadForm({ pet, onSubmit, onCancel }: LeadFormProps) {
 
       {/* Phone */}
       <div>
-        <div className="flbl">Telefon <span style={{ color: T.red }}>*</span></div>
+        <div className="flbl">WhatsApp / Telefon <span style={{ color: T.red }}>*</span></div>
         <input style={inp} type="tel" placeholder="+49 170 1234567" value={f.phone} onChange={e => set('phone', e.target.value)} />
         {f.phone && !phoneOk && <div style={{ fontSize: 12, color: T.red, marginTop: 3 }}>Bitte gültige Telefonnummer eingeben</div>}
       </div>
@@ -134,27 +117,6 @@ export function LeadForm({ pet, onSubmit, onCancel }: LeadFormProps) {
         {f.email && !emailOk && <div style={{ fontSize: 12, color: T.red, marginTop: 3 }}>Bitte gültige E-Mail-Adresse eingeben</div>}
       </div>
 
-      {/* Desired cover */}
-      <div>
-        <div className="flbl">Gewünschter Schutz <span style={{ color: T.red }}>*</span></div>
-        {chipOpts([
-          { v: 'op', label: 'OP-Schutz' },
-          { v: 'voll', label: 'Vollschutz' },
-          { v: 'unsicher', label: 'Bin mir nicht sicher' },
-        ], f.desiredCover, 'desiredCover')}
-      </div>
-
-      {/* Contact time */}
-      <div>
-        <div className="flbl">Gewünschte Kontaktzeit</div>
-        {chipOpts([
-          { v: 'morgens', label: 'Morgens (8–12 Uhr)' },
-          { v: 'mittags', label: 'Mittags (12–16 Uhr)' },
-          { v: 'nachmittags', label: 'Nachmittags (16–20 Uhr)' },
-          { v: 'egal', label: 'Egal' },
-        ], f.contactTime, 'contactTime')}
-      </div>
-
       {/* Consents – never pre-selected */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         <div className="flbl">Einwilligungen (beide erforderlich)</div>
@@ -162,14 +124,14 @@ export function LeadForm({ pet, onSubmit, onCancel }: LeadFormProps) {
         <ConsentCheckbox text={consentContactText} checked={c2} onChange={setC2} />
         {(!c1 || !c2) && (
           <p style={{ fontSize: 12, color: T.muted }}>
-            Beide Einwilligungen sind nötig, um deine Anfrage weiterzuleiten.
+            Beide Einwilligungen sind erforderlich, um dich mit einem Beratungspartner zu verbinden.
           </p>
         )}
       </div>
 
-      {/* No-submit notice */}
+      {/* Trust badge */}
       <div style={{ fontSize: 12, background: T.pLight, borderRadius: 9, padding: '9px 13px', color: T.primary, fontWeight: 600, textAlign: 'center' }}>
-        Kein Abschluss in der App · Anfrage ist unverbindlich
+        Orientierung zuerst · Beratung nur auf Wunsch
       </div>
 
       {/* Submit – primary when valid, disabled when not */}
@@ -178,7 +140,7 @@ export function LeadForm({ pet, onSubmit, onCancel }: LeadFormProps) {
         disabled={!valid}
         onClick={valid ? handleSubmit : undefined}
       >
-        Anfrage absenden →
+        Beratung per WhatsApp erhalten →
       </button>
 
       <button style={{ cssText: BTN.ghost } as React.CSSProperties}
@@ -189,7 +151,7 @@ export function LeadForm({ pet, onSubmit, onCancel }: LeadFormProps) {
       </button>
 
       <p style={{ fontSize: 11, color: T.muted, textAlign: 'center' }}>
-        Daten werden nur mit deiner Einwilligung weitergeleitet
+        Deine Angaben werden nur zur Zuordnung und Kontaktaufnahme für die Schutzklärung genutzt.
       </p>
     </div>
   )
