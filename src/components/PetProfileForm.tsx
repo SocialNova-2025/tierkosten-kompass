@@ -14,6 +14,8 @@ export function PetProfileForm({ initial, onDone }: PetProfileFormProps) {
   const [age, setAge]         = useState(initial?.ageYears?.toString() ?? '')
   const [weight, setWeight]   = useState(initial?.weightKg?.toString() ?? '')
   const [ins, setIns]         = useState(initial?.hasInsurance ?? false)
+  const [city, setCity]       = useState(initial?.city ?? '')
+  const [city, setCity]       = useState(initial?.city ?? '')
 
   const ageNum    = Number(age)
   const weightNum = Number(weight)
@@ -79,6 +81,29 @@ export function PetProfileForm({ initial, onDone }: PetProfileFormProps) {
         </div>
       </div>
 
+      {/* City – optional */}
+      <div>
+        <div className="flbl">Stadt oder PLZ <span style={{ color: T.muted, fontWeight: 400, fontSize: 11 }}>(optional – für Notdienst-Suche)</span></div>
+        <input
+          style={inp}
+          placeholder="z.\u00a0B. München oder 80331"
+          value={city}
+          onChange={e => setCity(e.target.value)}
+        />
+      </div>
+
+      {/* Stadt/PLZ – optional, für Notdienst-Suche */}
+      <div>
+        <div className="flbl">Stadt oder PLZ <span style={{ fontSize: 11, fontWeight: 400, color: T.muted }}>(optional)</span></div>
+        <input
+          style={inp}
+          placeholder="z. B. München oder 80331"
+          value={city}
+          onChange={e => setCity(e.target.value)}
+        />
+        <div style={{ fontSize: 11, color: T.muted, marginTop: 3 }}>Wird nur für die Notdienst-Suche verwendet.</div>
+      </div>
+
       {/* Submit */}
       <button
         ref={el => { if (el) el.style.cssText = valid ? BTN.primary : BTN.primaryDisabled }}
@@ -92,6 +117,7 @@ export function PetProfileForm({ initial, onDone }: PetProfileFormProps) {
             ageYears: ageNum,
             weightKg: weightNum,
             hasInsurance: ins,
+            ...(city.trim() ? { city: city.trim() } : {}),
           })
         }}
       >
