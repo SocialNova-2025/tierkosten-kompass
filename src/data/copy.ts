@@ -7,9 +7,9 @@
 
 /** Medical disclaimer – interpolate pet name */
 export const disclaimer = (petName: string): string =>
-  `TierKosten Kompass stellt keine Diagnose und ersetzt keinen Tierarzt. ` +
-  `Die Einschätzung ist eine Orientierung auf Basis deiner Angaben. ` +
-  `Bitte lass ${petName} im Zweifel immer tierärztlich abklären.`
+  'TierKosten Kompass stellt keine Diagnose und ersetzt keinen Tierarzt. ' +
+  'Die Einschätzung ist eine Orientierung auf Basis deiner Angaben. ' +
+  'Bitte lass ' + petName + ' im Zweifel immer tierärztlich abklären.'
 
 /** Cost disclaimer – shown below every cost section */
 export const costHint =
@@ -31,21 +31,18 @@ export const insuranceHint =
 
 /** DSGVO consent texts – both required, never pre-selected */
 export const consentShareText =
-  'Ich bin damit einverstanden, dass meine Angaben zur Zuordnung und ' +
-  'Schutzklärung an einen passenden Beratungspartner weitergegeben werden. ' +
-  'Diese Einwilligung kann ich jederzeit mit Wirkung für die Zukunft widerrufen. ' +
-  'Weitere Infos in der Datenschutzerklärung.'
+  'Ich bin damit einverstanden, WhatsApp für die Schutzklärung zu öffnen ' +
+  'und den vorbereiteten Text selbst abzusenden.'
 
 export const consentContactText =
-  'Ich bin damit einverstanden, dass mich ein passender Beratungspartner ' +
-  'per WhatsApp oder telefonisch kontaktiert. ' +
-  'Auch diese Einwilligung kann ich jederzeit widerrufen.'
+  'Ich bin damit einverstanden, dass meine Angaben zur Zuordnung und ' +
+  'Schutzklärung im WhatsApp-Chat an einen passenden Beratungspartner übermittelt werden.'
 
-/** Lead confirmation – shown after successful submission */
+/** Lead confirmation – shown on P10 after WhatsApp was opened */
 export const leadConfirmation =
-  'Wir haben deine Angaben erhalten. Ein passender Beratungspartner meldet ' +
-  'sich per WhatsApp bei dir und hilft dir, die Schutzmöglichkeiten für dein ' +
-  'Tier einzuordnen. Es ist keine Sofortentscheidung nötig.'
+  'Du kannst den vorbereiteten Text im WhatsApp-Chat prüfen und selbst absenden. ' +
+  'Ein passender Beratungspartner meldet sich danach bei dir. ' +
+  'Es ist keine Sofortentscheidung nötig.'
 
 /** Onboarding disclaimer */
 export const onboardingText =
