@@ -14,6 +14,7 @@ import { calcUrgency, calcScore, isRedFlag } from '../lib/urgency'
 import { calcGap }     from '../lib/gapCheck'
 import { isLeadValid, isEmailValid, isPhoneValid } from '../lib/leadValidation'
 import { buildWhatsAppUrl, buildWhatsAppMessage }  from '../lib/whatsapp'
+import { buildMapsUrl } from '../lib/maps'
 import { DEMO_CASES }  from '../data/demoCases'
 import type { LeadFields } from '../types'
 
@@ -125,5 +126,38 @@ describe('WhatsApp link builder', () => {
   })
   it('includes preExistingNote when preExisting=ja', () => {
     expect(buildWhatsAppMessage({ ...params, preExisting: 'ja', preExistingNote: 'Nierenproblem' })).toContain('Nierenproblem')
+  })
+})
+
+
+// ── Maps URL builder ────────────────────────────────────────────────
+
+describe('Maps URL builder (Notdienst-Suche)', () => {
+  it('returns google.com/maps/search URL', () => {
+    expect(buildMapsUrl('München')).toContain('google.com/maps/search/')
+  })
+  it('with city encodes city name', () => {
+    const url = buildMapsUrl('München')
+    expect(url).toContain(encodeURIComponent('Tierärztlicher Notdienst München'))
+  })
+  it('with PLZ encodes PLZ', () => {
+    const url = buildMapsUrl('80331')
+    expect(url).toContain(encodeURIComponent('Tierärztlicher Notdienst 80331'))
+  })
+  it('without city uses "in der Nähe"', () => {
+    const url = buildMapsUrl()
+    expect(url).toContain(encodeURIComponent('Tierärztlicher Notdienst in der Nähe'))
+  })
+  it('with empty string uses "in der Nähe"', () => {
+    const url = buildMapsUrl('')
+    expect(url).toContain(encodeURIComponent('Tierärztlicher Notdienst in der Nähe'))
+  })
+  it('with whitespace-only string uses "in der Nähe"', () => {
+    const url = buildMapsUrl('   ')
+    expect(url).toContain(encodeURIComponent('Tierärztlicher Notdienst in der Nähe'))
+  })
+  it('URL is properly encoded (no raw spaces)', () => {
+    const url = buildMapsUrl('Berlin')
+    expect(url).not.toContain(' ')
   })
 })
