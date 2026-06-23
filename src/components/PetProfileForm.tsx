@@ -15,7 +15,6 @@ export function PetProfileForm({ initial, onDone }: PetProfileFormProps) {
   const [weight, setWeight]   = useState(initial?.weightKg?.toString() ?? '')
   const [ins, setIns]         = useState(initial?.hasInsurance ?? false)
   const [city, setCity]       = useState(initial?.city ?? '')
-  const [city, setCity]       = useState(initial?.city ?? '')
 
   const ageNum    = Number(age)
   const weightNum = Number(weight)
@@ -23,16 +22,15 @@ export function PetProfileForm({ initial, onDone }: PetProfileFormProps) {
 
   const inp: React.CSSProperties = {
     width: '100%', padding: '0 14px', height: 46, borderRadius: 11,
-    fontSize: 14, border: `1.5px solid ${T.border}`, background: '#fff',
+    fontSize: 14, border: '1.5px solid ' + T.border, background: '#fff',
     color: T.text, fontFamily: 'inherit', outline: 'none',
   }
 
   const segBtn = (active: boolean): React.CSSProperties => ({
     padding: 12, borderRadius: 11, fontSize: 14, fontWeight: 600, cursor: 'pointer',
-    fontFamily: 'inherit', border: `1.5px solid ${active ? T.primary : T.border}`,
+    fontFamily: 'inherit', border: '1.5px solid ' + (active ? T.primary : T.border),
     background: '#fff', color: active ? T.primary : T.muted, width: '100%',
   })
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -52,15 +50,10 @@ export function PetProfileForm({ initial, onDone }: PetProfileFormProps) {
       {/* Name */}
       <div>
         <div className="flbl">Name <span style={{ color: T.red }}>*</span></div>
-        <input
-          style={inp}
-          placeholder="Name des Tieres"
-          value={name}
-          onChange={e => setName(e.target.value)}
-        />
+        <input style={inp} placeholder="Name des Tieres" value={name} onChange={e => setName(e.target.value)} />
       </div>
 
-      {/* Age + Weight in 2-col */}
+      {/* Age + Weight */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
         <div>
           <div className="flbl">Alter (Jahre) <span style={{ color: T.red }}>*</span></div>
@@ -81,26 +74,10 @@ export function PetProfileForm({ initial, onDone }: PetProfileFormProps) {
         </div>
       </div>
 
-      {/* City – optional */}
-      <div>
-        <div className="flbl">Stadt oder PLZ <span style={{ color: T.muted, fontWeight: 400, fontSize: 11 }}>(optional – für Notdienst-Suche)</span></div>
-        <input
-          style={inp}
-          placeholder="z.\u00a0B. München oder 80331"
-          value={city}
-          onChange={e => setCity(e.target.value)}
-        />
-      </div>
-
-      {/* Stadt/PLZ – optional, für Notdienst-Suche */}
+      {/* Stadt/PLZ – optional */}
       <div>
         <div className="flbl">Stadt oder PLZ <span style={{ fontSize: 11, fontWeight: 400, color: T.muted }}>(optional)</span></div>
-        <input
-          style={inp}
-          placeholder="z. B. München oder 80331"
-          value={city}
-          onChange={e => setCity(e.target.value)}
-        />
+        <input style={inp} placeholder="z. B. München oder 80331" value={city} onChange={e => setCity(e.target.value)} />
         <div style={{ fontSize: 11, color: T.muted, marginTop: 3 }}>Wird nur für die Notdienst-Suche verwendet.</div>
       </div>
 
