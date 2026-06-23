@@ -603,7 +603,7 @@ export default function App() {
             <i className="ti ti-check" aria-hidden="true" style={{ fontSize: 28, color: T.primary }} />
           </div>
           <h2 style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-.03em', color: T.text, textAlign: 'center' }}>
-            Wir haben deine Angaben erhalten
+            WhatsApp wurde geöffnet
           </h2>
           <p style={{ fontSize: 13, color: T.muted, lineHeight: 1.7, textAlign: 'center', maxWidth: 280 }}>
             {leadConfirmation}
