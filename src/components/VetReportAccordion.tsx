@@ -1,0 +1,105 @@
+import { useState } from 'react'
+import type { CheckSession, Pet } from '../types'
+import { T } from '../styles/tokens'
+import { getSymptomById } from '../data/symptoms'
+import { disclaimer } from '../data/copy'
+
+const DUR: Record<string, string> = {
+  lt12: '< 12 Std.', h12_24: '12–24 Std.', t1_3: '1–3 Tage', laenger: '> 3 Tage',
+}
+const STM: Record<string, string> = { leicht: 'leicht', mittel: 'mittel', stark: 'stark' }
+const FN: Record<string, string>  = { normal: 'normal', weniger: 'weniger als sonst', gar_nicht: 'gar nicht' }
+const SC: Record<string, string>  = { nein: 'nein', vielleicht: 'vielleicht', ja: 'ja' }
+
+interface VetReportAccordionProps {
+  session: CheckSession
+  pet: Pet
+}
+
+export function VetReportAccordion({ session, pet }: VetReportAccordionProps) {
+  const [open, setOpen] = useState(false)
+  const sym = getSymptomById(session.symptomId)
+  const a = session.answers
+
+  const rows: [string, string][] = [
+    ['Tier', `${pet.name} · ${pet.species === 'hund' ? 'Hund' : 'Katze'} · ${pet.ageYears} J. · ${pet.weightKg} kg`],
+    ['Versicherung', pet.hasInsurance ? 'vorhanden' : 'nicht vorhanden'],
+    ['Symptom', sym?.label ?? '-'],
+    ...(a.Q_DAUER  ? [['Seit',     DUR[a.Q_DAUER] ?? ''] as [string,string]] : []),
+    ...(a.Q_STAERKE? [['Stärke',   STM[a.Q_STAERKE] ?? ''] as [string,string]] : []),
+    ...(a.Q_FRISST ? [['Fressen',  FN[a.Q_FRISST] ?? ''] as [string,string]] : []),
+    ...(a.Q_TRINKT ? [['Trinken',  FN[a.Q_TRINKT] ?? ''] as [string,string]] : []),
+    ...(a.Q_SCHMERZ? [['Schmerzen',SC[a.Q_SCHMERZ] ?? ''] as [string,string]] : []),
+  ]
+
+  const questions = [
+    'Welche Untersuchung empfehlen Sie zuerst?',
+    'Welche Kosten kommen ungefähr auf mich zu?',
+    'Gibt es einen Kostenvoranschlag?',
+    'Wann sollte ich mich melden, wenn es keine Besserung gibt?',
+  ]
+
+  return (
+    <div style={{ border: `1px solid ${T.border}`, borderRadius: 13, overflow: 'hidden' }}>
+      <button
+        style={{
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '14px 16px',
+          background: T.pLight,
+          border: 'none',
+          cursor: 'pointer',
+          fontSize: 13,
+          fontWeight: 700,
+          color: T.primary,
+          fontFamily: 'inherit',
+        }}
+        onClick={() => setOpen(v => !v)}
+        aria-expanded={open}
+      >
+        <span>Vorbereitungsbericht</span>
+        <span>{open ? '▲' : '▼'}</span>
+      </button>
+
+      {open && (
+        <div style={{ padding: '14px 16px', background: '#fff', display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {/* Data table */}
+          <div>
+            {rows.map(([k, v]) => (
+              <div
+                key={k}
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  padding: '6px 0',
+                  borderBottom: `1px solid ${T.border}`,
+                  fontSize: 13,
+                }}
+              >
+                <span style={{ color: T.muted }}>{k}</span>
+                <span style={{ fontWeight: 600, textAlign: 'right' }}>{v}</span>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ height: 1, background: T.border }} />
+
+          {/* Questions */}
+          <div>
+            <div className="flbl">Fragen für den Tierarzt</div>
+            <ul style={{ margin: 0, paddingLeft: 16, fontSize: 13, color: T.text, lineHeight: 1.7 }}>
+              {questions.map(q => <li key={q}>{q}</li>)}
+            </ul>
+          </div>
+
+          {/* Disclaimer */}
+          <div style={{ background: '#F3F7F7', borderRadius: 10, padding: '10px 13px', fontSize: 12, lineHeight: 1.6, color: T.muted, fontStyle: 'italic' }}>
+            {disclaimer(pet.name)}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}

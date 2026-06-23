@@ -1,0 +1,10 @@
+{
+  "name": "TierKosten Kompass",
+  "short_name": "TierKosten",
+  "description": "Die App vor der Tierarztrechnung",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#0A7A73",
+  "background_color": "#F4F8F8",
+  "icons": []
+}
