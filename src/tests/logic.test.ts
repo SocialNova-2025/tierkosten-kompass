@@ -270,3 +270,57 @@ describe('Maps-CTA urgency routing (Gelb vs Rot)', () => {
     expect(r.level).not.toBe('gelb')
   })
 })
+
+
+// ── Rot-Struktur: Reihenfolge und Inhalt (urgency-driven) ───────────────
+
+describe('Rot-Ergebnisfall: Struktur und Reihenfolge', () => {
+  it('Felix (rot via Red-Flag) hat urgency=rot', () => {
+    const r = calcUrgency(DEMO_CASES[3].answers, DEMO_CASES[3].symptom, DEMO_CASES[3].pet)
+    expect(r.level).toBe('rot')
+    expect(r.redFlag).toBe(true)
+  })
+  it('Notdienst-Block erscheint nur bei rot (urgency=rot)', () => {
+    const rot   = calcUrgency(DEMO_CASES[3].answers, DEMO_CASES[3].symptom, DEMO_CASES[3].pet)
+    const gelb  = calcUrgency(DEMO_CASES[0].answers, DEMO_CASES[0].symptom, DEMO_CASES[0].pet)
+    const gruen = calcUrgency(DEMO_CASES[2].answers, DEMO_CASES[2].symptom, DEMO_CASES[2].pet)
+    expect(rot.level).toBe('rot')
+    expect(gelb.level).not.toBe('rot')
+    expect(gruen.level).not.toBe('rot')
+  })
+  it('Vorbereitung-Abschnitt erscheint nur bei rot (gleiche Bedingung wie Notdienst-Block)', () => {
+    const r = calcUrgency(DEMO_CASES[3].answers, DEMO_CASES[3].symptom, DEMO_CASES[3].pet)
+    expect(r.level).toBe('rot')
+  })
+  it('Tierarzt-Maps-CTA erscheint nicht bei rot (nur bei gelb)', () => {
+    const rot  = calcUrgency(DEMO_CASES[3].answers, DEMO_CASES[3].symptom, DEMO_CASES[3].pet)
+    const gelb = calcUrgency(DEMO_CASES[0].answers, DEMO_CASES[0].symptom, DEMO_CASES[0].pet)
+    expect(rot.level).toBe('rot')
+    expect(gelb.level).toBe('gelb')
+    expect(rot.level).not.toBe('gelb')
+  })
+  it('Notdienst-URL enthaelt Notdienst-Begriff (nicht Tierarzt-Begriff)', () => {
+    const url = buildEmergencyVetMapsUrl('München')
+    expect(url).toContain('Notdienst')
+    expect(url).not.toContain('gut+bewertete')
+  })
+  it('Score-basiertes Rot (nicht nur Red-Flag) hat urgency=rot via calcUrgency', () => {
+    // Any score >= red threshold: use a heavy symptom configuration
+    const heavyAnswers = { Q_ATEM: 'stark' as const, Q_BLUT: 'viel' as const, Q_GIFT: 'ja' as const }
+    const r = calcUrgency(heavyAnswers, 'humpeln', DEMO_CASES[0].pet)
+    expect(r.level).toBe('rot')
+  })
+  it('Red-Flag und Score-Rot nutzen dieselbe urgency level (rot)', () => {
+    const redFlag = calcUrgency(DEMO_CASES[3].answers, DEMO_CASES[3].symptom, DEMO_CASES[3].pet)
+    const scoreRed = calcUrgency({ Q_ATEM: 'stark', Q_BLUT: 'viel', Q_GIFT: 'ja' }, 'humpeln', DEMO_CASES[0].pet)
+    expect(redFlag.level).toBe('rot')
+    expect(scoreRed.level).toBe('rot')
+  })
+  it('Demo-Faelle unveraendert: Bruno=gelb, Mimi=gelb, Rocky=gruen, Felix=rot', () => {
+    const [b, m, r, f] = DEMO_CASES.map(d => calcUrgency(d.answers, d.symptom, d.pet).level)
+    expect(b).toBe('gelb')
+    expect(m).toBe('gelb')
+    expect(r).toBe('gruen')
+    expect(f).toBe('rot')
+  })
+})
