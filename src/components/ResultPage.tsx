@@ -41,10 +41,7 @@ function SchutzCardGruen({ onSchutz }: { onSchutz: () => void }) {
       <p style={{ fontSize: 13, color: T.muted, margin: 0, lineHeight: 1.6 }}>
         Auch kleinere Fälle können sich summieren. Wenn du möchtest, kannst du einordnen lassen, ob dein Tier grundsätzlich passend abgesichert ist.
       </p>
-      <button
-        onClick={onSchutz}
-        style={{ width: '100%', padding: '11px 0', borderRadius: 11, background: 'transparent', border: '1.5px solid ' + T.primary, color: T.primary, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
-      >
+      <button onClick={onSchutz} style={{ width: '100%', padding: '11px 0', borderRadius: 11, background: 'transparent', border: '1.5px solid ' + T.primary, color: T.primary, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
         Schutz passend einordnen
       </button>
     </div>
@@ -75,10 +72,7 @@ function SchutzCardRot({ onSchutz }: { onSchutz: () => void }) {
       <p style={{ fontSize: 13, color: T.muted, margin: 0, lineHeight: 1.6 }}>
         Wenn die akute Versorgung geklärt ist, kann eine Schutzklärung sinnvoll sein — besonders, wenn hohe Kosten entstehen können.
       </p>
-      <button
-        onClick={onSchutz}
-        style={{ width: '100%', padding: '11px 0', borderRadius: 11, background: 'transparent', border: '1.5px solid ' + T.primary, color: T.primary, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
-      >
+      <button onClick={onSchutz} style={{ width: '100%', padding: '11px 0', borderRadius: 11, background: 'transparent', border: '1.5px solid ' + T.primary, color: T.primary, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
         Nach dem Notfall Schutz einordnen
       </button>
       <p style={{ fontSize: 11, color: T.muted, margin: 0, textAlign: 'center', lineHeight: 1.4 }}>
@@ -89,9 +83,9 @@ function SchutzCardRot({ onSchutz }: { onSchutz: () => void }) {
 }
 
 export function ResultPage({ session, pet, onSchutz, onNewCheck, onSave, alreadySaved }: ResultPageProps) {
-  const sym                               = getSymptomById(session.symptomId)
-  const [localCity, setLocalCity]         = useState('')
-  const [localCityYel, setLocalCityYel]   = useState('')
+  const sym                             = getSymptomById(session.symptomId)
+  const [localCity, setLocalCity]       = useState('')
+  const [localCityYel, setLocalCityYel] = useState('')
   const isRed = session.urgency === 'rot'
   const isGrn = session.urgency === 'gruen'
   const isYel = session.urgency === 'gelb'
@@ -100,34 +94,17 @@ export function ResultPage({ session, pet, onSchutz, onNewCheck, onSave, already
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 22, paddingBottom: 16 }}>
 
-      {/* Emergency banner - always first for ROT */}
+      {/* ROT: Notfallblock mit integrierter Notdienst-Suche */}
       {isRed && (
-        <div style={{ background: T.red, color: '#fff', borderRadius: 13, padding: '14px 16px', textAlign: 'center', fontWeight: 700, fontSize: 14, lineHeight: 1.4 }}>
-          Bitte jetzt sofort einen Notdienst oder eine Tierklinik kontaktieren
-        </div>
-      )}
-
-      {/* Title */}
-      <div>
-        <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: T.muted, marginBottom: 3 }}>
-          Ergebnis für
-        </div>
-        <h2 style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-.03em', color: T.text }}>
-          {pet.name} · {sym?.label ?? session.symptomId}
-        </h2>
-      </div>
-
-      {/* 1 - Urgency */}
-      <SectionHeader label="1 · Dringlichkeit" />
-      <UrgencyCard level={session.urgency} petName={pet.name} />
-
-      {/* Notdienst-CTA - nur bei ROT */}
-      {isRed && (
-        <div style={{ borderRadius: 12, background: T.redLight, border: '1px solid ' + T.redBorder, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div style={{ borderRadius: 13, background: T.redLight, border: '1.5px solid ' + T.redBorder, padding: '16px 14px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ fontWeight: 700, fontSize: 16, color: T.red }}>Das kann dringend sein</div>
+          <p style={{ fontSize: 13, color: T.text, margin: 0, lineHeight: 1.6 }}>
+            Deine Angaben können auf einen Notfall hindeuten. Bitte kontaktiere jetzt sofort einen tierärztlichen Notdienst oder eine Tierklinik. Warte damit nicht.
+          </p>
           {!pet.city && (
             <input
               style={{ width: '100%', padding: '0 12px', height: 38, borderRadius: 9, fontSize: 13, border: '1.5px solid ' + T.border, background: '#fff', color: T.text, fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box' }}
-              placeholder="Stadt oder PLZ (optional)"
+              placeholder="Stadt oder PLZ eingeben"
               value={localCity}
               onChange={e => setLocalCity(e.target.value)}
             />
@@ -147,7 +124,38 @@ export function ResultPage({ session, pet, onSchutz, onNewCheck, onSave, already
         </div>
       )}
 
-      {/* Tierarzt-CTA - nur bei GELB */}
+      {/* ROT: Was du jetzt vorbereiten kannst */}
+      {isRed && (
+        <div style={{ background: '#F3F7F7', borderRadius: 12, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style={{ fontWeight: 700, fontSize: 14, color: T.text }}>Was du jetzt vorbereiten kannst</div>
+          <p style={{ fontSize: 13, color: T.muted, margin: 0, lineHeight: 1.5 }}>
+            Während du den Notdienst kontaktierst, halte diese Informationen bereit.
+          </p>
+          <ul style={{ margin: '4px 0 0', paddingLeft: 18, fontSize: 13, color: T.text, lineHeight: 1.75 }}>
+            <li>Symptome und Zeitpunkt des Beginns</li>
+            <li>Alter, Gewicht und bekannte Vorerkrankungen</li>
+            <li>Medikamente, falls vorhanden</li>
+            <li>Fotos oder Videos vom Verhalten, falls hilfreich</li>
+            <li>Versicherungsdaten, falls vorhanden</li>
+          </ul>
+        </div>
+      )}
+
+      {/* Title */}
+      <div>
+        <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: T.muted, marginBottom: 3 }}>
+          Ergebnis für
+        </div>
+        <h2 style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-.03em', color: T.text }}>
+          {pet.name} · {sym?.label ?? session.symptomId}
+        </h2>
+      </div>
+
+      {/* 1 - Dringlichkeit */}
+      <SectionHeader label="1 · Dringlichkeit" />
+      <UrgencyCard level={session.urgency} petName={pet.name} />
+
+      {/* GELB: Tierarzt-Maps-CTA */}
       {isYel && (
         <div style={{ borderRadius: 12, background: T.amberLight, border: '1px solid ' + T.amberBorder, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
           {!pet.city && (
@@ -177,7 +185,7 @@ export function ResultPage({ session, pet, onSchutz, onNewCheck, onSave, already
         {disclaimer(pet.name)}
       </div>
 
-      {/* 2 - Measures */}
+      {/* 2 - Massnahmen */}
       <SectionHeader label="2 · Mögliche Maßnahmen" />
       <div className="card">
         <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
@@ -194,7 +202,7 @@ export function ResultPage({ session, pet, onSchutz, onNewCheck, onSave, already
         </p>
       </div>
 
-      {/* 3 - Costs */}
+      {/* 3 - Kosten */}
       <SectionHeader label="3 · Kosten-Orientierung" />
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
         <div className="flbl" style={{ marginBottom: 0 }}>Kosten-Orientierung</div>
@@ -208,21 +216,16 @@ export function ResultPage({ session, pet, onSchutz, onNewCheck, onSave, already
       <CostScenarioCard scenario={session.cost.basis}         tier={0} />
       <CostScenarioCard scenario={session.cost.wahrscheinlich} tier={1} />
       <CostScenarioCard scenario={session.cost.erhoeht}        tier={2} />
-
       <CostDrivers drivers={session.cost.drivers} />
-
       <div style={{ background: '#F3F7F7', borderRadius: 10, padding: '10px 13px', fontSize: 12, lineHeight: 1.65, color: T.muted, fontStyle: 'italic' }}>
         {costHint}
       </div>
 
       <div style={{ height: 1, background: T.border }} />
-
-      {/* Report accordion */}
       <VetReportAccordion session={session} pet={pet} />
-
       <div style={{ height: 1, background: T.border }} />
 
-      {/* Schutz-Card - szenarioabhaengig, immer sichtbar */}
+      {/* Schutz-Card */}
       {isRed  && <SchutzCardRot  onSchutz={onSchutz} />}
       {!isRed && isGrn  && <SchutzCardGruen onSchutz={onSchutz} />}
       {!isRed && !isGrn && <SchutzCardGelb  onSchutz={onSchutz} />}
@@ -238,7 +241,6 @@ export function ResultPage({ session, pet, onSchutz, onNewCheck, onSave, already
             In Tierakte speichern
           </button>
         )}
-
         <button ref={el => { if (el) el.style.cssText = BTN.ghost }} onClick={onNewCheck}>
           Neuen Check starten
         </button>
