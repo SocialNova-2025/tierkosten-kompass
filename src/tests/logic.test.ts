@@ -133,7 +133,8 @@ describe('Gap check logic', () => {
 // ── Lead validation ───────────────────────────────────────────────────────
 
 describe('Lead form validation', () => {
-  const valid = { firstName: 'Jana', lastName: 'M', phone: '01701234567', email: 'a@b.de', desiredCover: 'op' as const, contactTime: '' as const }
+  // desiredCover and contactTime removed from LeadFields – partner clarifies these via WhatsApp
+  const valid = { firstName: 'Jana', lastName: 'M', phone: '01701234567', email: 'a@b.de' }
 
   it('all valid + both consents → true', () => {
     expect(isLeadValid(valid, true, true)).toBe(true)
@@ -153,8 +154,9 @@ describe('Lead form validation', () => {
   it('phone with spaces counts correctly', () => {
     expect(isPhoneValid('+49 170 123456')).toBe(true)
   })
-  it('missing desiredCover → false', () => {
-    expect(isLeadValid({ ...valid, desiredCover: '' }, true, true)).toBe(false)
+  it('no desiredCover field required – name+phone+email+consents sufficient', () => {
+    // desiredCover removed: form is valid without it
+    expect(isLeadValid(valid, true, true)).toBe(true)
   })
   it('empty firstName → false', () => {
     expect(isLeadValid({ ...valid, firstName: '' }, true, true)).toBe(false)
