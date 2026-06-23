@@ -64,7 +64,33 @@ export function ResultPage({ session, pet, onSchutz, onNewCheck, onSave, already
       {/* 1 – Urgency */}
       <SectionHeader label="1 · Dringlichkeit" />
       <UrgencyCard level={session.urgency} petName={pet.name} />
-      <div style={{ background: '#F3F7F7', borderRadius: 10, padding: '10px 13px', fontSize: 12, lineHeight: 1.65, color: T.muted, fontStyle: 'italic' }}>
+      {/* Notdienst-CTA – direkt im Dringlichkeitsblock, nur bei ROT */}
+      {isRed && (
+        <div style={{ borderRadius: 12, background: T.redLight, border: '1px solid ' + T.redBorder, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {!pet.city && (
+            <input
+              style={{ width: '100%', padding: '0 12px', height: 38, borderRadius: 9, fontSize: 13, border: '1.5px solid ' + T.border, background: '#fff', color: T.text, fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box' }}
+              placeholder="Stadt oder PLZ (optional)"
+              value={localCity}
+              onChange={e => setLocalCity(e.target.value)}
+            />
+          )}
+          <button
+            onClick={() => {
+              const city = pet.city || localCity.trim() || undefined
+              window.open(buildMapsUrl(city), '_blank', 'noopener,noreferrer')
+            }}
+            style={{ width: '100%', padding: '13px 0', borderRadius: 11, background: T.red, color: '#fff', border: 'none', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
+          >
+            Jetzt Notdienst in der Nähe finden
+          </button>
+          <p style={{ fontSize: 12, color: T.muted, margin: 0, textAlign: 'center', lineHeight: 1.5 }}>
+            Bitte rufe dort direkt an und prüfe, ob aktuell ein Notdienst verfügbar ist.
+          </p>
+        </div>
+      )}
+
+            <div style={{ background: '#F3F7F7', borderRadius: 10, padding: '10px 13px', fontSize: 12, lineHeight: 1.65, color: T.muted, fontStyle: 'italic' }}>
         {disclaimer(pet.name)}
       </div>
 
@@ -116,39 +142,9 @@ export function ResultPage({ session, pet, onSchutz, onNewCheck, onSave, already
       {/* CTAs – order and weight depend on urgency */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {isRed ? (
-          <>
-            <div style={{ background: T.redLight, border: '1px solid ' + T.redBorder, borderRadius: 13, padding: 14 }}>
-              <p style={{ fontSize: 13, fontWeight: 700, color: T.red, margin: '0 0 6px', textAlign: 'center' }}>Notfall hat Vorrang</p>
-              <p style={{ fontSize: 12, color: T.text, margin: '0 0 12px', lineHeight: 1.5, textAlign: 'center' }}>
-                Bitte zuerst einen Notdienst oder eine Tierklinik kontaktieren. Den Schutz-Check kannst du danach erledigen.
-              </p>
-              {!pet.city && (
-                <div style={{ marginBottom: 10 }}>
-                  <input
-                    style={{ width: '100%', padding: '0 12px', height: 40, borderRadius: 9, fontSize: 13, border: '1.5px solid ' + T.redBorder, background: '#fff', color: T.text, fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box' }}
-                    placeholder="Stadt oder PLZ eingeben"
-                    value={localCity}
-                    onChange={e => setLocalCity(e.target.value)}
-                  />
-                </div>
-              )}
-              <button
-                onClick={() => {
-                  const city = pet.city || localCity.trim() || undefined
-                  window.open(buildMapsUrl(city), '_blank', 'noopener,noreferrer')
-                }}
-                style={{ width: '100%', padding: '13px 0', borderRadius: 11, background: T.red, color: '#fff', border: 'none', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
-              >
-                Notdienst in deiner Nähe öffnen →
-              </button>
-              <p style={{ fontSize: 12, color: T.muted, margin: '8px 0 0', textAlign: 'center', lineHeight: 1.5 }}>
-                Bitte rufe dort direkt an und prüfe, ob aktuell ein Notdienst verfügbar ist.
-              </p>
-            </div>
-            <button ref={el => { if (el) el.style.cssText = BTN.ghost }} onClick={onSchutz}>
-              Schutz später einordnen (nach dem Notfall)
-            </button>
-          </>
+          <button ref={el => { if (el) el.style.cssText = BTN.ghost }} onClick={onSchutz}>
+            Schutz später einordnen (nach dem Notfall)
+          </button>
         ) : isGrn ? (
           <button
             style={{ width: '100%', padding: 12, borderRadius: 13, border: `1.5px solid ${T.border}`, background: 'transparent', color: T.muted, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}
