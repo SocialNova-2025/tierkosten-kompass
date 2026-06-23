@@ -14,7 +14,7 @@ import { calcUrgency, calcScore, isRedFlag } from '../lib/urgency'
 import { calcGap }     from '../lib/gapCheck'
 import { isLeadValid, isEmailValid, isPhoneValid } from '../lib/leadValidation'
 import { buildWhatsAppUrl, buildWhatsAppMessage }  from '../lib/whatsapp'
-import { buildMapsUrl } from '../lib/maps'
+import { buildMapsUrl, buildEmergencyVetMapsUrl, buildRegularVetMapsUrl } from '../lib/maps'
 import { DEMO_CASES }  from '../data/demoCases'
 import type { LeadFields } from '../types'
 
@@ -197,5 +197,76 @@ describe('Schutz-CTA card selection (driven by urgency)', () => {
     const url = buildWhatsAppUrl('Schutzklarung')
     expect(url).toContain('wa.me/')
     expect(url.length).toBeGreaterThan(20)
+  })
+})
+
+
+// ── Regular vet Maps URL builder (Gelb-Fall) ────────────────────────────
+
+describe('buildRegularVetMapsUrl (Tierarzt-Suche fuer Gelb-Fall)', () => {
+  it('returns google.com/maps/search URL', () => {
+    expect(buildRegularVetMapsUrl('München')).toContain('google.com/maps/search/')
+  })
+  it('with city encodes correct query (gut bewertete Tieraerzte)', () => {
+    const url = buildRegularVetMapsUrl('München')
+    expect(url).toContain(encodeURIComponent('gut bewertete Tierärzte München'))
+  })
+  it('with PLZ encodes PLZ', () => {
+    const url = buildRegularVetMapsUrl('80331')
+    expect(url).toContain(encodeURIComponent('gut bewertete Tierärzte 80331'))
+  })
+  it('without city uses "in der Naehe"', () => {
+    const url = buildRegularVetMapsUrl()
+    expect(url).toContain(encodeURIComponent('gut bewertete Tierärzte in der Nähe'))
+  })
+  it('with empty string uses "in der Naehe"', () => {
+    const url = buildRegularVetMapsUrl('')
+    expect(url).toContain(encodeURIComponent('gut bewertete Tierärzte in der Nähe'))
+  })
+  it('with whitespace-only uses "in der Naehe"', () => {
+    const url = buildRegularVetMapsUrl('   ')
+    expect(url).toContain(encodeURIComponent('gut bewertete Tierärzte in der Nähe'))
+  })
+  it('URL has no raw spaces', () => {
+    expect(buildRegularVetMapsUrl('Berlin')).not.toContain(' ')
+  })
+  it('does NOT contain Notdienst (different from red-case URL)', () => {
+    expect(buildRegularVetMapsUrl('Hamburg')).not.toContain('Notdienst')
+  })
+})
+
+describe('buildEmergencyVetMapsUrl (Notdienst-Suche fuer Rot-Fall)', () => {
+  it('contains Notdienst search term', () => {
+    expect(buildEmergencyVetMapsUrl('München')).toContain(encodeURIComponent('Tierärztlicher Notdienst München'))
+  })
+  it('without city falls back to "in der Naehe"', () => {
+    expect(buildEmergencyVetMapsUrl()).toContain(encodeURIComponent('Tierärztlicher Notdienst in der Nähe'))
+  })
+  it('does NOT contain "gut bewertete" (different from gelb-case URL)', () => {
+    expect(buildEmergencyVetMapsUrl('Berlin')).not.toContain('gut+bewertete')
+  })
+  it('buildMapsUrl alias still works (backward compat)', () => {
+    expect(buildMapsUrl('Hamburg')).toContain(encodeURIComponent('Tierärztlicher Notdienst Hamburg'))
+  })
+})
+
+describe('Maps-CTA urgency routing (Gelb vs Rot)', () => {
+  it('Bruno (gelb) bekommt Tierarzt-CTA (nicht Notdienst)', () => {
+    const r = calcUrgency(DEMO_CASES[0].answers, DEMO_CASES[0].symptom, DEMO_CASES[0].pet)
+    expect(r.level).toBe('gelb')
+    const url = buildRegularVetMapsUrl('München')
+    expect(url).not.toContain('Notdienst')
+  })
+  it('Felix (rot) bekommt Notdienst-CTA (nicht Tierarzt-Suche)', () => {
+    const r = calcUrgency(DEMO_CASES[3].answers, DEMO_CASES[3].symptom, DEMO_CASES[3].pet)
+    expect(r.level).toBe('rot')
+    const url = buildEmergencyVetMapsUrl('München')
+    expect(url).toContain('Notdienst')
+  })
+  it('Rocky (gruen) bekommt keinen Maps-CTA (level weder rot noch gelb)', () => {
+    const r = calcUrgency(DEMO_CASES[2].answers, DEMO_CASES[2].symptom, DEMO_CASES[2].pet)
+    expect(r.level).toBe('gruen')
+    expect(r.level).not.toBe('rot')
+    expect(r.level).not.toBe('gelb')
   })
 })
