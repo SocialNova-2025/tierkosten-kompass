@@ -132,7 +132,7 @@ export function MiniPetRecord({ pet, sessions, onNewCheck, onEdit, onSchutz }: M
           Neuen Akut-Check starten
         </button>
         <button ref={el => { if (el) el.style.cssText = BTN.outline }} onClick={onSchutz}>
-          Versicherungsschutz prüfen
+          Schutzlücke einordnen
         </button>
       </div>
     </div>
