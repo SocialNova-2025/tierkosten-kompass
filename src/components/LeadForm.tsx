@@ -7,34 +7,68 @@ import { isLeadValid, isEmailValid, isPhoneValid } from '../lib/leadValidation'
 import { lsGet, lsSet, STORAGE_KEYS } from '../lib/storage'
 
 interface LeadFormProps {
-  pet: Pet
+  pet: Pet | null
   onSubmit: () => void
   onCancel: () => void
+}
+
+interface PetInfo {
+  name: string
+  species: 'hund' | 'katze' | ''
+  breed: string
+  ageYears: string
 }
 
 const INITIAL_FIELDS: LeadFields = {
   firstName: '', lastName: '', phone: '', email: '',
 }
 
+function isAgeValid(v: string): boolean {
+  const n = Number(v)
+  return v.trim() !== '' && !isNaN(n) && n >= 0 && n <= 25
+}
+
 export function LeadForm({ pet, onSubmit, onCancel }: LeadFormProps) {
   const [f, setF]   = useState<LeadFields>(INITIAL_FIELDS)
-  const [c1, setC1] = useState(false)  // never pre-selected
-  const [c2, setC2] = useState(false)  // never pre-selected
-
+  const [c1, setC1] = useState(false)
+  const [c2, setC2] = useState(false)
   const set = (k: keyof LeadFields, v: string) => setF(p => ({ ...p, [k]: v }))
+
+  // Pet info – pre-filled from existing profile where available
+  const [petInfo, setPetInfo] = useState<PetInfo>({
+    name: pet?.name ?? '',
+    species: pet?.species ?? '',
+    breed: pet?.breed ?? '',
+    ageYears: pet ? String(pet.ageYears) : '',
+  })
+  const setPetField = <K extends keyof PetInfo>(k: K, v: PetInfo[K]) =>
+    setPetInfo(p => ({ ...p, [k]: v }))
+
+  // Full-edit mode: starts open when no pet profile exists
+  const [fullEdit, setFullEdit] = useState(!pet)
 
   const emailOk = f.email ? isEmailValid(f.email) : true
   const phoneOk = f.phone ? isPhoneValid(f.phone) : true
-  const valid   = isLeadValid(f, c1, c2)
+
+  const petInfoComplete =
+    petInfo.name.trim().length > 0 &&
+    (petInfo.species === 'hund' || petInfo.species === 'katze') &&
+    petInfo.breed.trim().length > 0 &&
+    isAgeValid(petInfo.ageYears)
+
+  const valid = isLeadValid(f, c1, c2) && petInfoComplete
 
   const handleSubmit = () => {
     if (!valid) return
-    // Persist lead locally (no backend yet)
     const lead: PersistedLead = {
       id: Date.now().toString(),
       submittedAt: new Date().toISOString(),
       fields: { ...f },
-      petSnapshot: { ...pet },
+      petSnapshot: pet ? { ...pet } : null,
+      petName: petInfo.name.trim(),
+      petSpecies: petInfo.species as 'hund' | 'katze',
+      breed: petInfo.breed.trim(),
+      petAgeYears: Number(petInfo.ageYears),
       consent1: c1,
       consent2: c2,
     }
@@ -46,11 +80,140 @@ export function LeadForm({ pet, onSubmit, onCancel }: LeadFormProps) {
   const inp: React.CSSProperties = {
     width: '100%', padding: '0 14px', height: 46, borderRadius: 11,
     fontSize: 14, border: `1.5px solid ${T.border}`, background: '#fff',
-    color: T.text, fontFamily: 'inherit', outline: 'none',
+    color: T.text, fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box',
   }
+
+  // ── Age display helper ───────────────────────────────────────────────
+  const ageLabel = petInfo.ageYears === '0'
+    ? 'unter 1 Jahr'
+    : petInfo.ageYears ? `${petInfo.ageYears} Jahre` : '–'
+
+  // ── Pet data block ───────────────────────────────────────────────────
+  const petBlock = (pet && !fullEdit) ? (
+    // COMPACT VIEW – pet profile exists, not in edit mode
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div className="card card-teal">
+        <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.10em', textTransform: 'uppercase', color: T.primary, marginBottom: 6 }}>
+          Für die Zuordnung nutzen wir
+        </div>
+        <div style={{ fontSize: 13, color: T.text, lineHeight: 1.8 }}>
+          {petInfo.name} · {petInfo.species === 'hund' ? 'Hund' : 'Katze'} · {petInfo.breed || '–'} · {ageLabel}
+          {pet.weightKg > 0 && <span style={{ color: T.muted }}> · {pet.weightKg} kg</span>}
+        </div>
+        <button
+          style={{ fontSize: 12, color: T.primary, background: 'none', border: 'none', padding: '6px 0 0', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', fontWeight: 500 }}
+          onClick={() => setFullEdit(true)}
+        >
+          Angaben ändern
+        </button>
+      </div>
+
+      {/* Inline breed field if missing from profile */}
+      {!pet.breed && (
+        <div>
+          <div className="flbl">Rasse <span style={{ color: T.red }}>*</span></div>
+          <input
+            style={inp}
+            placeholder="z.B. Labrador, Mischling, Unbekannt"
+            value={petInfo.breed}
+            onChange={e => setPetField('breed', e.target.value)}
+          />
+          <div style={{ fontSize: 11, color: T.muted, marginTop: 3 }}>
+            Auch „Mischling" oder „Unbekannt" ist vollkommen in Ordnung.
+          </div>
+        </div>
+      )}
+    </div>
+  ) : (
+    // FULL EDIT / ENTRY FORM
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <div style={{ fontSize: 13, color: T.muted, lineHeight: 1.5 }}>
+        {!pet
+          ? 'Damit wir dich passend zuordnen können, brauchen wir ein paar Angaben zu deinem Vierbeiner.'
+          : 'Bitte überprüfe oder ergänze die Angaben zu deinem Vierbeiner.'}
+      </div>
+
+      {/* Name */}
+      <div>
+        <div className="flbl">Name des Vierbeiners <span style={{ color: T.red }}>*</span></div>
+        <input
+          style={inp} placeholder="z.B. Bruno"
+          value={petInfo.name} onChange={e => setPetField('name', e.target.value)}
+        />
+      </div>
+
+      {/* Species */}
+      <div>
+        <div className="flbl">Tierart <span style={{ color: T.red }}>*</span></div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          {(['hund', 'katze'] as const).map(s => (
+            <button
+              key={s}
+              style={{
+                flex: 1, padding: '12px 0', borderRadius: 11, fontSize: 14,
+                fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit',
+                border: `1.5px solid ${petInfo.species === s ? T.primary : T.border}`,
+                background: '#fff', color: petInfo.species === s ? T.primary : T.text,
+              }}
+              onClick={() => setPetField('species', s)}
+            >
+              {s === 'hund' ? 'Hund' : 'Katze'}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Breed */}
+      <div>
+        <div className="flbl">Rasse <span style={{ color: T.red }}>*</span></div>
+        <input
+          style={inp} placeholder="z.B. Labrador, Mischling, Unbekannt"
+          value={petInfo.breed} onChange={e => setPetField('breed', e.target.value)}
+        />
+        <div style={{ fontSize: 11, color: T.muted, marginTop: 3 }}>
+          Auch „Mischling" oder „Unbekannt" ist vollkommen in Ordnung.
+        </div>
+      </div>
+
+      {/* Age */}
+      <div>
+        <div className="flbl">Alter (Jahre) <span style={{ color: T.red }}>*</span></div>
+        <input
+          style={inp} type="number" min="0" max="25" placeholder="z.B. 3"
+          value={petInfo.ageYears}
+          onChange={e => setPetField('ageYears', e.target.value)}
+        />
+        <div style={{ fontSize: 11, color: T.muted, marginTop: 3 }}>
+          0 eingeben für unter 1 Jahr · max. 25 Jahre
+        </div>
+        {petInfo.ageYears && !isAgeValid(petInfo.ageYears) && (
+          <div style={{ fontSize: 12, color: T.red, marginTop: 3 }}>
+            Bitte ein gültiges Alter eingeben (0–25 Jahre)
+          </div>
+        )}
+      </div>
+
+      {/* "Übernehmen" button when editing existing pet */}
+      {pet && fullEdit && (
+        <button
+          style={{
+            fontSize: 13, fontWeight: 600, borderRadius: 9, padding: '9px 14px',
+            border: 'none', cursor: petInfoComplete ? 'pointer' : 'default',
+            fontFamily: 'inherit', background: T.pLight,
+            color: petInfoComplete ? T.primary : T.muted,
+          }}
+          onClick={() => { if (petInfoComplete) setFullEdit(false) }}
+          disabled={!petInfoComplete}
+        >
+          Angaben übernehmen ✓
+        </button>
+      )}
+    </div>
+  )
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+
       {/* Header */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
         <h2 style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-.03em', color: T.text }}>
@@ -83,13 +246,13 @@ export function LeadForm({ pet, onSubmit, onCancel }: LeadFormProps) {
         </div>
       </div>
 
-      {/* Pre-filled pet data */}
-      <div className="card card-teal">
-        <div className="flbl" style={{ marginBottom: 6 }}>Tierdaten (vorausgefüllt)</div>
-        <div style={{ fontSize: 13, color: T.text }}>
-          {pet.name} · {pet.species === 'hund' ? 'Hund' : 'Katze'} · {pet.ageYears} J. · {pet.weightKg} kg · Versicherung: {pet.hasInsurance ? 'Ja' : 'Nein'}
-        </div>
+      {/* Pet data block */}
+      <div>
+        <div className="flbl" style={{ marginBottom: 8 }}>Angaben zu deinem Vierbeiner</div>
+        {petBlock}
       </div>
+
+      <div style={{ height: 1, background: T.border }} />
 
       {/* Name row */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
@@ -117,7 +280,7 @@ export function LeadForm({ pet, onSubmit, onCancel }: LeadFormProps) {
         {f.email && !emailOk && <div style={{ fontSize: 12, color: T.red, marginTop: 3 }}>Bitte gültige E-Mail-Adresse eingeben</div>}
       </div>
 
-      {/* Consents – never pre-selected */}
+      {/* Consents */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         <div className="flbl">Einwilligungen (beide erforderlich)</div>
         <ConsentCheckbox text={consentShareText}   checked={c1} onChange={setC1} />
@@ -134,7 +297,7 @@ export function LeadForm({ pet, onSubmit, onCancel }: LeadFormProps) {
         Orientierung zuerst · Beratung nur auf Wunsch
       </div>
 
-      {/* Submit – primary when valid, disabled when not */}
+      {/* Submit */}
       <button
         ref={el => { if (el) el.style.cssText = valid ? BTN.primary : BTN.primaryDisabled }}
         disabled={!valid}
@@ -143,10 +306,7 @@ export function LeadForm({ pet, onSubmit, onCancel }: LeadFormProps) {
         Beratung per WhatsApp erhalten →
       </button>
 
-      <button style={{ cssText: BTN.ghost } as React.CSSProperties}
-        ref={el => { if (el) el.style.cssText = BTN.ghost }}
-        onClick={onCancel}
-      >
+      <button ref={el => { if (el) el.style.cssText = BTN.ghost }} onClick={onCancel}>
         Abbrechen
       </button>
 
