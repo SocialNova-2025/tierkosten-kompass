@@ -161,3 +161,41 @@ describe('Maps URL builder (Notdienst-Suche)', () => {
     expect(url).not.toContain(' ')
   })
 })
+
+
+// ── Schutz-CTA card logic (urgency-based) ───────────────────────────────
+// ResultPage renders SchutzCardRot / SchutzCardGruen / SchutzCardGelb
+// based on session.urgency. These tests verify the urgency values of all
+// demo cases so the correct card is guaranteed to appear.
+describe('Schutz-CTA card selection (driven by urgency)', () => {
+  it('Felix (rot) → SchutzCardRot wird angezeigt', () => {
+    const r = calcUrgency(DEMO_CASES[3].answers, DEMO_CASES[3].symptom, DEMO_CASES[3].pet)
+    expect(r.level).toBe('rot')
+  })
+  it('Bruno (gelb) → SchutzCardGelb wird angezeigt', () => {
+    const r = calcUrgency(DEMO_CASES[0].answers, DEMO_CASES[0].symptom, DEMO_CASES[0].pet)
+    expect(r.level).toBe('gelb')
+  })
+  it('Mimi (gelb) → SchutzCardGelb wird angezeigt', () => {
+    const r = calcUrgency(DEMO_CASES[1].answers, DEMO_CASES[1].symptom, DEMO_CASES[1].pet)
+    expect(r.level).toBe('gelb')
+  })
+  it('Rocky (gruen) → SchutzCardGruen wird angezeigt', () => {
+    const r = calcUrgency(DEMO_CASES[2].answers, DEMO_CASES[2].symptom, DEMO_CASES[2].pet)
+    expect(r.level).toBe('gruen')
+  })
+  it('Notdienst-Button nur bei rot (Felix)', () => {
+    const r = calcUrgency(DEMO_CASES[3].answers, DEMO_CASES[3].symptom, DEMO_CASES[3].pet)
+    expect(r.level).toBe('rot')
+    expect(r.redFlag).toBe(true)
+  })
+  it('Notdienst-Button nicht bei gruen (Rocky)', () => {
+    const r = calcUrgency(DEMO_CASES[2].answers, DEMO_CASES[2].symptom, DEMO_CASES[2].pet)
+    expect(r.level).not.toBe('rot')
+  })
+  it('WhatsApp-Funnel erreichbar: buildWhatsAppUrl gibt valide URL zurueck', () => {
+    const url = buildWhatsAppUrl('Schutzklarung')
+    expect(url).toContain('wa.me/')
+    expect(url.length).toBeGreaterThan(20)
+  })
+})
