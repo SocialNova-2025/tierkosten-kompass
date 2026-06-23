@@ -90,16 +90,13 @@ export interface GapResult {
 }
 
 // ── Lead form ─────────────────────────────────────────────────────────────
-export type DesiredCover = 'op' | 'voll' | 'unsicher'
-export type ContactTime = 'morgens' | 'mittags' | 'nachmittags' | 'egal'
-
+// desiredCover and contactTime removed – the advisory partner clarifies
+// these in the WhatsApp conversation, not the app form.
 export interface LeadFields {
   firstName: string
   lastName: string
   phone: string
   email: string
-  desiredCover: DesiredCover | ''
-  contactTime: ContactTime | ''
 }
 
 // ── App screen identifiers ─────────────────────────────────────────────────
