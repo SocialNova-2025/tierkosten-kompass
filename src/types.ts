@@ -9,6 +9,7 @@ export interface Pet {
   weightKg: number
   hasInsurance: boolean
   breed?: string          // optional – captured in LeadForm if missing from profile
+  city?: string           // optional – Stadt oder PLZ für Notdienst-Suche
 }
 
 // ── Urgency ────────────────────────────────────────────────────────────────
