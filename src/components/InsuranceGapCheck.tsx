@@ -47,13 +47,13 @@ export function InsuranceGapCheck({ pet, onDone, onSkip }: InsuranceGapCheckProp
       {/* Intro card */}
       <div className="card card-teal">
         <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: T.primary, marginBottom: 6 }}>
-          Schutz-Check
+          Schutzklärung
         </div>
         <p style={{ fontSize: 13, color: T.muted, margin: 0, lineHeight: 1.5 }}>{insuranceHint}</p>
       </div>
 
       <h2 style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-.03em', color: T.text }}>
-        Passt dein Schutz zu solchen Kosten?
+        Verstehen, ob dein Tier gut abgesichert ist
       </h2>
 
       {/* Q1: Versicherung */}
