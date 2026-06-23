@@ -8,6 +8,7 @@ export interface Pet {
   ageYears: number
   weightKg: number
   hasInsurance: boolean
+  breed?: string          // optional – captured in LeadForm if missing from profile
 }
 
 // ── Urgency ────────────────────────────────────────────────────────────────
@@ -72,7 +73,7 @@ export interface Symptom {
   id: string
   label: string
   icon: string
-  species?: Species   // undefined means shown for both
+  species?: Species
 }
 
 // ── Gap check ─────────────────────────────────────────────────────────────
@@ -90,8 +91,6 @@ export interface GapResult {
 }
 
 // ── Lead form ─────────────────────────────────────────────────────────────
-// desiredCover and contactTime removed – the advisory partner clarifies
-// these in the WhatsApp conversation, not the app form.
 export interface LeadFields {
   firstName: string
   lastName: string
@@ -101,19 +100,9 @@ export interface LeadFields {
 
 // ── App screen identifiers ─────────────────────────────────────────────────
 export type Screen =
-  | 'P0'   // Onboarding disclaimer
-  | 'P1'   // Start
-  | 'P2'   // Pet profile
-  | 'P3'   // Symptom grid
-  | 'P4a'  // Questions: safety
-  | 'P4b'  // Questions: progression
-  | 'P4c'  // Questions: condition
-  | 'P6'   // Result
-  | 'P7'   // Insurance gap check
-  | 'P8'   // Gap result
-  | 'P9'   // Lead form
-  | 'P10'  // Lead confirmation
-  | 'P11'  // Mini pet record
+  | 'P0' | 'P1' | 'P2' | 'P3'
+  | 'P4a' | 'P4b' | 'P4c'
+  | 'P6' | 'P7' | 'P8' | 'P9' | 'P10' | 'P11'
 
 export type NavTab = 'start' | 'check' | 'akte'
 
@@ -127,12 +116,17 @@ export interface DemoCase {
   expectedScore: number
 }
 
-// ── Persisted lead (local-only until backend exists) ──────────────────────
+// ── Persisted lead ────────────────────────────────────────────────────────
 export interface PersistedLead {
-  id: string           // timestamp-based unique id
-  submittedAt: string  // ISO string
+  id: string
+  submittedAt: string
   fields: LeadFields
-  petSnapshot: Pet     // snapshot of pet data at time of submission
+  petSnapshot: Pet | null          // null when no pet profile existed at submission
+  // Explicit pet data for WhatsApp automation (always present):
+  petName: string
+  petSpecies: 'hund' | 'katze'
+  breed: string
+  petAgeYears: number
   consent1: boolean
   consent2: boolean
 }
