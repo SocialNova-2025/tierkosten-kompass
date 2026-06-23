@@ -23,28 +23,29 @@ export const emergencyNotice =
   'Bitte kontaktiere jetzt sofort einen tierärztlichen Notdienst oder eine Tierklinik. ' +
   'Warte damit nicht.'
 
-/** Insurance disclaimer – shown at top of gap check */
+/** Schutzklärung intro – shown at top of gap check */
 export const insuranceHint =
-  'Dieser Check ersetzt keine Versicherungsberatung – er zeigt mögliche Lücken. ' +
-  'Für eine verbindliche Prüfung wirst du – nur mit deiner Einwilligung – ' +
-  'an einen lizenzierten Partner weitergeleitet.'
+  'Dein Ergebnis zeigt, welche Kosten entstehen können. ' +
+  'Wenn du möchtest, kannst du prüfen lassen, ob dein Tier für solche Fälle ' +
+  'passend abgesichert ist. Dieser Check ersetzt keine verbindliche Beratung.'
 
 /** DSGVO consent texts – both required, never pre-selected */
 export const consentShareText =
-  'Ich willige ein, dass meine angegebenen Kontakt- und Tierdaten zum Zweck einer ' +
-  'Schutz-/Versicherungsanfrage an einen lizenzierten Partner weitergegeben werden. ' +
+  'Ich bin damit einverstanden, dass meine Angaben zur Zuordnung und ' +
+  'Schutzklärung an einen passenden Beratungspartner weitergegeben werden. ' +
   'Diese Einwilligung kann ich jederzeit mit Wirkung für die Zukunft widerrufen. ' +
   'Weitere Infos in der Datenschutzerklärung.'
 
 export const consentContactText =
-  'Ich willige ein, dass mich der Partner zur Bearbeitung meiner Anfrage per Telefon ' +
-  'und/oder E-Mail kontaktiert. Auch diese Einwilligung kann ich jederzeit widerrufen.'
+  'Ich bin damit einverstanden, dass mich ein passender Beratungspartner ' +
+  'per WhatsApp oder telefonisch kontaktiert. ' +
+  'Auch diese Einwilligung kann ich jederzeit widerrufen.'
 
 /** Lead confirmation – shown after successful submission */
 export const leadConfirmation =
-  'Danke – deine Anfrage ist eingegangen. Ein lizenzierter Partner meldet sich ' +
-  'innerhalb von 1–2 Werktagen, um deinen Schutz zu prüfen. Es entsteht dir ' +
-  'dadurch keine Verpflichtung. Du kannst deine Einwilligung jederzeit widerrufen.'
+  'Wir haben deine Angaben erhalten. Ein passender Beratungspartner meldet ' +
+  'sich per WhatsApp bei dir und hilft dir, die Schutzmöglichkeiten für dein ' +
+  'Tier einzuordnen. Es ist keine Sofortentscheidung nötig.'
 
 /** Onboarding disclaimer */
 export const onboardingText =
