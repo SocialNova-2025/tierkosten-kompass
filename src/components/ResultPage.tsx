@@ -7,7 +7,7 @@ import { CostDrivers } from './CostDrivers'
 import { VetReportAccordion } from './VetReportAccordion'
 import { getSymptomById } from '../data/symptoms'
 import { disclaimer, costHint } from '../data/copy'
-import { buildMapsUrl } from '../lib/maps'
+import { buildEmergencyVetMapsUrl, buildRegularVetMapsUrl } from '../lib/maps'
 
 interface ResultPageProps {
   session: CheckSession
@@ -34,7 +34,6 @@ function SectionHeader({ label }: { label: string }) {
   )
 }
 
-/** Schutz-Card Gruen: sichtbar, ruhig, praventiv */
 function SchutzCardGruen({ onSchutz }: { onSchutz: () => void }) {
   return (
     <div style={{ background: T.pLight, borderRadius: 13, border: '1px solid ' + T.border, padding: '16px 16px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -52,7 +51,6 @@ function SchutzCardGruen({ onSchutz }: { onSchutz: () => void }) {
   )
 }
 
-/** Schutz-Card Gelb: sichtbar, staerker, kostenbezogen */
 function SchutzCardGelb({ onSchutz }: { onSchutz: () => void }) {
   return (
     <div style={{ background: T.pLight, borderRadius: 13, border: '1.5px solid ' + T.primary, padding: '16px 16px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -60,10 +58,7 @@ function SchutzCardGelb({ onSchutz }: { onSchutz: () => void }) {
       <p style={{ fontSize: 13, color: T.text, margin: 0, lineHeight: 1.6 }}>
         Dein Ergebnis zeigt, dass Diagnostik oder Behandlungskosten entstehen können. Eine kurze Schutzklärung kann helfen, besser einzuordnen, ob dein Tier passend abgesichert ist.
       </p>
-      <button
-        ref={el => { if (el) el.style.cssText = BTN.primary }}
-        onClick={onSchutz}
-      >
+      <button ref={el => { if (el) el.style.cssText = BTN.primary }} onClick={onSchutz}>
         Schutzklärung per WhatsApp starten
       </button>
       <p style={{ fontSize: 11, color: T.muted, margin: 0, textAlign: 'center', lineHeight: 1.4 }}>
@@ -73,7 +68,6 @@ function SchutzCardGelb({ onSchutz }: { onSchutz: () => void }) {
   )
 }
 
-/** Schutz-Card Rot: sichtbar, medizinisch nachrangig, nicht alarmistisch */
 function SchutzCardRot({ onSchutz }: { onSchutz: () => void }) {
   return (
     <div style={{ background: '#fff', borderRadius: 13, border: '1px solid ' + T.border, padding: '16px 16px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -95,11 +89,13 @@ function SchutzCardRot({ onSchutz }: { onSchutz: () => void }) {
 }
 
 export function ResultPage({ session, pet, onSchutz, onNewCheck, onSave, alreadySaved }: ResultPageProps) {
-  const sym      = getSymptomById(session.symptomId)
-  const [localCity, setLocalCity] = useState('')
-  const isRed  = session.urgency === 'rot'
-  const isGrn  = session.urgency === 'gruen'
-  const band   = BAND_LABEL[session.cost.band] ?? 'mittel'
+  const sym                               = getSymptomById(session.symptomId)
+  const [localCity, setLocalCity]         = useState('')
+  const [localCityYel, setLocalCityYel]   = useState('')
+  const isRed = session.urgency === 'rot'
+  const isGrn = session.urgency === 'gruen'
+  const isYel = session.urgency === 'gelb'
+  const band  = BAND_LABEL[session.cost.band] ?? 'mittel'
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 22, paddingBottom: 16 }}>
@@ -125,7 +121,7 @@ export function ResultPage({ session, pet, onSchutz, onNewCheck, onSave, already
       <SectionHeader label="1 · Dringlichkeit" />
       <UrgencyCard level={session.urgency} petName={pet.name} />
 
-      {/* Notdienst-CTA - direkt im Dringlichkeitsblock, nur bei ROT */}
+      {/* Notdienst-CTA - nur bei ROT */}
       {isRed && (
         <div style={{ borderRadius: 12, background: T.redLight, border: '1px solid ' + T.redBorder, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
           {!pet.city && (
@@ -139,7 +135,7 @@ export function ResultPage({ session, pet, onSchutz, onNewCheck, onSave, already
           <button
             onClick={() => {
               const city = pet.city || localCity.trim() || undefined
-              window.open(buildMapsUrl(city), '_blank', 'noopener,noreferrer')
+              window.open(buildEmergencyVetMapsUrl(city), '_blank', 'noopener,noreferrer')
             }}
             style={{ width: '100%', padding: '13px 0', borderRadius: 11, background: T.red, color: '#fff', border: 'none', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
           >
@@ -147,6 +143,32 @@ export function ResultPage({ session, pet, onSchutz, onNewCheck, onSave, already
           </button>
           <p style={{ fontSize: 12, color: T.muted, margin: 0, textAlign: 'center', lineHeight: 1.5 }}>
             Bitte rufe dort direkt an und prüfe, ob aktuell ein Notdienst verfügbar ist.
+          </p>
+        </div>
+      )}
+
+      {/* Tierarzt-CTA - nur bei GELB */}
+      {isYel && (
+        <div style={{ borderRadius: 12, background: T.amberLight, border: '1px solid ' + T.amberBorder, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {!pet.city && (
+            <input
+              style={{ width: '100%', padding: '0 12px', height: 38, borderRadius: 9, fontSize: 13, border: '1.5px solid ' + T.border, background: '#fff', color: T.text, fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box' }}
+              placeholder="Stadt oder PLZ (optional)"
+              value={localCityYel}
+              onChange={e => setLocalCityYel(e.target.value)}
+            />
+          )}
+          <button
+            onClick={() => {
+              const city = pet.city || localCityYel.trim() || undefined
+              window.open(buildRegularVetMapsUrl(city), '_blank', 'noopener,noreferrer')
+            }}
+            style={{ width: '100%', padding: '13px 0', borderRadius: 11, background: T.amber, color: '#fff', border: 'none', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
+          >
+            Gut bewertete Tierärzte in deiner Umgebung finden
+          </button>
+          <p style={{ fontSize: 12, color: T.muted, margin: 0, textAlign: 'center', lineHeight: 1.5 }}>
+            Bitte prüfe in Maps die aktuellen Bewertungen, Öffnungszeiten und rufe bei Bedarf vorher an.
           </p>
         </div>
       )}
