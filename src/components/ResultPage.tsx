@@ -122,7 +122,7 @@ export function ResultPage({ session, pet, onSchutz, onNewCheck, onSave, already
               </p>
             </div>
             <button ref={el => { if (el) el.style.cssText = BTN.ghost }} onClick={onSchutz}>
-              Schutz später prüfen (nach dem Notfall)
+              Schutz später einordnen (nach dem Notfall)
             </button>
           </>
         ) : isGrn ? (
@@ -130,11 +130,11 @@ export function ResultPage({ session, pet, onSchutz, onNewCheck, onSave, already
             style={{ width: '100%', padding: 12, borderRadius: 13, border: `1.5px solid ${T.border}`, background: 'transparent', color: T.muted, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}
             onClick={onSchutz}
           >
-            Für zukünftige Fälle: Schutz unverbindlich prüfen →
+            Für zukünftige Fälle: Schutzlücke einordnen →
           </button>
         ) : (
           <button ref={el => { if (el) el.style.cssText = BTN.outline }} onClick={onSchutz}>
-            Schutz unverbindlich prüfen lassen
+            Schutzlücke verstehen & einordnen
           </button>
         )}
 
