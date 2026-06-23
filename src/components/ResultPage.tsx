@@ -125,7 +125,7 @@ export function ResultPage({ session, pet, onSchutz, onNewCheck, onSave, already
               {!pet.city && (
                 <div style={{ marginBottom: 10 }}>
                   <input
-                    style={{ width: '100%', padding: '0 12px', height: 40, borderRadius: 9, fontSize: 13, border: '1.5px solid ' + T.redBorder, background: '#fff', color: T.text, fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box' } as React.CSSProperties}
+                    style={{ width: '100%', padding: '0 12px', height: 40, borderRadius: 9, fontSize: 13, border: '1.5px solid ' + T.redBorder, background: '#fff', color: T.text, fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box' }}
                     placeholder="Stadt oder PLZ eingeben"
                     value={localCity}
                     onChange={e => setLocalCity(e.target.value)}
