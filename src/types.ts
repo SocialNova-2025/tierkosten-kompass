@@ -90,12 +90,26 @@ export interface GapResult {
   gaps: string[]
 }
 
-// ── Lead form ─────────────────────────────────────────────────────────────
+// ── Lead form – protection context ────────────────────────────────────────
+export type ProtectionStatus = 'ja' | 'nein' | 'nicht_sicher'
+
+export type SupportGoal =
+  | 'verstehen_ob_passend'
+  | 'kein_schutz_orientieren'
+  | 'hat_schutz_einordnen'
+  | 'unsicher'
+
+export type PreExistingStatus = 'nein' | 'ja' | 'nicht_sicher'
+
 export interface LeadFields {
   firstName: string
   lastName: string
   phone: string
   email: string
+  protectionStatus: ProtectionStatus | ''
+  supportGoal: SupportGoal | ''
+  preExisting: PreExistingStatus | ''
+  preExistingNote: string
 }
 
 // ── App screen identifiers ─────────────────────────────────────────────────
@@ -120,13 +134,15 @@ export interface DemoCase {
 export interface PersistedLead {
   id: string
   submittedAt: string
+  status: 'whatsapp_opened'
   fields: LeadFields
-  petSnapshot: Pet | null          // null when no pet profile existed at submission
-  // Explicit pet data for WhatsApp automation (always present):
+  petSnapshot: Pet | null
   petName: string
   petSpecies: 'hund' | 'katze'
   breed: string
   petAgeYears: number
+  sessionSnapshot: CheckSession | null
+  whatsAppMessage: string
   consent1: boolean
   consent2: boolean
 }
