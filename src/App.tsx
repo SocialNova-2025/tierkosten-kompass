@@ -73,7 +73,6 @@ export default function App() {
   // ── Persist pet whenever it changes ──────────────────────────────────
   useEffect(() => {
     if (pet) lsSet(STORAGE_KEYS.PET, pet)
-    // Note: deletion on null happens inside handleClearAll
   }, [pet])
 
   // ── Persist sessions whenever they change ─────────────────────────────
@@ -115,13 +114,11 @@ export default function App() {
     else goHome()
   }, [screen, pet, session, go, goHome])
 
-  // ── Pet done ──────────────────────────────────────────────────────────
   const handlePetDone = useCallback((p: Pet) => {
     setPet(p)
     go('P3')
   }, [go])
 
-  // ── Symptom selected ──────────────────────────────────────────────────
   const handleSymptom = useCallback((sid: string) => {
     setSymptomId(sid)
     setAnswers({})
@@ -129,7 +126,6 @@ export default function App() {
     go('P4a')
   }, [go])
 
-  // ── Answer change (with live red-flag check) ──────────────────────────
   const handleAnswer = useCallback((key: keyof CheckAnswers, value: string) => {
     setAnswers(prev => {
       const next = { ...prev, [key]: value } as CheckAnswers
@@ -143,7 +139,6 @@ export default function App() {
     })
   }, [])
 
-  // ── Build session ─────────────────────────────────────────────────────
   const buildSession = useCallback((): CheckSession => {
     const { level, score, redFlag } = calcUrgency(answers, symptomId, pet)
     const cost = getCostData(symptomId)
@@ -166,17 +161,14 @@ export default function App() {
     go('P6')
   }, [buildSession, go])
 
-  // ── P4a gate ──────────────────────────────────────────────────────────
   const canProceedP4a = !!(
     answers.Q_ATEM &&
     answers.Q_BLUT &&
     (symptomId !== 'urin_katze' || pet?.species !== 'katze' || answers.Q_URIN)
   )
 
-  // ── P4b gate ──────────────────────────────────────────────────────────
   const canProceedP4b = !!(answers.Q_DAUER && answers.Q_STAERKE)
 
-  // ── Save session ──────────────────────────────────────────────────────
   const handleSave = useCallback(() => {
     if (session && !sessions.find(s => s.id === session.id)) {
       setSessions(prev => [...prev, session])
@@ -184,7 +176,6 @@ export default function App() {
     }
   }, [session, sessions])
 
-  // ── Load demo ─────────────────────────────────────────────────────────
   const handleLoadDemo = useCallback((idx: number) => {
     const demo = DEMO_CASES[idx]
     const p = { ...demo.pet }
@@ -212,11 +203,8 @@ export default function App() {
     go('P6')
   }, [go])
 
-  // ── Clear all ─────────────────────────────────────────────────────────
   const handleClearAll = useCallback(() => {
-    // 1. Wipe localStorage first so no stale data survives a reload
     lsClearAll()
-    // 2. Reset all React state to defaults
     setPet(null)
     setSymptomId('')
     setAnswers({})
@@ -234,7 +222,6 @@ export default function App() {
   // SCREEN RENDERING
   // ─────────────────────────────────────────────────────────────────────
 
-  // Settings overlay
   if (settingsOpen) {
     return (
       <AppShell screen={screen} activeTab={tab} onTab={handleTab} onBack={() => setSettings(false)} onSettings={() => setSettings(false)}>
@@ -247,7 +234,6 @@ export default function App() {
     )
   }
 
-  // P0 – Onboarding
   if (screen === 'P0') {
     return (
       <AppShell screen="P0" activeTab={tab} onTab={handleTab} onSettings={() => setSettings(true)} noNav>
@@ -276,11 +262,9 @@ export default function App() {
     )
   }
 
-  // P1 – Start screen
   if (screen === 'P1') {
     return (
       <AppShell screen="P1" activeTab={tab} onTab={handleTab} onSettings={() => setSettings(true)}>
-        {/* Hero */}
         <div style={{ textAlign: 'center', padding: '32px 0 24px' }}>
           <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.10em', textTransform: 'uppercase', color: T.primary, marginBottom: 16 }}>
             TierKosten Kompass
@@ -296,7 +280,6 @@ export default function App() {
           </p>
         </div>
 
-        {/* Value prop */}
         <div style={{ borderTop: `1px solid ${T.border}`, borderBottom: `1px solid ${T.border}`, marginBottom: 24 }}>
           {[
             ['01', 'Wie dringend ist es?', 'Klare Handlungsempfehlung – grün, gelb oder rot.'],
@@ -313,7 +296,6 @@ export default function App() {
           ))}
         </div>
 
-        {/* Primary CTA – dominant */}
         <button
           ref={el => { if (el) el.style.cssText = BTN.primary }}
           onClick={() => { setAnswers({}); setSymptomId(''); go(pet ? 'P3' : 'P2') }}
@@ -321,19 +303,17 @@ export default function App() {
           Akut-Check starten →
         </button>
 
-        {/* Secondary – subordinate text link */}
         <button
           ref={el => { if (el) el.style.cssText = BTN.textLink }}
           onClick={() => go(pet ? 'P7' : 'P2')}
           style={{ marginTop: 6 } as React.CSSProperties}
         >
-          Versicherungsschutz prüfen
+          Schutzlücke erkennen
         </button>
       </AppShell>
     )
   }
 
-  // P2 – Pet profile
   if (screen === 'P2') {
     return (
       <AppShell screen="P2" activeTab={tab} onTab={handleTab} onBack={handleBack} onSettings={() => setSettings(true)}>
@@ -342,7 +322,6 @@ export default function App() {
     )
   }
 
-  // P3 – Symptom grid
   if (screen === 'P3') {
     if (!pet) { go('P2'); return null }
     return (
@@ -352,9 +331,6 @@ export default function App() {
     )
   }
 
-  // ── Question screens ──────────────────────────────────────────────────
-
-  // P4a – Safety questions
   if (screen === 'P4a') {
     const isUrinKatze = symptomId === 'urin_katze' && pet?.species === 'katze'
     const urinQ: QuestionDef = {
@@ -423,7 +399,6 @@ export default function App() {
     )
   }
 
-  // P4b – Progression questions
   if (screen === 'P4b') {
     const qs: QuestionDef[] = [
       {
@@ -481,7 +456,6 @@ export default function App() {
     )
   }
 
-  // P4c – General condition
   if (screen === 'P4c') {
     const qs: QuestionDef[] = [
       {
@@ -533,7 +507,6 @@ export default function App() {
     )
   }
 
-  // P6 – Result
   if (screen === 'P6') {
     if (!session || !pet) { go('P3'); return null }
     return (
@@ -551,7 +524,6 @@ export default function App() {
     )
   }
 
-  // P7 – Gap check
   if (screen === 'P7') {
     return (
       <AppShell screen="P7" activeTab={tab} onTab={handleTab} onBack={handleBack} onSettings={() => setSettings(true)}>
@@ -564,7 +536,6 @@ export default function App() {
     )
   }
 
-  // P8 – Gap result
   if (screen === 'P8') {
     const res = gapResult ?? { result: 'gelb' as const, gaps: [] }
     const titles = {
@@ -600,7 +571,7 @@ export default function App() {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             <button ref={el => { if (el) el.style.cssText = BTN.primary }} onClick={() => go('P9')}>
-              Schutz unverbindlich prüfen lassen →
+              Beratung per WhatsApp erhalten →
             </button>
             <button ref={el => { if (el) el.style.cssText = BTN.ghost }} onClick={goHome}>
               Später
@@ -611,7 +582,6 @@ export default function App() {
     )
   }
 
-  // P9 – Lead form
   if (screen === 'P9') {
     if (!pet) { go('P7'); return null }
     return (
@@ -625,7 +595,6 @@ export default function App() {
     )
   }
 
-  // P10 – Lead confirmation
   if (screen === 'P10') {
     return (
       <AppShell screen="P10" activeTab={tab} onTab={handleTab} onSettings={() => setSettings(true)} noNav>
@@ -634,7 +603,7 @@ export default function App() {
             <i className="ti ti-check" aria-hidden="true" style={{ fontSize: 28, color: T.primary }} />
           </div>
           <h2 style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-.03em', color: T.text, textAlign: 'center' }}>
-            Deine Anfrage ist eingegangen
+            Wir haben deine Angaben erhalten
           </h2>
           <p style={{ fontSize: 13, color: T.muted, lineHeight: 1.7, textAlign: 'center', maxWidth: 280 }}>
             {leadConfirmation}
@@ -643,14 +612,13 @@ export default function App() {
             Fertig
           </button>
           <p style={{ fontSize: 11, color: T.muted, textAlign: 'center' }}>
-            Einwilligung jederzeit widerrufbar · Kein automatischer Abschluss
+            Einwilligung jederzeit widerrufbar · Keine Sofortentscheidung nötig
           </p>
         </div>
       </AppShell>
     )
   }
 
-  // P11 – Tierakte
   if (screen === 'P11') {
     const petSessions = sessions.filter(s => s.petId === (pet?.id ?? ''))
     return (
