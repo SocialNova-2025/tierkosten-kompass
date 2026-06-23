@@ -191,18 +191,10 @@ export function LeadForm({ pet, session, onSubmit, onCancel }: LeadFormProps) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
         <h2 style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-.03em', color: T.text }}>Beratung per WhatsApp erhalten</h2>
-        <p style={{ fontSize: 13, color: T.muted }}>Damit wir dich passend zuordnen können, brauchen wir noch ein paar Angaben. Du öffnest WhatsApp mit einem vorbereiteten Text – und entscheidest selbst, ob du ihn abschickst.</p>
+        <p style={{ fontSize: 13, color: T.muted }}>Fülle kurz die Angaben aus. Danach öffnet sich WhatsApp mit einer vorbereiteten Nachricht. Du sendest sie selbst ab und ein Beratungspartner meldet sich anschließend per WhatsApp bei dir.</p>
       </div>
-      <div className="card card-teal">
-        <div className="flbl">So funktioniert es</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 }}>
-          {[['1. Formular ausfüllen','Deine Angaben werden in eine WhatsApp-Nachricht übernommen.'],['2. WhatsApp öffnen','Du siehst den vorbereiteten Text – nichts wird automatisch gesendet.'],['3. Selbst absenden','Du entscheidest: Nachricht prüfen, anpassen und erst dann senden.']].map(([h, b]) => (
-            <div key={h} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-              <div style={{ width: 5, height: 5, borderRadius: '50%', background: T.primary, marginTop: 7, flexShrink: 0 }} />
-              <div><div style={{ fontSize: 13, fontWeight: 600, color: T.text, marginBottom: 1 }}>{h}</div><div style={{ fontSize: 12, color: T.muted, lineHeight: 1.5 }}>{b}</div></div>
-            </div>
-          ))}
-        </div>
+      <div style={{ background: T.pLight, borderRadius: 10, padding: '10px 14px', fontSize: 13, color: T.primary, lineHeight: 1.6 }}>
+        Du füllst das Formular aus, öffnest WhatsApp und sendest die vorbereitete Nachricht selbst ab. Danach meldet sich ein Beratungspartner per WhatsApp bei dir.
       </div>
       <div>
         <div className="flbl" style={{ marginBottom: 8 }}>Angaben zu deinem Vierbeiner</div>
