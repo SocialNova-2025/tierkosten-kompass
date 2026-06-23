@@ -40,9 +40,8 @@ export const consentContactText =
 
 /** Lead confirmation – shown on P10 after WhatsApp was opened */
 export const leadConfirmation =
-  'Du kannst den vorbereiteten Text im WhatsApp-Chat prüfen und selbst absenden. ' +
-  'Ein passender Beratungspartner meldet sich danach bei dir. ' +
-  'Es ist keine Sofortentscheidung nötig.'
+  'Bitte prüfe die vorbereitete Nachricht und sende sie selbst ab. ' +
+  'Danach meldet sich ein Beratungspartner per WhatsApp bei dir.'
 
 /** Onboarding disclaimer */
 export const onboardingText =
