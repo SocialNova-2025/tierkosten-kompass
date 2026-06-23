@@ -51,7 +51,7 @@ export function EmergencyModal({ petName: _petName, onContinue }: EmergencyModal
         }}
         onClick={onContinue}
       >
-        Zur Vorbereitung weiter →
+        Verstanden →
       </button>
     </div>
   )
