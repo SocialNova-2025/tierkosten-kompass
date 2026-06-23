@@ -511,7 +511,6 @@ export default function App() {
     if (!session || !pet) { go('P3'); return null }
     return (
       <AppShell screen="P6" activeTab={tab} onTab={handleTab} onBack={handleBack} onSettings={() => setSettings(true)}>
-        {showEmerg && <EmergencyModal petName={pet.name} onContinue={() => setShowEmerg(false)} />}
         <ResultPage
           session={session}
           pet={pet}
