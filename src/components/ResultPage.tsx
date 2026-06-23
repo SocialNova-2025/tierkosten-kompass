@@ -7,6 +7,7 @@ import { CostDrivers } from './CostDrivers'
 import { VetReportAccordion } from './VetReportAccordion'
 import { getSymptomById } from '../data/symptoms'
 import { disclaimer, costHint } from '../data/copy'
+import { buildMapsUrl } from '../lib/maps'
 
 interface ResultPageProps {
   session: CheckSession
@@ -34,7 +35,8 @@ function SectionHeader({ label }: { label: string }) {
 }
 
 export function ResultPage({ session, pet, onSchutz, onNewCheck, onSave, alreadySaved }: ResultPageProps) {
-  const sym    = getSymptomById(session.symptomId)
+  const sym      = getSymptomById(session.symptomId)
+  const [localCity, setLocalCity] = useState('')
   const isRed  = session.urgency === 'rot'
   const isGrn  = session.urgency === 'gruen'
   const band   = BAND_LABEL[session.cost.band] ?? 'mittel'
@@ -115,10 +117,32 @@ export function ResultPage({ session, pet, onSchutz, onNewCheck, onSave, already
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {isRed ? (
           <>
-            <div style={{ background: T.redLight, border: `1px solid ${T.redBorder}`, borderRadius: 13, padding: 14, textAlign: 'center' }}>
-              <p style={{ fontSize: 13, fontWeight: 700, color: T.red, margin: '0 0 3px' }}>Notfall hat Vorrang</p>
-              <p style={{ fontSize: 12, color: T.text, margin: 0, lineHeight: 1.5 }}>
-                Bitte zuerst den Notdienst kontaktieren. Den Schutz-Check kannst du danach erledigen.
+            <div style={{ background: T.redLight, border: '1px solid ' + T.redBorder, borderRadius: 13, padding: 14 }}>
+              <p style={{ fontSize: 13, fontWeight: 700, color: T.red, margin: '0 0 6px', textAlign: 'center' }}>Notfall hat Vorrang</p>
+              <p style={{ fontSize: 12, color: T.text, margin: '0 0 12px', lineHeight: 1.5, textAlign: 'center' }}>
+                Bitte zuerst einen Notdienst oder eine Tierklinik kontaktieren. Den Schutz-Check kannst du danach erledigen.
+              </p>
+              {!pet.city && (
+                <div style={{ marginBottom: 10 }}>
+                  <input
+                    style={{ width: '100%', padding: '0 12px', height: 40, borderRadius: 9, fontSize: 13, border: '1.5px solid ' + T.redBorder, background: '#fff', color: T.text, fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box' } as React.CSSProperties}
+                    placeholder="Stadt oder PLZ eingeben"
+                    value={localCity}
+                    onChange={e => setLocalCity(e.target.value)}
+                  />
+                </div>
+              )}
+              <button
+                onClick={() => {
+                  const city = pet.city || localCity.trim() || undefined
+                  window.open(buildMapsUrl(city), '_blank', 'noopener,noreferrer')
+                }}
+                style={{ width: '100%', padding: '13px 0', borderRadius: 11, background: T.red, color: '#fff', border: 'none', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
+              >
+                Notdienst in deiner Nähe öffnen →
+              </button>
+              <p style={{ fontSize: 12, color: T.muted, margin: '8px 0 0', textAlign: 'center', lineHeight: 1.5 }}>
+                Bitte rufe dort direkt an und prüfe, ob aktuell ein Notdienst verfügbar ist.
               </p>
             </div>
             <button ref={el => { if (el) el.style.cssText = BTN.ghost }} onClick={onSchutz}>
