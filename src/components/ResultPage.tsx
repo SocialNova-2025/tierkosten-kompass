@@ -2,13 +2,13 @@ import { useState } from 'react'
 import type { CheckSession, Pet } from '../types'
 import { T, BTN } from '../styles/tokens'
 import { UrgencyCard } from './UrgencyCard'
-import { CostScenarioCard } from './CostScenarioCard'
 import { CostDrivers } from './CostDrivers'
 import { VetReportAccordion } from './VetReportAccordion'
 import { getSymptomById } from '../data/symptoms'
-import { disclaimer, costHint } from '../data/copy'
+import { disclaimer } from '../data/copy'
 import { buildEmergencyVetMapsUrl, buildRegularVetMapsUrl } from '../lib/maps'
 import { useCopy } from '../lib/LanguageContext'
+import { calcCostTier } from '../lib/costTier'
 
 interface ResultPageProps {
   session: CheckSession
@@ -19,15 +19,17 @@ interface ResultPageProps {
   alreadySaved: boolean
 }
 
-const BAND_LABEL: Record<string, string> = {
-  niedrig: 'niedrig', mittel: 'mittel', hoch: 'hoch', sehr_hoch: 'sehr hoch',
-}
+const DISCLAIMER =
+  'Die Werte sind eine Orientierung, keine Preisgarantie. ' +
+  'Die tatsächlichen Kosten hängen u. a. von Praxis, Diagnostik, Notdienst, Medikamenten und Verlauf ab.'
 
 function SectionHeader({ label }: { label: string }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '4px 0 6px' }}>
       <div style={{ flex: 1, height: 1, background: T.border }} />
-      <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: T.muted, whiteSpace: 'nowrap' }}>{label}</div>
+      <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: T.muted, whiteSpace: 'nowrap' }}>
+        {label}
+      </div>
       <div style={{ flex: 1, height: 1, background: T.border }} />
     </div>
   )
@@ -89,14 +91,25 @@ export function ResultPage({ session, pet, onSchutz, onNewCheck, onSave, already
   const isRed = session.urgency === 'rot'
   const isGrn = session.urgency === 'gruen'
   const isYel = session.urgency === 'gelb'
-  const band  = BAND_LABEL[session.cost.band] ?? 'mittel'
 
+  // Build label list for multi-symptom display
   const allSelected = session.selectedSymptoms ?? [session.symptomId]
   const showMulti   = allSelected.length > 1
+
+  // Derive cost tier from existing answers — pure presentation, no score/urgency change
+  const costTier = calcCostTier(
+    session.symptomId,
+    session.answers,
+    session.redFlag,
+    pet,
+    session.score,
+  )
+  const isEmergencyCost = costTier.tier === 'emergency'
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 22, paddingBottom: 16 }}>
 
+      {/* ROT: Notfallblock mit integrierter Notdienst-Suche */}
       {isRed && (
         <div style={{ borderRadius: 13, background: T.redLight, border: '1.5px solid ' + T.redBorder, padding: '16px 14px', display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div style={{ fontWeight: 700, fontSize: 16, color: T.red }}>Das kann dringend sein</div>
@@ -112,7 +125,10 @@ export function ResultPage({ session, pet, onSchutz, onNewCheck, onSave, already
             />
           )}
           <button
-            onClick={() => { const city = pet.city || localCity.trim() || undefined; window.open(buildEmergencyVetMapsUrl(city), '_blank', 'noopener,noreferrer') }}
+            onClick={() => {
+              const city = pet.city || localCity.trim() || undefined
+              window.open(buildEmergencyVetMapsUrl(city), '_blank', 'noopener,noreferrer')
+            }}
             style={{ width: '100%', padding: '13px 0', borderRadius: 11, background: T.red, color: '#fff', border: 'none', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
           >
             Jetzt Notdienst in der Nähe finden
@@ -123,6 +139,7 @@ export function ResultPage({ session, pet, onSchutz, onNewCheck, onSave, already
         </div>
       )}
 
+      {/* ROT: Was du jetzt vorbereiten kannst */}
       {isRed && (
         <div style={{ background: '#F3F7F7', borderRadius: 12, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
           <div style={{ fontWeight: 700, fontSize: 14, color: T.text }}>Was du jetzt vorbereiten kannst</div>
@@ -139,8 +156,11 @@ export function ResultPage({ session, pet, onSchutz, onNewCheck, onSave, already
         </div>
       )}
 
+      {/* Title */}
       <div>
-        <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: T.muted, marginBottom: 3 }}>Ergebnis für</div>
+        <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: T.muted, marginBottom: 3 }}>
+          Ergebnis für
+        </div>
         <h2 style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-.03em', color: T.text }}>
           {pet.name} · {sym?.label ?? session.symptomId}
         </h2>
@@ -152,9 +172,11 @@ export function ResultPage({ session, pet, onSchutz, onNewCheck, onSave, already
         )}
       </div>
 
+      {/* 1 - Dringlichkeit */}
       <SectionHeader label="1 · Dringlichkeit" />
       <UrgencyCard level={session.urgency} petName={pet.name} />
 
+      {/* GELB: Tierarzt-Maps-CTA */}
       {isYel && (
         <div style={{ borderRadius: 12, background: T.amberLight, border: '1px solid ' + T.amberBorder, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
           {!pet.city && (
@@ -166,7 +188,10 @@ export function ResultPage({ session, pet, onSchutz, onNewCheck, onSave, already
             />
           )}
           <button
-            onClick={() => { const city = pet.city || localCityYel.trim() || undefined; window.open(buildRegularVetMapsUrl(city), '_blank', 'noopener,noreferrer') }}
+            onClick={() => {
+              const city = pet.city || localCityYel.trim() || undefined
+              window.open(buildRegularVetMapsUrl(city), '_blank', 'noopener,noreferrer')
+            }}
             style={{ width: '100%', padding: '13px 0', borderRadius: 11, background: T.amber, color: '#fff', border: 'none', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
           >
             Gut bewertete Tierärzte in deiner Umgebung finden
@@ -177,49 +202,102 @@ export function ResultPage({ session, pet, onSchutz, onNewCheck, onSave, already
         </div>
       )}
 
-      <div style={{ background: '#F3F7F7', borderRadius: 10, padding: '10px 13px', fontSize: 12, lineHeight: 1.65, color: T.muted, fontStyle: 'italic' }}>{disclaimer(pet.name)}</div>
+      <div style={{ background: '#F3F7F7', borderRadius: 10, padding: '10px 13px', fontSize: 12, lineHeight: 1.65, color: T.muted, fontStyle: 'italic' }}>
+        {disclaimer(pet.name)}
+      </div>
 
-      <SectionHeader label="2 · Mögliche Maßnahmen" />
-      <div className="card">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+      {/* 2 - Kosten-Orientierung (costTier-basiert) */}
+      <SectionHeader label="2 · Kosten-Orientierung" />
+
+      {isEmergencyCost ? (
+        /* EMERGENCY: keine falsche enge Spanne */
+        <div style={{ borderRadius: 13, background: T.redLight, border: '1.5px solid ' + T.redBorder, padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.10em', textTransform: 'uppercase', color: T.red }}>
+            Notfall / Klinik
+          </div>
+          <div style={{ fontSize: 16, fontWeight: 700, color: T.red, lineHeight: 1.35 }}>
+            Häufig deutlich höher — Kosten nicht eng vorhersehbar
+          </div>
+          <p style={{ fontSize: 13, color: T.text, margin: 0, lineHeight: 1.6 }}>
+            {costTier.reasoning}
+          </p>
+          <div style={{ borderTop: '1px solid ' + T.redBorder, paddingTop: 10 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: T.red, marginBottom: 5 }}>
+              Kann deutlich steigen durch:
+            </div>
+            <p style={{ fontSize: 13, color: T.text, margin: 0, lineHeight: 1.5 }}>
+              {costTier.escalation}
+            </p>
+          </div>
+          <CostDrivers drivers={costTier.drivers} />
+        </div>
+      ) : (
+        /* NON-EMERGENCY: wahrscheinlicher Bereich laut Angaben */
+        <div style={{ borderRadius: 13, background: T.pLight, border: '1px solid ' + T.pMid, padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.10em', textTransform: 'uppercase', color: T.primary }}>
+            Wahrscheinlicher Bereich laut deinen Angaben
+          </div>
+          <div style={{ fontSize: 28, fontWeight: 700, letterSpacing: '-.03em', color: T.primary }}>
+            {costTier.range}
+          </div>
+          <p style={{ fontSize: 13, color: T.text, margin: 0, lineHeight: 1.6 }}>
+            {costTier.reasoning}
+          </p>
+          <div style={{ borderTop: '1px solid ' + T.pMid, paddingTop: 10 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: T.muted, marginBottom: 4, textTransform: 'uppercase', letterSpacing: '.06em' }}>
+              Kann höher werden, wenn …
+            </div>
+            <p style={{ fontSize: 12, color: T.muted, margin: 0, lineHeight: 1.55 }}>
+              {costTier.escalation}
+            </p>
+          </div>
+          <CostDrivers drivers={costTier.drivers} />
+        </div>
+      )}
+
+      {/* Maßnahmen (bleibt als Kontext, kompakt) */}
+      <div style={{ background: '#F3F7F7', borderRadius: 10, padding: '10px 13px' }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: T.muted, textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6 }}>
+          Mögliche Maßnahmen
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
           {session.cost.measures.map(m => (
-            <div key={m} style={{ display: 'flex', gap: 9, fontSize: 13, color: T.text }}>
-              <span style={{ color: T.primary, fontWeight: 700 }}>→</span>
+            <div key={m} style={{ display: 'flex', gap: 8, fontSize: 12, color: T.text }}>
+              <span style={{ color: T.primary, fontWeight: 700, flexShrink: 0 }}>→</span>
               <span>{m}</span>
             </div>
           ))}
         </div>
-        <div style={{ height: 1, background: T.border, margin: '9px 0' }} />
-        <p style={{ fontSize: 12, color: T.muted, margin: 0, lineHeight: 1.5 }}>Was wirklich nötig ist, entscheidet die Tierärztin / der Tierarzt nach Untersuchung.</p>
       </div>
 
-      <SectionHeader label="3 · Kosten-Orientierung" />
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-        <div className="flbl" style={{ marginBottom: 0 }}>Kosten-Orientierung</div>
-        <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 9px', borderRadius: 20, background: isRed ? T.red : T.primary, color: '#fff' }}>Risiko: {band}</span>
+      {/* Dauerhafter Kostenhinweis */}
+      <div style={{ background: '#F3F7F7', borderRadius: 10, padding: '10px 13px', fontSize: 12, lineHeight: 1.65, color: T.muted, fontStyle: 'italic' }}>
+        {DISCLAIMER}
       </div>
-      <p style={{ fontSize: 12, color: T.muted, marginBottom: 8 }}>Drei Szenarien – je nachdem, was beim Tierarzt nötig wird:</p>
-      <CostScenarioCard scenario={session.cost.basis}         tier={0} />
-      <CostScenarioCard scenario={session.cost.wahrscheinlich} tier={1} />
-      <CostScenarioCard scenario={session.cost.erhoeht}        tier={2} />
-      <CostDrivers drivers={session.cost.drivers} />
-      <div style={{ background: '#F3F7F7', borderRadius: 10, padding: '10px 13px', fontSize: 12, lineHeight: 1.65, color: T.muted, fontStyle: 'italic' }}>{costHint}</div>
 
       <div style={{ height: 1, background: T.border }} />
       <VetReportAccordion session={session} pet={pet} />
       <div style={{ height: 1, background: T.border }} />
 
+      {/* Schutz-Card */}
       {isRed  && <SchutzCardRot  onSchutz={onSchutz} />}
       {!isRed && isGrn  && <SchutzCardGruen onSchutz={onSchutz} />}
       {!isRed && !isGrn && <SchutzCardGelb  onSchutz={onSchutz} />}
 
+      {/* Secondary actions */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {alreadySaved ? (
-          <p style={{ textAlign: 'center', fontSize: 13, fontWeight: 600, color: T.green, padding: '6px 0' }}>In Tierakte gespeichert</p>
+          <p style={{ textAlign: 'center', fontSize: 13, fontWeight: 600, color: T.green, padding: '6px 0' }}>
+            In Tierakte gespeichert
+          </p>
         ) : (
-          <button ref={el => { if (el) el.style.cssText = BTN.outline }} onClick={onSave}>In Tierakte speichern</button>
+          <button ref={el => { if (el) el.style.cssText = BTN.outline }} onClick={onSave}>
+            In Tierakte speichern
+          </button>
         )}
-        <button ref={el => { if (el) el.style.cssText = BTN.ghost }} onClick={onNewCheck}>Neuen Check starten</button>
+        <button ref={el => { if (el) el.style.cssText = BTN.ghost }} onClick={onNewCheck}>
+          Neuen Check starten
+        </button>
       </div>
     </div>
   )
