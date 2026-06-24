@@ -8,6 +8,7 @@ import { VetReportAccordion } from './VetReportAccordion'
 import { getSymptomById } from '../data/symptoms'
 import { disclaimer, costHint } from '../data/copy'
 import { buildEmergencyVetMapsUrl, buildRegularVetMapsUrl } from '../lib/maps'
+import { useCopy } from '../lib/LanguageContext'
 
 interface ResultPageProps {
   session: CheckSession
@@ -26,9 +27,7 @@ function SectionHeader({ label }: { label: string }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '4px 0 6px' }}>
       <div style={{ flex: 1, height: 1, background: T.border }} />
-      <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: T.muted, whiteSpace: 'nowrap' }}>
-        {label}
-      </div>
+      <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: T.muted, whiteSpace: 'nowrap' }}>{label}</div>
       <div style={{ flex: 1, height: 1, background: T.border }} />
     </div>
   )
@@ -83,6 +82,7 @@ function SchutzCardRot({ onSchutz }: { onSchutz: () => void }) {
 }
 
 export function ResultPage({ session, pet, onSchutz, onNewCheck, onSave, alreadySaved }: ResultPageProps) {
+  const copy = useCopy()
   const sym                             = getSymptomById(session.symptomId)
   const [localCity, setLocalCity]       = useState('')
   const [localCityYel, setLocalCityYel] = useState('')
@@ -91,10 +91,12 @@ export function ResultPage({ session, pet, onSchutz, onNewCheck, onSave, already
   const isYel = session.urgency === 'gelb'
   const band  = BAND_LABEL[session.cost.band] ?? 'mittel'
 
+  const allSelected = session.selectedSymptoms ?? [session.symptomId]
+  const showMulti   = allSelected.length > 1
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 22, paddingBottom: 16 }}>
 
-      {/* ROT: Notfallblock mit integrierter Notdienst-Suche */}
       {isRed && (
         <div style={{ borderRadius: 13, background: T.redLight, border: '1.5px solid ' + T.redBorder, padding: '16px 14px', display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div style={{ fontWeight: 700, fontSize: 16, color: T.red }}>Das kann dringend sein</div>
@@ -110,10 +112,7 @@ export function ResultPage({ session, pet, onSchutz, onNewCheck, onSave, already
             />
           )}
           <button
-            onClick={() => {
-              const city = pet.city || localCity.trim() || undefined
-              window.open(buildEmergencyVetMapsUrl(city), '_blank', 'noopener,noreferrer')
-            }}
+            onClick={() => { const city = pet.city || localCity.trim() || undefined; window.open(buildEmergencyVetMapsUrl(city), '_blank', 'noopener,noreferrer') }}
             style={{ width: '100%', padding: '13px 0', borderRadius: 11, background: T.red, color: '#fff', border: 'none', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
           >
             Jetzt Notdienst in der Nähe finden
@@ -124,7 +123,6 @@ export function ResultPage({ session, pet, onSchutz, onNewCheck, onSave, already
         </div>
       )}
 
-      {/* ROT: Was du jetzt vorbereiten kannst */}
       {isRed && (
         <div style={{ background: '#F3F7F7', borderRadius: 12, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
           <div style={{ fontWeight: 700, fontSize: 14, color: T.text }}>Was du jetzt vorbereiten kannst</div>
@@ -141,21 +139,22 @@ export function ResultPage({ session, pet, onSchutz, onNewCheck, onSave, already
         </div>
       )}
 
-      {/* Title */}
       <div>
-        <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: T.muted, marginBottom: 3 }}>
-          Ergebnis für
-        </div>
+        <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: T.muted, marginBottom: 3 }}>Ergebnis für</div>
         <h2 style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-.03em', color: T.text }}>
           {pet.name} · {sym?.label ?? session.symptomId}
         </h2>
+        {showMulti && (
+          <p style={{ fontSize: 12, color: T.muted, margin: '4px 0 0', lineHeight: 1.5 }}>
+            <span style={{ fontWeight: 600 }}>{copy.results.selectedSymptomsLabel}:</span>{' '}
+            {allSelected.map(id => getSymptomById(id)?.label ?? id).join(' · ')}
+          </p>
+        )}
       </div>
 
-      {/* 1 - Dringlichkeit */}
       <SectionHeader label="1 · Dringlichkeit" />
       <UrgencyCard level={session.urgency} petName={pet.name} />
 
-      {/* GELB: Tierarzt-Maps-CTA */}
       {isYel && (
         <div style={{ borderRadius: 12, background: T.amberLight, border: '1px solid ' + T.amberBorder, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
           {!pet.city && (
@@ -167,10 +166,7 @@ export function ResultPage({ session, pet, onSchutz, onNewCheck, onSave, already
             />
           )}
           <button
-            onClick={() => {
-              const city = pet.city || localCityYel.trim() || undefined
-              window.open(buildRegularVetMapsUrl(city), '_blank', 'noopener,noreferrer')
-            }}
+            onClick={() => { const city = pet.city || localCityYel.trim() || undefined; window.open(buildRegularVetMapsUrl(city), '_blank', 'noopener,noreferrer') }}
             style={{ width: '100%', padding: '13px 0', borderRadius: 11, background: T.amber, color: '#fff', border: 'none', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
           >
             Gut bewertete Tierärzte in deiner Umgebung finden
@@ -181,11 +177,8 @@ export function ResultPage({ session, pet, onSchutz, onNewCheck, onSave, already
         </div>
       )}
 
-      <div style={{ background: '#F3F7F7', borderRadius: 10, padding: '10px 13px', fontSize: 12, lineHeight: 1.65, color: T.muted, fontStyle: 'italic' }}>
-        {disclaimer(pet.name)}
-      </div>
+      <div style={{ background: '#F3F7F7', borderRadius: 10, padding: '10px 13px', fontSize: 12, lineHeight: 1.65, color: T.muted, fontStyle: 'italic' }}>{disclaimer(pet.name)}</div>
 
-      {/* 2 - Massnahmen */}
       <SectionHeader label="2 · Mögliche Maßnahmen" />
       <div className="card">
         <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
@@ -197,53 +190,36 @@ export function ResultPage({ session, pet, onSchutz, onNewCheck, onSave, already
           ))}
         </div>
         <div style={{ height: 1, background: T.border, margin: '9px 0' }} />
-        <p style={{ fontSize: 12, color: T.muted, margin: 0, lineHeight: 1.5 }}>
-          Was wirklich nötig ist, entscheidet die Tierärztin / der Tierarzt nach Untersuchung.
-        </p>
+        <p style={{ fontSize: 12, color: T.muted, margin: 0, lineHeight: 1.5 }}>Was wirklich nötig ist, entscheidet die Tierärztin / der Tierarzt nach Untersuchung.</p>
       </div>
 
-      {/* 3 - Kosten */}
       <SectionHeader label="3 · Kosten-Orientierung" />
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
         <div className="flbl" style={{ marginBottom: 0 }}>Kosten-Orientierung</div>
-        <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 9px', borderRadius: 20, background: isRed ? T.red : T.primary, color: '#fff' }}>
-          Risiko: {band}
-        </span>
+        <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 9px', borderRadius: 20, background: isRed ? T.red : T.primary, color: '#fff' }}>Risiko: {band}</span>
       </div>
-      <p style={{ fontSize: 12, color: T.muted, marginBottom: 8 }}>
-        Drei Szenarien – je nachdem, was beim Tierarzt nötig wird:
-      </p>
+      <p style={{ fontSize: 12, color: T.muted, marginBottom: 8 }}>Drei Szenarien – je nachdem, was beim Tierarzt nötig wird:</p>
       <CostScenarioCard scenario={session.cost.basis}         tier={0} />
       <CostScenarioCard scenario={session.cost.wahrscheinlich} tier={1} />
       <CostScenarioCard scenario={session.cost.erhoeht}        tier={2} />
       <CostDrivers drivers={session.cost.drivers} />
-      <div style={{ background: '#F3F7F7', borderRadius: 10, padding: '10px 13px', fontSize: 12, lineHeight: 1.65, color: T.muted, fontStyle: 'italic' }}>
-        {costHint}
-      </div>
+      <div style={{ background: '#F3F7F7', borderRadius: 10, padding: '10px 13px', fontSize: 12, lineHeight: 1.65, color: T.muted, fontStyle: 'italic' }}>{costHint}</div>
 
       <div style={{ height: 1, background: T.border }} />
       <VetReportAccordion session={session} pet={pet} />
       <div style={{ height: 1, background: T.border }} />
 
-      {/* Schutz-Card */}
       {isRed  && <SchutzCardRot  onSchutz={onSchutz} />}
       {!isRed && isGrn  && <SchutzCardGruen onSchutz={onSchutz} />}
       {!isRed && !isGrn && <SchutzCardGelb  onSchutz={onSchutz} />}
 
-      {/* Secondary actions */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {alreadySaved ? (
-          <p style={{ textAlign: 'center', fontSize: 13, fontWeight: 600, color: T.green, padding: '6px 0' }}>
-            In Tierakte gespeichert
-          </p>
+          <p style={{ textAlign: 'center', fontSize: 13, fontWeight: 600, color: T.green, padding: '6px 0' }}>In Tierakte gespeichert</p>
         ) : (
-          <button ref={el => { if (el) el.style.cssText = BTN.outline }} onClick={onSave}>
-            In Tierakte speichern
-          </button>
+          <button ref={el => { if (el) el.style.cssText = BTN.outline }} onClick={onSave}>In Tierakte speichern</button>
         )}
-        <button ref={el => { if (el) el.style.cssText = BTN.ghost }} onClick={onNewCheck}>
-          Neuen Check starten
-        </button>
+        <button ref={el => { if (el) el.style.cssText = BTN.ghost }} onClick={onNewCheck}>Neuen Check starten</button>
       </div>
     </div>
   )
