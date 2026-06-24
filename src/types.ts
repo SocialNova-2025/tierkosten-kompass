@@ -8,8 +8,8 @@ export interface Pet {
   ageYears: number
   weightKg: number
   hasInsurance: boolean
-  breed?: string          // optional – captured in LeadForm if missing from profile
-  city?: string           // optional – Stadt oder PLZ für Notdienst-Suche
+  breed?: string
+  city?: string
 }
 
 // ── Urgency ────────────────────────────────────────────────────────────────
@@ -60,7 +60,10 @@ export interface CostData {
 export interface CheckSession {
   id: string
   petId: string
+  /** Primary symptom used for urgency calculation. Also the sole symptomId for legacy sessions. */
   symptomId: string
+  /** All user-selected symptoms (1–3). Missing in sessions created before multi-select. */
+  selectedSymptoms?: string[]
   answers: CheckAnswers
   urgency: UrgencyLevel
   score: number
