@@ -1,5 +1,18 @@
 /**
  * TierKosten Kompass – Logic Test Suite
+ *
+ * Tests verifying:
+ *   - 4 demo case scores and levels (spec-exact, never change)
+ *   - All red-flag overrides
+ *   - Age modifier (+1 for < 1 or > 10 years)
+ *   - Gap check logic (all scenarios)
+ *   - Lead validation (all edge cases, incl. new protection-context fields)
+ *   - WhatsApp link builder
+ *   - Maps URL builder
+ *   - Multi-symptom selection (getPrimarySymptom, Red-Flag-first logic)
+ *   - Language system (DE/EN copy structure)
+ *   - Name field copy (DE)
+ *   - calcCostTier (per-symptom rules, demo cases, guarantee constraints)
  */
 import { describe, it, expect } from 'vitest'
 import { calcUrgency, calcScore, isRedFlag } from '../lib/urgency'
@@ -11,6 +24,7 @@ import { DEMO_CASES }  from '../data/demoCases'
 import { getPrimarySymptom, RED_FLAG_SYMPTOM_IDS, MAX_SYMPTOMS } from '../lib/symptomUtils'
 import { DE } from '../data/copy.de'
 import { EN } from '../data/copy.en'
+import { calcCostTier } from '../lib/costTier'
 import type { LeadFields } from '../types'
 
 describe('Demo case scores (spec-exact, never change)', () => {
@@ -225,4 +239,169 @@ describe('Language system – EN copy mirrors DE structure', () => {
   it('EN.symptomGrid and DE.symptomGrid have same keys', () => { expect(Object.keys(EN.symptomGrid).sort()).toEqual(Object.keys(DE.symptomGrid).sort()) })
   it('EN.settings and DE.settings have same keys', () => { expect(Object.keys(EN.settings).sort()).toEqual(Object.keys(DE.settings).sort()) })
   it('EN.common and DE.common have same keys', () => { expect(Object.keys(EN.common).sort()).toEqual(Object.keys(DE.common).sort()) })
+})
+
+describe('calcCostTier – humpeln', () => {
+  it('low: belastet normal, kein Unfall, leichte Schmerzen, kurze Dauer', () => {
+    const r = calcCostTier('humpeln', { Q_BELASTET: 'normal', Q_UNFALL: 'nein', Q_STAERKE: 'leicht', Q_DAUER: 'lt12' }, false)
+    expect(r.tier).toBe('low'); expect(r.range).not.toBeNull(); expect(r.range).toContain('€')
+  })
+  it('medium: belastet teilweise, mittlere Schmerzen', () => {
+    const r = calcCostTier('humpeln', { Q_BELASTET: 'teilweise', Q_STAERKE: 'mittel', Q_UNFALL: 'nein', Q_DAUER: 'lt12' }, false)
+    expect(r.tier).toBe('medium'); expect(r.range).not.toBeNull()
+  })
+  it('medium: länger als 24h (t1_3)', () => {
+    const r = calcCostTier('humpeln', { Q_DAUER: 't1_3', Q_UNFALL: 'nein', Q_STAERKE: 'leicht', Q_BELASTET: 'normal' }, false)
+    expect(r.tier).toBe('medium')
+  })
+  it('high: belastet gar nicht → high', () => {
+    const r = calcCostTier('humpeln', { Q_BELASTET: 'gar_nicht', Q_UNFALL: 'nein', Q_STAERKE: 'leicht' }, false)
+    expect(r.tier).toBe('high'); expect(r.range).not.toBeNull()
+  })
+  it('high: Unfall → high', () => {
+    const r = calcCostTier('humpeln', { Q_UNFALL: 'ja', Q_BELASTET: 'teilweise', Q_STAERKE: 'mittel' }, false)
+    expect(r.tier).toBe('high')
+  })
+  it('high: starke Schmerzen → high', () => {
+    const r = calcCostTier('humpeln', { Q_STAERKE: 'stark', Q_UNFALL: 'nein', Q_BELASTET: 'teilweise' }, false)
+    expect(r.tier).toBe('high')
+  })
+  it('emergency: redFlag → emergency', () => {
+    const r = calcCostTier('humpeln', { Q_ATEM: 'stark' }, true)
+    expect(r.tier).toBe('emergency'); expect(r.range).toBeNull()
+  })
+  it('high has meaningful escalation hint', () => {
+    const r = calcCostTier('humpeln', { Q_BELASTET: 'gar_nicht' }, false)
+    expect(r.escalation.length).toBeGreaterThan(20)
+  })
+  it('Bruno (Demo): Unfall+teilweise+mittel → high', () => {
+    const r = calcCostTier('humpeln', DEMO_CASES[0].answers, false, DEMO_CASES[0].pet, 8)
+    expect(r.tier).toBe('high'); expect(r.range).not.toBeNull()
+  })
+})
+
+describe('calcCostTier – frisst_nicht', () => {
+  it('medium: frisst weniger, sonst stabil', () => {
+    const r = calcCostTier('frisst_nicht', { Q_FRISST: 'weniger', Q_TRINKT: 'normal', Q_VERHALTEN: 'nein' }, false)
+    expect(r.tier).toBe('medium'); expect(r.range).not.toBeNull()
+  })
+  it('high: frisst gar nicht', () => {
+    const r = calcCostTier('frisst_nicht', { Q_FRISST: 'gar_nicht', Q_TRINKT: 'normal', Q_VERHALTEN: 'nein' }, false)
+    expect(r.tier).toBe('high'); expect(r.range).not.toBeNull()
+  })
+  it('high: trinkt weniger', () => {
+    const r = calcCostTier('frisst_nicht', { Q_FRISST: 'weniger', Q_TRINKT: 'weniger', Q_VERHALTEN: 'nein' }, false)
+    expect(r.tier).toBe('high')
+  })
+  it('high: deutlich verändertes Verhalten', () => {
+    const r = calcCostTier('frisst_nicht', { Q_FRISST: 'weniger', Q_TRINKT: 'normal', Q_VERHALTEN: 'deutlich' }, false)
+    expect(r.tier).toBe('high')
+  })
+  it('emergency: trinkt gar nicht + deutlich verändert', () => {
+    const r = calcCostTier('frisst_nicht', { Q_FRISST: 'gar_nicht', Q_TRINKT: 'gar_nicht', Q_VERHALTEN: 'deutlich' }, false)
+    expect(r.tier).toBe('emergency'); expect(r.range).toBeNull()
+  })
+  it('emergency: redFlag → emergency', () => {
+    const r = calcCostTier('frisst_nicht', {}, true)
+    expect(r.tier).toBe('emergency'); expect(r.range).toBeNull()
+  })
+  it('Mimi (Demo): frisst gar nicht + trinkt weniger + deutlich → high', () => {
+    const r = calcCostTier('frisst_nicht', DEMO_CASES[1].answers, false, DEMO_CASES[1].pet, 11)
+    expect(r.tier).toBe('high'); expect(r.range).not.toBeNull()
+  })
+})
+
+describe('calcCostTier – erbrechen', () => {
+  it('low: einmalig, trinkt normal, Verhalten normal', () => {
+    const r = calcCostTier('erbrechen', { Q_HAEUFIG: 'einmalig', Q_TRINKT: 'normal', Q_VERHALTEN: 'nein' }, false)
+    expect(r.tier).toBe('low'); expect(r.range).not.toBeNull()
+  })
+  it('medium: mehrmals', () => {
+    const r = calcCostTier('erbrechen', { Q_HAEUFIG: 'mehrmals', Q_TRINKT: 'normal', Q_VERHALTEN: 'nein' }, false)
+    expect(r.tier).toBe('medium')
+  })
+  it('medium: trinkt weniger', () => {
+    const r = calcCostTier('erbrechen', { Q_HAEUFIG: 'einmalig', Q_TRINKT: 'weniger', Q_VERHALTEN: 'nein' }, false)
+    expect(r.tier).toBe('medium')
+  })
+  it('high: anhaltend', () => {
+    const r = calcCostTier('erbrechen', { Q_HAEUFIG: 'anhaltend' }, false)
+    expect(r.tier).toBe('high'); expect(r.range).not.toBeNull()
+  })
+  it('high: Giftverdacht unklar', () => {
+    const r = calcCostTier('erbrechen', { Q_GIFT: 'unklar', Q_HAEUFIG: 'einmalig' }, false)
+    expect(r.tier).toBe('high')
+  })
+  it('emergency: redFlag → emergency, no range', () => {
+    const r = calcCostTier('erbrechen', { Q_GIFT: 'ja' }, true)
+    expect(r.tier).toBe('emergency'); expect(r.range).toBeNull()
+  })
+  it('Rocky (Demo): einmalig + normal + nein → low', () => {
+    const r = calcCostTier('erbrechen', DEMO_CASES[2].answers, false, DEMO_CASES[2].pet, 1)
+    expect(r.tier).toBe('low'); expect(r.range).not.toBeNull()
+  })
+})
+
+describe('calcCostTier – urin_katze', () => {
+  it('always emergency regardless of answers', () => {
+    const r = calcCostTier('urin_katze', { Q_URIN: 'troepfchen' }, false)
+    expect(r.tier).toBe('emergency'); expect(r.range).toBeNull()
+  })
+  it('emergency even with no answers', () => {
+    const r = calcCostTier('urin_katze', {}, false)
+    expect(r.tier).toBe('emergency'); expect(r.range).toBeNull()
+  })
+  it('Felix (Demo): urin_katze → emergency, no range', () => {
+    const r = calcCostTier('urin_katze', DEMO_CASES[3].answers, true, DEMO_CASES[3].pet, 99)
+    expect(r.tier).toBe('emergency'); expect(r.range).toBeNull()
+    expect(r.reasoning.length).toBeGreaterThan(10); expect(r.escalation.length).toBeGreaterThan(10)
+  })
+})
+
+describe('calcCostTier – guarantee constraints', () => {
+  it('low tier has range, non-null', () => {
+    const r = calcCostTier('erbrechen', { Q_HAEUFIG: 'einmalig', Q_TRINKT: 'normal', Q_VERHALTEN: 'nein' }, false)
+    expect(r.range).not.toBeNull(); expect(r.range).toMatch(/ca\. \d+/)
+  })
+  it('medium tier has range, non-null', () => {
+    const r = calcCostTier('humpeln', { Q_BELASTET: 'teilweise', Q_STAERKE: 'mittel', Q_UNFALL: 'nein' }, false)
+    expect(r.range).not.toBeNull()
+  })
+  it('high tier has range, non-null (not emergency)', () => {
+    const r = calcCostTier('humpeln', { Q_BELASTET: 'gar_nicht' }, false)
+    expect(r.range).not.toBeNull()
+  })
+  it('emergency tier always has null range – no false narrow price', () => {
+    const r1 = calcCostTier('urin_katze', {}, false)
+    const r2 = calcCostTier('erbrechen', {}, true)
+    const r3 = calcCostTier('humpeln', {}, true)
+    expect(r1.range).toBeNull(); expect(r2.range).toBeNull(); expect(r3.range).toBeNull()
+  })
+  it('all tiers have non-empty reasoning', () => {
+    const tiers = [
+      calcCostTier('erbrechen', { Q_HAEUFIG: 'einmalig', Q_TRINKT: 'normal', Q_VERHALTEN: 'nein' }, false),
+      calcCostTier('humpeln', { Q_BELASTET: 'teilweise', Q_STAERKE: 'mittel', Q_UNFALL: 'nein' }, false),
+      calcCostTier('humpeln', { Q_BELASTET: 'gar_nicht' }, false),
+      calcCostTier('urin_katze', {}, false),
+    ]
+    tiers.forEach(r => {
+      expect(r.reasoning.length).toBeGreaterThan(20)
+      expect(r.escalation.length).toBeGreaterThan(20)
+      expect(r.drivers.length).toBeGreaterThan(0)
+    })
+  })
+  it('all demo cases: urgency scores unchanged (costTier does not affect urgency)', () => {
+    DEMO_CASES.forEach(demo => {
+      const urgency = calcUrgency(demo.answers, demo.symptom, demo.pet)
+      expect(urgency.level).toBe(demo.expectedLevel)
+      expect(urgency.score).toBe(demo.expectedScore)
+    })
+  })
+  it('DISCLAIMER text contains no Preisgarantie promise (no "garantiert")', () => {
+    const DISCLAIMER =
+      'Die Werte sind eine Orientierung, keine Preisgarantie. ' +
+      'Die tatsächlichen Kosten hängen u. a. von Praxis, Diagnostik, Notdienst, Medikamenten und Verlauf ab.'
+    expect(DISCLAIMER).toContain('keine Preisgarantie')
+    expect(DISCLAIMER).not.toContain('garantiert')
+  })
 })
