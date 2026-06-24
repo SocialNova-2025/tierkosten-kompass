@@ -20,7 +20,7 @@ const TITLES: Partial<Record<Screen, string>> = {
   P6:  'Ergebnis',
   P7:  'Schutz-Check',
   P8:  'Schutz-Ergebnis',
-  P9:  'Anfrage senden',
+  P9:  'Beratung starten',
   P10: 'Bestätigung',
   P11: 'Tierakte',
 }
