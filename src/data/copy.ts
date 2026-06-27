@@ -7,9 +7,9 @@
 
 /** Medical disclaimer – interpolate pet name */
 export const disclaimer = (petName: string): string =>
-  'TierKosten Kompass stellt keine Diagnose und ersetzt keinen Tierarzt. ' +
-  'Die Einschätzung ist eine Orientierung auf Basis deiner Angaben. ' +
-  'Bitte lass ' + petName + ' im Zweifel immer tierärztlich abklären.'
+  `TierKosten Kompass stellt keine Diagnose und ersetzt keinen Tierarzt. ` +
+  `Die Einschätzung ist eine Orientierung auf Basis deiner Angaben. ` +
+  `Bitte lass ${petName} im Zweifel immer tierärztlich abklären.`
 
 /** Cost disclaimer – shown below every cost section */
 export const costHint =
@@ -23,29 +23,32 @@ export const emergencyNotice =
   'Bitte kontaktiere jetzt sofort einen tierärztlichen Notdienst oder eine Tierklinik. ' +
   'Warte damit nicht.'
 
-/** Schutzklärung intro – shown at top of gap check */
+/** Insurance disclaimer – shown at top of gap check */
 export const insuranceHint =
-  'Dein Ergebnis zeigt, welche Kosten entstehen können. ' +
-  'Wenn du möchtest, kannst du prüfen lassen, ob dein Tier für solche Fälle ' +
-  'passend abgesichert ist. Dieser Check ersetzt keine verbindliche Beratung.'
+  'Dieser Check ersetzt keine Versicherungsberatung – er zeigt mögliche Lücken. ' +
+  'Für eine verbindliche Prüfung wirst du – nur mit deiner Einwilligung – ' +
+  'an einen lizenzierten Partner weitergeleitet.'
 
 /** DSGVO consent texts – both required, never pre-selected */
 export const consentShareText =
-  'Ich bin damit einverstanden, WhatsApp für die Schutzklärung zu öffnen ' +
-  'und den vorbereiteten Text selbst abzusenden.'
+  'Ich willige ein, dass meine angegebenen Kontakt- und Tierdaten zum Zweck einer ' +
+  'Schutz-/Versicherungsanfrage an einen lizenzierten Partner weitergegeben werden. ' +
+  'Diese Einwilligung kann ich jederzeit mit Wirkung für die Zukunft widerrufen. ' +
+  'Weitere Infos in der Datenschutzerklärung.'
 
 export const consentContactText =
-  'Ich bin damit einverstanden, dass meine Angaben zur Zuordnung und ' +
-  'Schutzklärung im WhatsApp-Chat an einen passenden Beratungspartner übermittelt werden.'
+  'Ich willige ein, dass mich der Partner zur Bearbeitung meiner Anfrage per Telefon ' +
+  'und/oder E-Mail kontaktiert. Auch diese Einwilligung kann ich jederzeit widerrufen.'
 
-/** Lead confirmation – shown on P10 after WhatsApp was opened */
+/** Lead confirmation – shown after successful submission */
 export const leadConfirmation =
-  'Bitte prüfe die vorbereitete Nachricht und sende sie selbst ab. ' +
-  'Danach meldet sich ein Beratungspartner per WhatsApp bei dir.'
+  'Danke – deine Anfrage ist eingegangen. Ein lizenzierter Partner meldet sich ' +
+  'innerhalb von 1–2 Werktagen, um deinen Schutz zu prüfen. Es entsteht dir ' +
+  'dadurch keine Verpflichtung. Du kannst deine Einwilligung jederzeit widerrufen.'
 
-/** Onboarding disclaimer */
+/** Onboarding disclaimer – kein Schutz/Insurance-Bezug */
 export const onboardingText =
-  'TierKosten Kompass hilft dir einzuschätzen, wie dringend es ist, ' +
-  'was es ungefähr kosten kann und ob dein Schutz passt. ' +
+  'TierKosten Kompass hilft dir einzuschätzen, wie dringend es ist ' +
+  'und was es ungefähr kosten kann. ' +
   'Die App stellt keine Diagnose und ersetzt keinen Tierarzt. ' +
   'Im Notfall wende dich bitte sofort an einen Tierarzt oder Notdienst.'
