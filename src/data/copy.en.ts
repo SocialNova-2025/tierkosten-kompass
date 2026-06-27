@@ -1,6 +1,8 @@
 /**
  * copy.en.ts – English UI copy
+ *
  * Mirrors the structure of copy.de.ts exactly.
+ * Legal disclaimer: All texts comply with the same constraints as the German copy.
  */
 import type { AppCopy } from './copy.de'
 
@@ -8,29 +10,31 @@ export const EN: AppCopy = {
   onboarding: {
     title: 'Before we start',
     body:
-      'PetCost Compass helps you assess how urgent a situation is, ' +
-      'what it might cost, and whether your protection fits. ' +
+      'PetCost Compass helps you assess how urgent a situation is ' +
+      'and what it might cost. ' +
       'This app does not provide a diagnosis and does not replace a vet. ' +
       'In an emergency, please contact a vet or emergency service immediately.',
     cta: "Got it, let's go",
     dataPrivacy: 'Privacy & Legal',
   },
+
   home: {
     label: 'PetCost Compass',
     headline: "What's going on with your pet?",
     subline: 'Before the vet bill surprises you.',
-    tagline: '60-second check · Urgency · Cost risk · Coverage',
+    tagline: '60-second check · Assess urgency · Understand costs',
     features: [
       ['01', 'How urgent is it?', 'Clear guidance – green, yellow, or red.'],
       ['02', 'What might it cost?', 'Three realistic cost scenarios.'],
-      ['03', 'Is your coverage right?', 'Possible gaps in your insurance.'],
+      ['03', 'Find a vet or emergency service', 'Map opens near you instantly.'],
     ],
     startCta: 'Start quick check →',
     schutzCta: 'Check coverage gaps',
   },
+
   petProfile: {
     title: 'Your pet',
-    subtitle: 'Just 5 fields · under 30 seconds',
+    subtitle: 'Just 4 fields · under 30 seconds',
     speciesLabel: 'Species',
     dog: 'Dog',
     cat: 'Cat',
@@ -49,6 +53,7 @@ export const EN: AppCopy = {
     cityHint: 'Used only for finding nearby emergency vets.',
     cta: 'Continue →',
   },
+
   symptomGrid: {
     title: (petName: string) => `What are you observing in ${petName}?`,
     hint: 'Select up to 3 observations.',
@@ -57,10 +62,15 @@ export const EN: AppCopy = {
     cta: 'Continue →',
     minHint: 'Please select at least 1 observation.',
     maxHint: 'Maximum 3 observations. Remove one to add another.',
+    redFlagHint:
+      'Red dot = possible warning sign. These observations are given extra weight in the check. ' +
+      'This does not automatically mean an emergency.',
   },
+
   results: {
     selectedSymptomsLabel: 'Selected observations',
   },
+
   settings: {
     title: 'Settings',
     demosLabel: 'Load demo cases',
@@ -70,8 +80,9 @@ export const EN: AppCopy = {
     dataLabel: 'Data',
     clearAll: 'Delete all local data',
     footer:
-      'PetCost Compass · Demo prototype · All information without warranty · No medical advice',
+      'PetCost Compass · Beta · All information without warranty · No medical advice',
   },
+
   common: {
     next: 'Continue →',
     later: 'Later',
