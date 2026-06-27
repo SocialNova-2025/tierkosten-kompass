@@ -1,5 +1,9 @@
 /**
  * copy.de.ts – German UI copy (default language)
+ *
+ * All texts comply with the hard constraints:
+ * – No diagnosis, no price guarantee, no insurance recommendation
+ * – No forbidden words in Schutzfunnel (Anfrage, Angebot, Abschluss, kaufen, verkaufen)
  */
 
 export interface AppCopy {
@@ -47,6 +51,8 @@ export interface AppCopy {
     cta: string
     minHint: string
     maxHint: string
+    /** Ruhige Erklärung des roten Punktes (Warnsignal-Marker) */
+    redFlagHint: string
   }
   results: {
     selectedSymptomsLabel: string
@@ -76,8 +82,8 @@ export const DE: AppCopy = {
   onboarding: {
     title: 'Kurz vorab',
     body:
-      'TierKosten Kompass hilft dir einzuschätzen, wie dringend es ist, ' +
-      'was es ungefähr kosten kann und ob dein Schutz passt. ' +
+      'TierKosten Kompass hilft dir einzuschätzen, wie dringend es ist ' +
+      'und was es ungefähr kosten kann. ' +
       'Die App stellt keine Diagnose und ersetzt keinen Tierarzt. ' +
       'Im Notfall wende dich bitte sofort an einen Tierarzt oder Notdienst.',
     cta: "Verstanden, los geht's",
@@ -88,11 +94,11 @@ export const DE: AppCopy = {
     label: 'TierKosten Kompass',
     headline: 'Was ist mit deinem Tier los?',
     subline: 'Bevor dich die Tierarztrechnung überrascht.',
-    tagline: 'Schnellcheck in 60 Sekunden · Dringlichkeit · Kostenrisiko · Schutz',
+    tagline: 'Schnellcheck in 60 Sekunden · Dringlichkeit einschätzen · Kosten verstehen',
     features: [
       ['01', 'Wie dringend ist es?', 'Klare Handlungsempfehlung – grün, gelb oder rot.'],
       ['02', 'Was kostet es ungefähr?', 'Drei realistische Kostenszenarien.'],
-      ['03', 'Passt dein Schutz?', 'Mögliche Lücken im Versicherungsschutz.'],
+      ['03', 'Tierarzt oder Notdienst finden', 'Karte öffnet direkt in deiner Nähe.'],
     ],
     startCta: 'Akut-Check starten →',
     schutzCta: 'Schutzlücke erkennen',
@@ -100,7 +106,7 @@ export const DE: AppCopy = {
 
   petProfile: {
     title: 'Dein Tier',
-    subtitle: 'Nur 5 Angaben · unter 30 Sekunden',
+    subtitle: 'Nur 4 Angaben · unter 30 Sekunden',
     speciesLabel: 'Tierart',
     dog: 'Hund',
     cat: 'Katze',
@@ -128,6 +134,9 @@ export const DE: AppCopy = {
     cta: 'Weiter →',
     minHint: 'Bitte mindestens 1 Beobachtung auswählen.',
     maxHint: 'Maximal 3 Beobachtungen möglich. Entferne eine Auswahl, um eine andere hinzuzufügen.',
+    redFlagHint:
+      'Roter Punkt = mögliches Warnsignal. Diese Beobachtungen werden im Check besonders berücksichtigt. ' +
+      'Das bedeutet nicht automatisch, dass ein Notfall vorliegt.',
   },
 
   results: {
@@ -143,7 +152,7 @@ export const DE: AppCopy = {
     dataLabel: 'Daten',
     clearAll: 'Alle lokalen Daten löschen',
     footer:
-      'TierKosten Kompass · Demo-Prototyp · Alle Angaben ohne Gewähr · Kein medizinischer Rat',
+      'TierKosten Kompass · Beta · Alle Angaben ohne Gewähr · Kein medizinischer Rat',
   },
 
   common: {
