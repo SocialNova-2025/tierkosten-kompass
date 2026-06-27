@@ -1,4 +1,5 @@
 import type { Pet, CheckSession } from '../types'
+import { FEATURES } from '../config/features'
 import { T, BTN } from '../styles/tokens'
 import { getSymptomById } from '../data/symptoms'
 
@@ -77,7 +78,10 @@ export function MiniPetRecord({ pet, sessions, onNewCheck, onEdit, onSchutz }: M
           {[
             ['Vorerkrankungen', 'Keine angegeben'],
             ['Medikamente', 'Keine angegeben'],
-            ['Versicherung', pet.hasInsurance ? 'Vorhanden' : 'Nicht vorhanden'],
+            // Versicherungszeile nur sichtbar wenn insuranceFunnel aktiv
+            ...(FEATURES.insuranceFunnel
+              ? [['Versicherung', pet.hasInsurance ? 'Vorhanden' : 'Nicht vorhanden']]
+              : []),
           ].map(([k, v]) => (
             <div key={k}>
               <div style={{ fontSize: 10, color: T.muted, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 2 }}>{k}</div>
@@ -131,9 +135,12 @@ export function MiniPetRecord({ pet, sessions, onNewCheck, onEdit, onSchutz }: M
         <button ref={el => { if (el) el.style.cssText = BTN.primary }} onClick={onNewCheck}>
           Neuen Akut-Check starten
         </button>
-        <button ref={el => { if (el) el.style.cssText = BTN.outline }} onClick={onSchutz}>
-          Schutzlücke einordnen
-        </button>
+        {/* Versicherungsschutz prüfen – nur sichtbar wenn insuranceFunnel aktiv */}
+        {FEATURES.insuranceFunnel && (
+          <button ref={el => { if (el) el.style.cssText = BTN.outline }} onClick={onSchutz}>
+            Versicherungsschutz prüfen
+          </button>
+        )}
       </div>
     </div>
   )
