@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Pet, Species } from '../types'
+import { FEATURES } from '../config/features'
 import { T } from '../styles/tokens'
 import { BTN } from '../styles/tokens'
 import { useCopy } from '../lib/LanguageContext'
@@ -76,14 +77,17 @@ export function PetProfileForm({ initial, onDone }: PetProfileFormProps) {
         </div>
       </div>
 
-      {/* Insurance */}
-      <div>
-        <div className="flbl">{c.insuranceLabel} <span style={{ color: T.red }}>{copy.common.required}</span></div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-          <button style={segBtn(ins === true)}  onClick={() => setIns(true)}>{c.yes}</button>
-          <button style={segBtn(ins === false)} onClick={() => setIns(false)}>{c.no}</button>
+      {/* Versicherungsfrage – nur sichtbar wenn insuranceFunnel aktiv.
+          hasInsurance bleibt im Pet-Modell erhalten (Default: false) */}
+      {FEATURES.insuranceFunnel && (
+        <div>
+          <div className="flbl">{c.insuranceLabel} <span style={{ color: T.red }}>{copy.common.required}</span></div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+            <button style={segBtn(ins === true)}  onClick={() => setIns(true)}>{c.yes}</button>
+            <button style={segBtn(ins === false)} onClick={() => setIns(false)}>{c.no}</button>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Stadt/PLZ – optional */}
       <div>
