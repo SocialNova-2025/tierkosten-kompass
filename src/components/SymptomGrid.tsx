@@ -17,7 +17,8 @@ export function SymptomGrid({ pet, onDone }: SymptomGridProps) {
   const c    = copy.symptomGrid
 
   const list = getSymptomsForSpecies(pet.species)
-  const [selected, setSelected] = useState<string[]>([])
+  const [selected, setSelected]   = useState<string[]>([])
+  const [showInfo, setShowInfo]   = useState(false)
 
   const toggle = (id: string) => {
     setSelected(prev => {
@@ -37,11 +38,30 @@ export function SymptomGrid({ pet, onDone }: SymptomGridProps) {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14, position: 'relative' }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        <h2 style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-.03em', color: T.text }}>
-          {c.title(pet.name)}
-        </h2>
+        {/* Title + Info-Button */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <h2 style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-.03em', color: T.text, margin: 0 }}>
+            {c.title(pet.name)}
+          </h2>
+          <button
+            onClick={() => setShowInfo(v => !v)}
+            aria-label="Info zu roten Punkten"
+            aria-expanded={showInfo}
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              width: 20, height: 20, borderRadius: '50%', flexShrink: 0,
+              background: 'transparent', border: `1.5px solid ${T.red}`,
+              color: T.red, fontSize: 11, fontWeight: 700, cursor: 'pointer',
+              fontFamily: 'inherit', opacity: 0.72, lineHeight: 1,
+              padding: 0,
+            }}
+          >
+            i
+          </button>
+        </div>
+
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <p style={{ fontSize: 13, color: T.muted, margin: 0 }}>{c.hint}</p>
           {selected.length > 0 && (
@@ -128,6 +148,53 @@ export function SymptomGrid({ pet, onDone }: SymptomGridProps) {
 
       {selected.length === 0 && (
         <p style={{ fontSize: 11, color: T.muted, textAlign: 'center', margin: 0 }}>{c.minHint}</p>
+      )}
+
+      {/* Red-Flag Info Popup */}
+      {showInfo && (
+        <>
+          {/* Backdrop */}
+          <div
+            onClick={() => setShowInfo(false)}
+            style={{
+              position: 'fixed', top: 0, right: 0, bottom: 0, left: 0,
+              background: 'rgba(0,0,0,0.30)', zIndex: 50,
+            }}
+          />
+          {/* Card */}
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Rote Punkte: Erklärung"
+            style={{
+              position: 'fixed', bottom: 88, left: '50%', transform: 'translateX(-50%)',
+              width: 'min(320px, calc(100vw - 32px))',
+              background: '#fff', borderRadius: 14,
+              padding: '14px 16px 16px',
+              boxShadow: '0 8px 28px rgba(0,0,0,0.18)', zIndex: 51,
+              display: 'flex', flexDirection: 'column', gap: 10,
+            }}
+          >
+            {/* Close row */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => setShowInfo(false)}
+                aria-label="Schließen"
+                style={{
+                  background: 'transparent', border: 'none', cursor: 'pointer',
+                  color: T.muted, fontSize: 15, lineHeight: 1, padding: '2px 4px',
+                  fontFamily: 'inherit',
+                }}
+              >
+                ✕
+              </button>
+            </div>
+            {/* Hint text */}
+            <p style={{ fontSize: 13, color: T.text, lineHeight: 1.65, margin: '0 0 2px' }}>
+              {c.redFlagHint}
+            </p>
+          </div>
+        </>
       )}
     </div>
   )
