@@ -9,6 +9,7 @@ import { disclaimer } from '../data/copy'
 import { buildEmergencyVetMapsUrl, buildRegularVetMapsUrl } from '../lib/maps'
 import { useCopy } from '../lib/LanguageContext'
 import { calcCostTier } from '../lib/costTier'
+import { FEATURES } from '../config/features'
 
 interface ResultPageProps {
   session: CheckSession
@@ -151,7 +152,6 @@ export function ResultPage({ session, pet, onSchutz, onNewCheck, onSave, already
             <li>Alter, Gewicht und bekannte Vorerkrankungen</li>
             <li>Medikamente, falls vorhanden</li>
             <li>Fotos oder Videos vom Verhalten, falls hilfreich</li>
-            <li>Versicherungsdaten, falls vorhanden</li>
           </ul>
         </div>
       )}
@@ -279,10 +279,10 @@ export function ResultPage({ session, pet, onSchutz, onNewCheck, onSave, already
       <VetReportAccordion session={session} pet={pet} />
       <div style={{ height: 1, background: T.border }} />
 
-      {/* Schutz-Card */}
-      {isRed  && <SchutzCardRot  onSchutz={onSchutz} />}
-      {!isRed && isGrn  && <SchutzCardGruen onSchutz={onSchutz} />}
-      {!isRed && !isGrn && <SchutzCardGelb  onSchutz={onSchutz} />}
+      {/* Schutz-Card – nur wenn insuranceFunnel aktiv */}
+      {FEATURES.insuranceFunnel && isRed  && <SchutzCardRot  onSchutz={onSchutz} />}
+      {FEATURES.insuranceFunnel && !isRed && isGrn  && <SchutzCardGruen onSchutz={onSchutz} />}
+      {FEATURES.insuranceFunnel && !isRed && !isGrn && <SchutzCardGelb  onSchutz={onSchutz} />}
 
       {/* Secondary actions */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
