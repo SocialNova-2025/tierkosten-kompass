@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import type { CheckSession, Pet } from '../types'
+import { FEATURES } from '../config/features'
 import { T } from '../styles/tokens'
 import { getSymptomById } from '../data/symptoms'
 import { disclaimer } from '../data/copy'
-import { FEATURES } from '../config/features'
 
 const DUR: Record<string, string> = {
   lt12: '< 12 Std.', h12_24: '12–24 Std.', t1_3: '1–3 Tage', laenger: '> 3 Tage',
@@ -24,13 +24,16 @@ export function VetReportAccordion({ session, pet }: VetReportAccordionProps) {
 
   const rows: [string, string][] = [
     ['Tier', `${pet.name} · ${pet.species === 'hund' ? 'Hund' : 'Katze'} · ${pet.ageYears} J. · ${pet.weightKg} kg`],
-    ...(FEATURES.insuranceFunnel ? [['Versicherung', pet.hasInsurance ? 'vorhanden' : 'nicht vorhanden'] as [string, string]] : []),
+    // Versicherungszeile nur sichtbar wenn insuranceFunnel aktiv
+    ...(FEATURES.insuranceFunnel
+      ? [['Versicherung', pet.hasInsurance ? 'vorhanden' : 'nicht vorhanden'] as [string, string]]
+      : []),
     ['Symptom', sym?.label ?? '-'],
-    ...(a.Q_DAUER  ? [['Seit',     DUR[a.Q_DAUER] ?? ''] as [string,string]] : []),
-    ...(a.Q_STAERKE? [['Stärke',   STM[a.Q_STAERKE] ?? ''] as [string,string]] : []),
-    ...(a.Q_FRISST ? [['Fressen',  FN[a.Q_FRISST] ?? ''] as [string,string]] : []),
-    ...(a.Q_TRINKT ? [['Trinken',  FN[a.Q_TRINKT] ?? ''] as [string,string]] : []),
-    ...(a.Q_SCHMERZ? [['Schmerzen',SC[a.Q_SCHMERZ] ?? ''] as [string,string]] : []),
+    ...(a.Q_DAUER  ? [['Seit',     DUR[a.Q_DAUER] ?? ''] as [string, string]] : []),
+    ...(a.Q_STAERKE? [['Stärke',   STM[a.Q_STAERKE] ?? ''] as [string, string]] : []),
+    ...(a.Q_FRISST ? [['Fressen',  FN[a.Q_FRISST] ?? ''] as [string, string]] : []),
+    ...(a.Q_TRINKT ? [['Trinken',  FN[a.Q_TRINKT] ?? ''] as [string, string]] : []),
+    ...(a.Q_SCHMERZ? [['Schmerzen',SC[a.Q_SCHMERZ] ?? ''] as [string, string]] : []),
   ]
 
   const questions = [
