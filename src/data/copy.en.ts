@@ -10,7 +10,7 @@ export const EN: AppCopy = {
   onboarding: {
     title: 'Before we start',
     body:
-      'PetCost Compass helps you assess how urgent a situation is ' +
+      'TierKosten Kompass helps you assess how urgent a situation is ' +
       'and what it might cost. ' +
       'This app does not provide a diagnosis and does not replace a vet. ' +
       'In an emergency, please contact a vet or emergency service immediately.',
@@ -19,7 +19,7 @@ export const EN: AppCopy = {
   },
 
   home: {
-    label: 'PetCost Compass',
+    label: 'TierKosten Kompass',
     headline: "What's going on with your pet?",
     subline: 'Before the vet bill surprises you.',
     tagline: '60-second check · Assess urgency · Understand costs',
@@ -68,6 +68,70 @@ export const EN: AppCopy = {
       'This does not automatically mean an emergency.',
   },
 
+  checkFlow: {
+    stepNames: ['Safety check', 'Duration', 'General condition'],
+    step1Title: 'First things first',
+    step1Sub: "Let's make sure nothing urgent is missed.",
+    reqHint: 'Please answer all required questions',
+    step2Title: 'Since when and how severe?',
+    step2Sub: 'Rough answers are perfectly fine.',
+    step3Title: (petName: string) => `How is ${petName} doing otherwise?`,
+    step3Sub: 'Last questions — then you have your result.',
+    btnResult: 'Show result →',
+    q_urin_label: (petName: string) => `Can ${petName} urinate?`,
+    q_urin_normal: 'Yes, normally',
+    q_urin_troepfchen: 'Only drops',
+    q_urin_gar_nicht: 'Not at all',
+    q_atem_label: (petName: string) => `How is ${petName} breathing?`,
+    q_atem_unauffaellig: 'Normal / unremarkable',
+    q_atem_leicht: 'Slightly abnormal',
+    q_atem_stark: 'Strongly abnormal',
+    q_blut_label: 'Is blood visible?',
+    q_blut_nein: 'No',
+    q_blut_wenig: 'A little',
+    q_blut_viel: 'A lot',
+    q_unfall_label: 'Was there an accident or fall?',
+    q_unfall_nein: 'No',
+    q_unfall_ja: 'Yes',
+    q_gift_label: 'Suspicion of poisoning or foreign object?',
+    q_gift_nein: 'No',
+    q_gift_unklar: 'Unclear',
+    q_gift_ja: 'Yes',
+    q_dauer_label: (petName: string) => `How long has ${petName} been showing this?`,
+    q_dauer_lt12: 'Less than 12 hours',
+    q_dauer_h12_24: '12–24 hours',
+    q_dauer_t1_3: '1–3 days',
+    q_dauer_laenger: 'More than 3 days',
+    q_staerke_label: 'How severe is it?',
+    q_staerke_leicht: 'Mild',
+    q_staerke_mittel: 'Moderate',
+    q_staerke_stark: 'Severe',
+    q_haeufig_label: 'How often does it occur?',
+    q_haeufig_einmalig: 'Once',
+    q_haeufig_mehrmals: 'Several times',
+    q_haeufig_anhaltend: 'Ongoing / continuous',
+    q_belastet_label: (petName: string) => `Is ${petName} still using the leg?`,
+    q_belastet_normal: 'Yes, normally',
+    q_belastet_teilweise: 'Partially only',
+    q_belastet_gar_nicht: 'Not at all',
+    q_frisst_label: (petName: string) => `Is ${petName} eating?`,
+    q_frisst_normal: 'Normally',
+    q_frisst_weniger: 'Less than usual',
+    q_frisst_gar_nicht: 'Not at all',
+    q_trinkt_label: (petName: string) => `Is ${petName} drinking?`,
+    q_trinkt_normal: 'Normally',
+    q_trinkt_weniger: 'Less than usual',
+    q_trinkt_gar_nicht: 'Not at all',
+    q_verhalten_label: 'Any changes in behaviour?',
+    q_verhalten_nein: 'No, normal',
+    q_verhalten_etwas: 'Somewhat (guarded, restless)',
+    q_verhalten_deutlich: 'Clearly different (lethargic, very restless)',
+    q_schmerz_label: (petName: string) => `Does ${petName} appear to be in pain?`,
+    q_schmerz_nein: 'No',
+    q_schmerz_vielleicht: 'Maybe',
+    q_schmerz_ja: 'Yes',
+  },
+
   results: {
     selectedSymptomsLabel: 'Selected observations',
   },
@@ -81,7 +145,7 @@ export const EN: AppCopy = {
     dataLabel: 'Data',
     clearAll: 'Delete all local data',
     footer:
-      'PetCost Compass · Beta · All information without warranty · No medical advice',
+      'TierKosten Kompass · Beta · All information without warranty · No medical advice',
   },
 
   common: {
