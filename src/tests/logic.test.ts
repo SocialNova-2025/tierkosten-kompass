@@ -849,3 +849,55 @@ describe('Phase 3 – Route Guard + Copy + PetProfile (Soft-Launch)', () => {
     expect(calcUrgency(rocky.answers, rocky.symptom, rocky.pet).level).toBe('gruen') // Rocky 1 → Grün
   })
 })
+
+// ── SymptomGrid – Info-Button (rote Punkte Erklärung) ────────────────────
+
+describe('SymptomGrid – Info-Button: Kopie und Inhalt (Copy-basiert)', () => {
+  it('DE.symptomGrid.redFlagHint enthält "Roter Punkt"', () => {
+    expect(DE.symptomGrid.redFlagHint).toContain('Roter Punkt')
+  })
+  it('DE.symptomGrid.redFlagHint enthält "Warnsignal"', () => {
+    expect(DE.symptomGrid.redFlagHint).toContain('Warnsignal')
+  })
+  it('DE.symptomGrid.redFlagHint enthält "sofortige Hilfe"', () => {
+    expect(DE.symptomGrid.redFlagHint).toContain('sofortige Hilfe')
+  })
+  it('DE.symptomGrid.redFlagHint enthält "nicht automatisch" (beruhigende Formulierung)', () => {
+    expect(DE.symptomGrid.redFlagHint).toContain('nicht automatisch')
+  })
+  it('EN.symptomGrid.redFlagHint enthält "Red dot"', () => {
+    expect(EN.symptomGrid.redFlagHint).toContain('Red dot')
+  })
+  it('EN.symptomGrid.redFlagHint enthält "warning sign"', () => {
+    expect(EN.symptomGrid.redFlagHint).toContain('warning sign')
+  })
+  it('EN.symptomGrid.redFlagHint enthält "immediate help"', () => {
+    expect(EN.symptomGrid.redFlagHint).toContain('immediate help')
+  })
+  it('EN.symptomGrid.redFlagHint enthält "automatically" (beruhigende Formulierung)', () => {
+    expect(EN.symptomGrid.redFlagHint).toContain('automatically')
+  })
+  it('Rote Punkte: RED_FLAG_SYMPTOM_IDS unverändert (krampf, atemnot, gift, urin_katze)', () => {
+    expect(RED_FLAG_SYMPTOM_IDS.has('krampf')).toBe(true)
+    expect(RED_FLAG_SYMPTOM_IDS.has('atemnot')).toBe(true)
+    expect(RED_FLAG_SYMPTOM_IDS.has('gift')).toBe(true)
+    expect(RED_FLAG_SYMPTOM_IDS.has('urin_katze')).toBe(true)
+    expect(RED_FLAG_SYMPTOM_IDS.size).toBe(4)
+  })
+  it('Red-Flag-Logik unverändert: krampf → rot', () => {
+    expect(isRedFlag({}, 'krampf')).toBe(true)
+  })
+  it('Red-Flag-Logik unverändert: atemnot → rot', () => {
+    expect(isRedFlag({}, 'atemnot')).toBe(true)
+  })
+  it('Red-Flag-Logik unverändert: humpeln → kein Red-Flag', () => {
+    expect(isRedFlag({}, 'humpeln')).toBe(false)
+  })
+  it('Demo-Scores nach Info-Button-Addition unverändert', () => {
+    DEMO_CASES.forEach(demo => {
+      const r = calcUrgency(demo.answers, demo.symptom, demo.pet)
+      expect(r.level).toBe(demo.expectedLevel)
+      expect(r.score).toBe(demo.expectedScore)
+    })
+  })
+})
