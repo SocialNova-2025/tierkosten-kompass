@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import type { Pet } from '../types'
-import { T } from '../styles/tokens'
-import { BTN } from '../styles/tokens'
+import { T, BTN } from '../styles/tokens'
 import { getSymptomsForSpecies } from '../data/symptoms'
 import { getPrimarySymptom, RED_FLAG_SYMPTOM_IDS, MAX_SYMPTOMS } from '../lib/symptomUtils'
 import { useCopy } from '../lib/LanguageContext'
@@ -17,8 +16,9 @@ export function SymptomGrid({ pet, onDone }: SymptomGridProps) {
   const c    = copy.symptomGrid
 
   const list = getSymptomsForSpecies(pet.species)
-  const [selected, setSelected]   = useState<string[]>([])
-  const [showInfo, setShowInfo]   = useState(false)
+  const [selected, setSelected] = useState<string[]>([])
+  /** ID of the red-flag tile whose info popup is currently open, or null. */
+  const [infoOpen, setInfoOpen] = useState<string | null>(null)
 
   const toggle = (id: string) => {
     setSelected(prev => {
@@ -40,27 +40,10 @@ export function SymptomGrid({ pet, onDone }: SymptomGridProps) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14, position: 'relative' }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        {/* Title + Info-Button */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <h2 style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-.03em', color: T.text, margin: 0 }}>
-            {c.title(pet.name)}
-          </h2>
-          <button
-            onClick={() => setShowInfo(v => !v)}
-            aria-label="Info zu roten Punkten"
-            aria-expanded={showInfo}
-            style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              width: 20, height: 20, borderRadius: '50%', flexShrink: 0,
-              background: 'transparent', border: `1.5px solid ${T.red}`,
-              color: T.red, fontSize: 11, fontWeight: 700, cursor: 'pointer',
-              fontFamily: 'inherit', opacity: 0.72, lineHeight: 1,
-              padding: 0,
-            }}
-          >
-            i
-          </button>
-        </div>
+        {/* Title */}
+        <h2 style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-.03em', color: T.text, margin: 0 }}>
+          {c.title(pet.name)}
+        </h2>
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <p style={{ fontSize: 13, color: T.muted, margin: 0 }}>{c.hint}</p>
@@ -92,10 +75,16 @@ export function SymptomGrid({ pet, onDone }: SymptomGridProps) {
           const showPrimBadge = isPrimary && selected.length > 1
 
           return (
-            <button
+            <div
               key={s.id}
-              disabled={isBlocked}
-              onClick={() => toggle(s.id)}
+              role="button"
+              tabIndex={isBlocked ? -1 : 0}
+              aria-pressed={isSelected}
+              aria-disabled={isBlocked}
+              onClick={() => !isBlocked && toggle(s.id)}
+              onKeyDown={e => {
+                if ((e.key === 'Enter' || e.key === ' ') && !isBlocked) toggle(s.id)
+              }}
               style={{
                 display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                 padding: '13px 8px', borderRadius: 13,
@@ -104,36 +93,66 @@ export function SymptomGrid({ pet, onDone }: SymptomGridProps) {
                 cursor: isBlocked ? 'not-allowed' : 'pointer',
                 minHeight: 78, gap: 6, fontFamily: 'inherit', position: 'relative',
                 opacity: isBlocked ? 0.5 : 1, transition: 'all 0.15s',
+                userSelect: 'none',
               }}
               onMouseEnter={e => {
                 if (!isBlocked && !isSelected) {
-                  ;(e.currentTarget as HTMLButtonElement).style.borderColor = T.primary
-                  ;(e.currentTarget as HTMLButtonElement).style.background   = T.pLight
+                  ;(e.currentTarget as HTMLDivElement).style.borderColor = T.primary
+                  ;(e.currentTarget as HTMLDivElement).style.background   = T.pLight
                 }
               }}
               onMouseLeave={e => {
                 if (!isSelected) {
-                  ;(e.currentTarget as HTMLButtonElement).style.borderColor = T.border
-                  ;(e.currentTarget as HTMLButtonElement).style.background   = isBlocked ? '#f5f5f5' : '#fff'
+                  ;(e.currentTarget as HTMLDivElement).style.borderColor = T.border
+                  ;(e.currentTarget as HTMLDivElement).style.background   = isBlocked ? '#f5f5f5' : '#fff'
                 }
               }}
             >
+              {/* Per-card info icon – only for red-flag tiles */}
               {isRedFlag && (
-                <span style={{ position: 'absolute', top: 6, right: 6, width: 6, height: 6, borderRadius: '50%', background: T.red }} />
+                <button
+                  onClick={e => { e.stopPropagation(); setInfoOpen(s.id) }}
+                  aria-label={`Info: ${s.label}`}
+                  tabIndex={isBlocked ? -1 : 0}
+                  style={{
+                    position: 'absolute', top: 5, right: 5,
+                    width: 18, height: 18, borderRadius: '50%',
+                    background: 'transparent',
+                    border: `1.5px solid ${T.muted}`,
+                    color: T.muted, fontSize: 10, fontWeight: 700,
+                    cursor: 'pointer', fontFamily: 'inherit',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    lineHeight: 1, padding: 0, flexShrink: 0,
+                    opacity: 0.65,
+                  }}
+                >
+                  i
+                </button>
               )}
+
               {showPrimBadge && (
-                <span style={{ position: 'absolute', top: 5, left: 6, fontSize: 9, fontWeight: 700, letterSpacing: '.04em', color: T.primary, textTransform: 'uppercase' }}>
+                <span style={{
+                  position: 'absolute', top: 5, left: 6,
+                  fontSize: 9, fontWeight: 700, letterSpacing: '.04em',
+                  color: T.primary, textTransform: 'uppercase',
+                }}>
                   {c.primaryBadge}
                 </span>
               )}
+
               <span style={{ fontSize: 22, lineHeight: 1 }}>{s.icon}</span>
-              <span style={{ fontSize: 11, fontWeight: 600, color: isSelected ? T.primary : T.text, textAlign: 'center', lineHeight: 1.3 }}>
+              <span style={{
+                fontSize: 11, fontWeight: 600,
+                color: isSelected ? T.primary : T.text,
+                textAlign: 'center', lineHeight: 1.3,
+              }}>
                 {s.label}
               </span>
+
               {isSelected && (
                 <span style={{ position: 'absolute', bottom: 5, right: 6, fontSize: 10, color: T.primary, fontWeight: 700 }}>✓</span>
               )}
-            </button>
+            </div>
           )
         })}
       </div>
@@ -150,12 +169,12 @@ export function SymptomGrid({ pet, onDone }: SymptomGridProps) {
         <p style={{ fontSize: 11, color: T.muted, textAlign: 'center', margin: 0 }}>{c.minHint}</p>
       )}
 
-      {/* Red-Flag Info Popup */}
-      {showInfo && (
+      {/* Per-card Red-Flag Info Popup */}
+      {infoOpen && (
         <>
           {/* Backdrop */}
           <div
-            onClick={() => setShowInfo(false)}
+            onClick={() => setInfoOpen(null)}
             style={{
               position: 'fixed', top: 0, right: 0, bottom: 0, left: 0,
               background: 'rgba(0,0,0,0.30)', zIndex: 50,
@@ -165,7 +184,7 @@ export function SymptomGrid({ pet, onDone }: SymptomGridProps) {
           <div
             role="dialog"
             aria-modal="true"
-            aria-label="Rote Punkte: Erklärung"
+            aria-label="Warnsignal: Erklärung"
             style={{
               position: 'fixed', bottom: 88, left: '50%', transform: 'translateX(-50%)',
               width: 'min(320px, calc(100vw - 32px))',
@@ -178,7 +197,7 @@ export function SymptomGrid({ pet, onDone }: SymptomGridProps) {
             {/* Close row */}
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
               <button
-                onClick={() => setShowInfo(false)}
+                onClick={() => setInfoOpen(null)}
                 aria-label="Schließen"
                 style={{
                   background: 'transparent', border: 'none', cursor: 'pointer',
