@@ -54,6 +54,86 @@ export interface AppCopy {
     /** Ruhige Erklärung des roten Punktes (Warnsignal-Marker) */
     redFlagHint: string
   }
+  /** Check-Flow: P4a / P4b / P4c question texts */
+  checkFlow: {
+    stepNames: [string, string, string]
+    // P4a
+    step1Title: string
+    step1Sub: string
+    reqHint: string
+    // P4b
+    step2Title: string
+    step2Sub: string
+    // P4c
+    step3Title: (petName: string) => string
+    step3Sub: string
+    btnResult: string
+    // Q_URIN (katze only)
+    q_urin_label: (petName: string) => string
+    q_urin_normal: string
+    q_urin_troepfchen: string
+    q_urin_gar_nicht: string
+    // Q_ATEM
+    q_atem_label: (petName: string) => string
+    q_atem_unauffaellig: string
+    q_atem_leicht: string
+    q_atem_stark: string
+    // Q_BLUT
+    q_blut_label: string
+    q_blut_nein: string
+    q_blut_wenig: string
+    q_blut_viel: string
+    // Q_UNFALL
+    q_unfall_label: string
+    q_unfall_nein: string
+    q_unfall_ja: string
+    // Q_GIFT
+    q_gift_label: string
+    q_gift_nein: string
+    q_gift_unklar: string
+    q_gift_ja: string
+    // Q_DAUER
+    q_dauer_label: (petName: string) => string
+    q_dauer_lt12: string
+    q_dauer_h12_24: string
+    q_dauer_t1_3: string
+    q_dauer_laenger: string
+    // Q_STAERKE
+    q_staerke_label: string
+    q_staerke_leicht: string
+    q_staerke_mittel: string
+    q_staerke_stark: string
+    // Q_HAEUFIG
+    q_haeufig_label: string
+    q_haeufig_einmalig: string
+    q_haeufig_mehrmals: string
+    q_haeufig_anhaltend: string
+    // Q_BELASTET (humpeln only)
+    q_belastet_label: (petName: string) => string
+    q_belastet_normal: string
+    q_belastet_teilweise: string
+    q_belastet_gar_nicht: string
+    // Q_FRISST
+    q_frisst_label: (petName: string) => string
+    q_frisst_normal: string
+    q_frisst_weniger: string
+    q_frisst_gar_nicht: string
+    // Q_TRINKT
+    q_trinkt_label: (petName: string) => string
+    q_trinkt_normal: string
+    q_trinkt_weniger: string
+    q_trinkt_gar_nicht: string
+    // Q_VERHALTEN
+    q_verhalten_label: string
+    q_verhalten_nein: string
+    q_verhalten_etwas: string
+    q_verhalten_deutlich: string
+    // Q_SCHMERZ
+    q_schmerz_label: (petName: string) => string
+    q_schmerz_nein: string
+    q_schmerz_vielleicht: string
+    q_schmerz_ja: string
+  }
   results: {
     selectedSymptomsLabel: string
   }
@@ -138,6 +218,70 @@ export const DE: AppCopy = {
       'Roter Punkt = mögliches Warnsignal. Diese Beobachtungen können sofortige Hilfe erfordern ' +
       'und werden im Check besonders berücksichtigt. ' +
       'Das bedeutet nicht automatisch, dass ein Notfall vorliegt.',
+  },
+
+  checkFlow: {
+    stepNames: ['Sicherheitscheck', 'Verlauf', 'Allgemeinzustand'],
+    step1Title: 'Zuerst das Wichtigste',
+    step1Sub: 'Damit wir nichts Dringendes übersehen.',
+    reqHint: 'Bitte alle Pflichtfragen beantworten',
+    step2Title: 'Seit wann und wie stark?',
+    step2Sub: 'Grobe Angaben reichen völlig aus.',
+    step3Title: (petName: string) => `Wie geht es ${petName} sonst?`,
+    step3Sub: 'Letzte Fragen – dann hast du dein Ergebnis.',
+    btnResult: 'Ergebnis anzeigen →',
+    q_urin_label: (petName: string) => `Kann ${petName} Urin absetzen?`,
+    q_urin_normal: 'Ja, normal',
+    q_urin_troepfchen: 'Nur Tröpfchen',
+    q_urin_gar_nicht: 'Gar nicht',
+    q_atem_label: (petName: string) => `Wie atmet ${petName}?`,
+    q_atem_unauffaellig: 'Unauffällig / normal',
+    q_atem_leicht: 'Leicht auffällig',
+    q_atem_stark: 'Stark auffällig',
+    q_blut_label: 'Ist Blut sichtbar?',
+    q_blut_nein: 'Nein',
+    q_blut_wenig: 'Wenig',
+    q_blut_viel: 'Viel',
+    q_unfall_label: 'Gab es einen Unfall oder Sturz?',
+    q_unfall_nein: 'Nein',
+    q_unfall_ja: 'Ja',
+    q_gift_label: 'Verdacht auf Gift oder Fremdobjekt?',
+    q_gift_nein: 'Nein',
+    q_gift_unklar: 'Unklar',
+    q_gift_ja: 'Ja',
+    q_dauer_label: (petName: string) => `Seit wann zeigt ${petName} das?`,
+    q_dauer_lt12: 'Weniger als 12 Stunden',
+    q_dauer_h12_24: '12–24 Stunden',
+    q_dauer_t1_3: '1–3 Tage',
+    q_dauer_laenger: 'Länger als 3 Tage',
+    q_staerke_label: 'Wie stark ist es?',
+    q_staerke_leicht: 'Leicht',
+    q_staerke_mittel: 'Mittel',
+    q_staerke_stark: 'Stark',
+    q_haeufig_label: 'Wie oft tritt es auf?',
+    q_haeufig_einmalig: 'Einmalig',
+    q_haeufig_mehrmals: 'Mehrmals',
+    q_haeufig_anhaltend: 'Anhaltend / dauerhaft',
+    q_belastet_label: (petName: string) => `Belastet ${petName} das Bein noch?`,
+    q_belastet_normal: 'Ja, normal',
+    q_belastet_teilweise: 'Nur teilweise',
+    q_belastet_gar_nicht: 'Gar nicht',
+    q_frisst_label: (petName: string) => `Frisst ${petName}?`,
+    q_frisst_normal: 'Normal',
+    q_frisst_weniger: 'Weniger als sonst',
+    q_frisst_gar_nicht: 'Gar nicht',
+    q_trinkt_label: (petName: string) => `Trinkt ${petName}?`,
+    q_trinkt_normal: 'Normal',
+    q_trinkt_weniger: 'Weniger als sonst',
+    q_trinkt_gar_nicht: 'Gar nicht',
+    q_verhalten_label: 'Verhalten verändert?',
+    q_verhalten_nein: 'Nein, normal',
+    q_verhalten_etwas: 'Etwas (schont sich, unruhig)',
+    q_verhalten_deutlich: 'Deutlich (apathisch, sehr unruhig)',
+    q_schmerz_label: (petName: string) => `Wirkt ${petName} schmerzhaft?`,
+    q_schmerz_nein: 'Nein',
+    q_schmerz_vielleicht: 'Vielleicht',
+    q_schmerz_ja: 'Ja',
   },
 
   results: {
