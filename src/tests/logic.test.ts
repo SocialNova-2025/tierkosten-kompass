@@ -331,7 +331,7 @@ describe('Rot-Ergebnisfall: Struktur und Reihenfolge', () => {
 })
 
 
-// ── getPrimarySymptom – Red-Flag-first logic ─────────────────────────────
+// ── getPrimarySymptom – Red-Flag-first logic ───────────────────────────
 
 describe('getPrimarySymptom – Red-Flag-first (multi-symptom selection)', () => {
   it('single symptom → itself', () => {
@@ -410,7 +410,7 @@ describe('getPrimarySymptom – Demo cases still correct via multi-symptom path'
 })
 
 
-// ── Language system – structure and content ──────────────────────────────
+// ── Language system – structure and content ───────────────────────────────
 
 describe('Language system – DE is default, copy structure', () => {
   it('DE.petProfile.nameLabel is correct', () => {
@@ -479,7 +479,7 @@ describe('Language system – EN copy mirrors DE structure', () => {
 })
 
 
-// ── calcCostTier – costTier logic ────────────────────────────────────────────
+// ── calcCostTier – costTier logic ─────────────────────────────────────────
 
 describe('calcCostTier – humpeln', () => {
   it('low: belastet normal, kein Unfall, leichte Schmerzen, kurze Dauer', () => {
@@ -676,8 +676,6 @@ describe('calcCostTier – guarantee constraints', () => {
 
 // ── Feature-Flag Soft-Launch ──────────────────────────────────────────────
 
-import { FEATURES } from '../config/features'
-
 describe('Feature Flags – Soft-Launch (insuranceFunnel + showDemoCases)', () => {
   it('FEATURES.insuranceFunnel ist false (Soft-Launch)', () => {
     expect(FEATURES.insuranceFunnel).toBe(false)
@@ -850,9 +848,9 @@ describe('Phase 3 – Route Guard + Copy + PetProfile (Soft-Launch)', () => {
   })
 })
 
-// ── SymptomGrid – Info-Button (rote Punkte Erklärung) ────────────────────
+// ── SymptomGrid – Info-Icon (rote Punkte ersetzt durch Info-Icon pro Kachel) ──
 
-describe('SymptomGrid – Info-Button: Kopie und Inhalt (Copy-basiert)', () => {
+describe('SymptomGrid – Info-Icon: Kopie und Inhalt (Copy-basiert)', () => {
   it('DE.symptomGrid.redFlagHint enthält "Roter Punkt"', () => {
     expect(DE.symptomGrid.redFlagHint).toContain('Roter Punkt')
   })
@@ -877,27 +875,120 @@ describe('SymptomGrid – Info-Button: Kopie und Inhalt (Copy-basiert)', () => {
   it('EN.symptomGrid.redFlagHint enthält "automatically" (beruhigende Formulierung)', () => {
     expect(EN.symptomGrid.redFlagHint).toContain('automatically')
   })
-  it('Rote Punkte: RED_FLAG_SYMPTOM_IDS unverändert (krampf, atemnot, gift, urin_katze)', () => {
+  it('Rote Punkte: RED_FLAG_SYMPTOM_IDS unverändernt (krampf, atemnot, gift, urin_katze)', () => {
     expect(RED_FLAG_SYMPTOM_IDS.has('krampf')).toBe(true)
     expect(RED_FLAG_SYMPTOM_IDS.has('atemnot')).toBe(true)
     expect(RED_FLAG_SYMPTOM_IDS.has('gift')).toBe(true)
     expect(RED_FLAG_SYMPTOM_IDS.has('urin_katze')).toBe(true)
     expect(RED_FLAG_SYMPTOM_IDS.size).toBe(4)
   })
-  it('Red-Flag-Logik unverändert: krampf → rot', () => {
+  it('Red-Flag-Logik unverändernt: krampf → rot', () => {
     expect(isRedFlag({}, 'krampf')).toBe(true)
   })
-  it('Red-Flag-Logik unverändert: atemnot → rot', () => {
+  it('Red-Flag-Logik unverändernt: atemnot → rot', () => {
     expect(isRedFlag({}, 'atemnot')).toBe(true)
   })
-  it('Red-Flag-Logik unverändert: humpeln → kein Red-Flag', () => {
+  it('Red-Flag-Logik unverändernt: humpeln → kein Red-Flag', () => {
     expect(isRedFlag({}, 'humpeln')).toBe(false)
   })
-  it('Demo-Scores nach Info-Button-Addition unverändert', () => {
+  it('Demo-Scores nach Info-Icon-Addition unverändernt', () => {
     DEMO_CASES.forEach(demo => {
       const r = calcUrgency(demo.answers, demo.symptom, demo.pet)
       expect(r.level).toBe(demo.expectedLevel)
       expect(r.score).toBe(demo.expectedScore)
     })
+  })
+})
+
+// ── EN Branding – kein "PetCost Compass" ─────────────────────────────────
+
+describe('EN Branding – TierKosten Kompass (keine PetCost Compass)', () => {
+  it('EN.home.label ist "TierKosten Kompass"', () => {
+    expect(EN.home.label).toBe('TierKosten Kompass')
+  })
+  it('EN.home.label ist nicht "PetCost Compass"', () => {
+    expect(EN.home.label).not.toBe('PetCost Compass')
+  })
+  it('EN.settings.footer enthält "TierKosten Kompass"', () => {
+    expect(EN.settings.footer).toContain('TierKosten Kompass')
+  })
+  it('EN.settings.footer enthält nicht "PetCost Compass"', () => {
+    expect(EN.settings.footer).not.toContain('PetCost Compass')
+  })
+  it('EN.onboarding.body enthält "TierKosten Kompass"', () => {
+    expect(EN.onboarding.body).toContain('TierKosten Kompass')
+  })
+  it('EN.onboarding.body enthält nicht "PetCost Compass"', () => {
+    expect(EN.onboarding.body).not.toContain('PetCost Compass')
+  })
+  it('DE.home.label ist "TierKosten Kompass"', () => {
+    expect(DE.home.label).toBe('TierKosten Kompass')
+  })
+})
+
+// ── CheckFlow copy – P4a/P4b/P4c question texts ───────────────────────────
+
+describe('CheckFlow copy – Frage-Texte (DE + EN)', () => {
+  it('DE.checkFlow.stepNames hat 3 Einträge', () => {
+    expect(DE.checkFlow.stepNames).toHaveLength(3)
+    expect(DE.checkFlow.stepNames[0]).toBeTruthy()
+    expect(DE.checkFlow.stepNames[1]).toBeTruthy()
+    expect(DE.checkFlow.stepNames[2]).toBeTruthy()
+  })
+  it('EN.checkFlow.stepNames hat 3 Einträge', () => {
+    expect(EN.checkFlow.stepNames).toHaveLength(3)
+  })
+  it('DE.checkFlow.step1Title ist gesetzt', () => {
+    expect(DE.checkFlow.step1Title).toBeTruthy()
+    expect(DE.checkFlow.step1Title.length).toBeGreaterThan(5)
+  })
+  it('EN.checkFlow.step1Title ist Englisch (enthält "first")', () => {
+    expect(EN.checkFlow.step1Title.toLowerCase()).toContain('first')
+  })
+  it('DE.checkFlow.step3Title ist eine Funktion, die petName enthält', () => {
+    expect(typeof DE.checkFlow.step3Title).toBe('function')
+    expect(DE.checkFlow.step3Title('Bruno')).toContain('Bruno')
+  })
+  it('EN.checkFlow.step3Title ist eine Funktion mit petName', () => {
+    expect(typeof EN.checkFlow.step3Title).toBe('function')
+    expect(EN.checkFlow.step3Title('Bruno')).toContain('Bruno')
+  })
+  it('DE.checkFlow.q_atem_label ist eine Funktion mit petName', () => {
+    expect(typeof DE.checkFlow.q_atem_label).toBe('function')
+    expect(DE.checkFlow.q_atem_label('Max')).toContain('Max')
+  })
+  it('EN.checkFlow.q_atem_label ist eine Funktion mit petName', () => {
+    expect(typeof EN.checkFlow.q_atem_label).toBe('function')
+    expect(EN.checkFlow.q_atem_label('Max')).toContain('Max')
+  })
+  it('DE.checkFlow.q_blut_label ist ein String', () => {
+    expect(typeof DE.checkFlow.q_blut_label).toBe('string')
+    expect(DE.checkFlow.q_blut_label.length).toBeGreaterThan(5)
+  })
+  it('DE.checkFlow.btnResult ist gesetzt', () => {
+    expect(DE.checkFlow.btnResult).toBeTruthy()
+    expect(DE.checkFlow.btnResult.length).toBeGreaterThan(3)
+  })
+  it('EN.checkFlow.btnResult enthält "result"', () => {
+    expect(EN.checkFlow.btnResult.toLowerCase()).toContain('result')
+  })
+  it('DE und EN checkFlow haben dieselben Schlüssel', () => {
+    expect(Object.keys(EN.checkFlow).sort()).toEqual(Object.keys(DE.checkFlow).sort())
+  })
+  it('DE.checkFlow enthält alle Red-Flag-Urin-Optionen', () => {
+    expect(DE.checkFlow.q_urin_label('Mia')).toContain('Mia')
+    expect(DE.checkFlow.q_urin_normal).toBeTruthy()
+    expect(DE.checkFlow.q_urin_troepfchen).toBeTruthy()
+    expect(DE.checkFlow.q_urin_gar_nicht).toBeTruthy()
+  })
+  it('DE.checkFlow enthält alle Atem-Optionen', () => {
+    expect(DE.checkFlow.q_atem_unauffaellig).toBeTruthy()
+    expect(DE.checkFlow.q_atem_leicht).toBeTruthy()
+    expect(DE.checkFlow.q_atem_stark).toBeTruthy()
+  })
+  it('DE.checkFlow enthält alle Gift-Optionen', () => {
+    expect(DE.checkFlow.q_gift_nein).toBeTruthy()
+    expect(DE.checkFlow.q_gift_unklar).toBeTruthy()
+    expect(DE.checkFlow.q_gift_ja).toBeTruthy()
   })
 })
