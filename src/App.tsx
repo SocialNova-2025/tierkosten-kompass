@@ -27,27 +27,19 @@ import { getCostData }  from './data/costs'
 import { DEMO_CASES }   from './data/demoCases'
 import { T, BTN }       from './styles/tokens'
 import {
-  onboardingText, insuranceHint, disclaimer,
-  consentShareText, consentContactText, leadConfirmation,
+  insuranceHint, disclaimer, consentShareText, consentContactText, leadConfirmation,
 } from './data/copy'
-import { FEATURES } from './config/features'
+import { FEATURES }             from './config/features'
+import { useCopy }              from './lib/LanguageContext'
+import { RED_FLAG_SYMPTOM_IDS } from './lib/symptomUtils'
 
 // ─────────────────────────────────────────────────────────────────────────
-// HOME FEATURES – base (no insurance funnel)
-const HOME_FEATURES_BASE: [string, string, string][] = [
-  ['01', 'Wie dringend ist es?',         'Klare Handlungsempfehlung – grün, gelb oder rot.'],
-  ['02', 'Was kostet es ungefähr?',       'Drei realistische Kostenszenarien.'],
-  ['03', 'Tierarzt oder Notdienst finden', 'Karte öffnet direkt in deiner Nähe.'],
-]
+// HOME FEATURES – with insurance funnel (only used when flag is true)
 const HOME_FEATURES_WITH_INSURANCE: [string, string, string][] = [
   ['01', 'Wie dringend ist es?',   'Klare Handlungsempfehlung – grün, gelb oder rot.'],
   ['02', 'Was kostet es ungefähr?', 'Drei realistische Kostenszenarien.'],
   ['03', 'Passt dein Schutz?',      'Mögliche Lücken im Versicherungsschutz.'],
 ]
-
-// ─────────────────────────────────────────────────────────────────────────
-// STEP NAMES (shared across P4a / P4b / P4c)
-const STEP_NAMES = ['Sicherheitscheck', 'Verlauf', 'Allgemeinzustand']
 
 // ─────────────────────────────────────────────────────────────────────────
 // BACK MAP – evaluated at call-time so it sees current state
@@ -70,24 +62,26 @@ function getBackScreen(sc: Screen, hasPet: boolean, hasSession: boolean): Screen
 
 // ─────────────────────────────────────────────────────────────────────────
 export default function App() {
+  const copy = useCopy()
+
   // ── Core navigation state ────────────────────────────────────────────
   const [screen, setScreen]   = useState<Screen>('P0')
   const [tab, setTab]         = useState<NavTab>('start')
   const [settingsOpen, setSettings] = useState(false)
 
   // ── Domain state (initialised from localStorage where applicable) ────
-  const [pet, setPet]             = useState<Pet | null>(() => lsGet<Pet>(STORAGE_KEYS.PET))
-  const [symptomId, setSymptomId] = useState<string>('')
-  const [answers, setAnswers]     = useState<CheckAnswers>({})
-  const [session, setSession]     = useState<CheckSession | null>(null)
-  const [sessions, setSessions]   = useState<CheckSession[]>(() => lsGet<CheckSession[]>(STORAGE_KEYS.SESSIONS) ?? [])
-  const [sessSaved, setSessSaved] = useState(false)
-  const [showEmerg, setShowEmerg] = useState(false)
+  const [pet, setPet]                           = useState<Pet | null>(() => lsGet<Pet>(STORAGE_KEYS.PET))
+  const [symptomId, setSymptomId]               = useState<string>('')
+  const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([])
+  const [answers, setAnswers]                   = useState<CheckAnswers>({})
+  const [session, setSession]                   = useState<CheckSession | null>(null)
+  const [sessions, setSessions]                 = useState<CheckSession[]>(() => lsGet<CheckSession[]>(STORAGE_KEYS.SESSIONS) ?? [])
+  const [sessSaved, setSessSaved]               = useState(false)
+  const [showEmerg, setShowEmerg]               = useState(false)
 
   // ── Persist pet whenever it changes ──────────────────────────────────
   useEffect(() => {
     if (pet) lsSet(STORAGE_KEYS.PET, pet)
-    // Note: deletion on null happens inside handleClearAll
   }, [pet])
 
   // ── Persist sessions whenever they change ─────────────────────────────
@@ -117,6 +111,7 @@ export default function App() {
     else if (t === 'check') {
       setAnswers({})
       setSymptomId('')
+      setSelectedSymptoms([])
       setScreen(pet ? 'P3' : 'P2')
     } else {
       setScreen('P11')
@@ -135,11 +130,13 @@ export default function App() {
     go('P3')
   }, [go])
 
-  // ── Symptom selected ──────────────────────────────────────────────────
-  const handleSymptom = useCallback((sid: string) => {
-    setSymptomId(sid)
+  // ── Multi-symptom selected (called from SymptomGrid.onDone) ──────────
+  const handleMultiSymptom = useCallback((syms: string[], primary: string) => {
+    setSelectedSymptoms(syms)
+    setSymptomId(primary)
     setAnswers({})
-    if (['krampf', 'atemnot', 'gift'].includes(sid)) setShowEmerg(true)
+    setShowEmerg(false)
+    if (syms.some(s => RED_FLAG_SYMPTOM_IDS.has(s))) setShowEmerg(true)
     go('P4a')
   }, [go])
 
@@ -165,6 +162,7 @@ export default function App() {
       id: Date.now().toString(),
       petId: pet?.id ?? '',
       symptomId,
+      selectedSymptoms: selectedSymptoms.length > 0 ? selectedSymptoms : undefined,
       answers: { ...answers },
       urgency: level,
       score,
@@ -172,7 +170,7 @@ export default function App() {
       cost,
       createdAt: new Date().toISOString(),
     }
-  }, [answers, symptomId, pet])
+  }, [answers, symptomId, selectedSymptoms, pet])
 
   const handleComputeResult = useCallback(() => {
     const s = buildSession()
@@ -208,6 +206,7 @@ export default function App() {
       id: 'demo_' + Date.now(),
       petId: p.id,
       symptomId: demo.symptom,
+      selectedSymptoms: [demo.symptom],
       answers: { ...demo.answers },
       urgency: level,
       score,
@@ -217,6 +216,7 @@ export default function App() {
     }
     setPet(p)
     setSymptomId(demo.symptom)
+    setSelectedSymptoms([demo.symptom])
     setAnswers(demo.answers)
     setSession(s)
     setShowEmerg(redFlag)
@@ -228,11 +228,10 @@ export default function App() {
 
   // ── Clear all ─────────────────────────────────────────────────────────
   const handleClearAll = useCallback(() => {
-    // 1. Wipe localStorage first so no stale data survives a reload
     lsClearAll()
-    // 2. Reset all React state to defaults
     setPet(null)
     setSymptomId('')
+    setSelectedSymptoms([])
     setAnswers({})
     setSession(null)
     setSessions([])
@@ -263,6 +262,7 @@ export default function App() {
 
   // P0 – Onboarding
   if (screen === 'P0') {
+    const ob = copy.onboarding
     return (
       <AppShell screen="P0" activeTab={tab} onTab={handleTab} onSettings={() => setSettings(true)} noNav>
         <div style={{
@@ -274,16 +274,16 @@ export default function App() {
             margin: '0 auto 18px', fontSize: 20, fontWeight: 700, color: '#fff',
           }}>TK</div>
           <h2 style={{ fontSize: 20, fontWeight: 700, color: '#fff', textAlign: 'center', marginBottom: 12 }}>
-            Kurz vorab
+            {ob.title}
           </h2>
           <p style={{ fontSize: 14, lineHeight: 1.7, color: 'rgba(255,255,255,.9)', marginBottom: 18, textAlign: 'center' }}>
-            {onboardingText}
+            {ob.body}
           </p>
           <button ref={el => { if (el) el.style.cssText = BTN.primary }} onClick={() => go('P1')}>
-            Verstanden, los geht's
+            {ob.cta}
           </button>
           <button ref={el => { if (el) el.style.cssText = BTN.textLink }}>
-            Datenschutz & Hinweise
+            {ob.dataPrivacy}
           </button>
         </div>
       </AppShell>
@@ -292,53 +292,54 @@ export default function App() {
 
   // P1 – Start screen
   if (screen === 'P1') {
+    const h = copy.home
     return (
       <AppShell screen="P1" activeTab={tab} onTab={handleTab} onSettings={() => setSettings(true)}>
         {/* Hero */}
         <div style={{ textAlign: 'center', padding: '32px 0 24px' }}>
           <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.10em', textTransform: 'uppercase', color: T.primary, marginBottom: 16 }}>
-            TierKosten Kompass
+            {h.label}
           </div>
           <h1 style={{ fontSize: 26, fontWeight: 700, lineHeight: 1.1, letterSpacing: '-.03em', color: T.text, marginBottom: 10 }}>
-            Was ist mit deinem Tier los?
+            {h.headline}
           </h1>
           <p style={{ fontSize: 16, color: T.muted, lineHeight: 1.5, marginBottom: 6 }}>
-            Bevor dich die Tierarztrechnung überrascht.
+            {h.subline}
           </p>
           <p style={{ fontSize: 11, color: '#8FA8A8', letterSpacing: '.04em', textTransform: 'uppercase' }}>
-            Schnellcheck in 60 Sekunden · Dringlichkeit · Kostenrisiko
+            {h.tagline}
           </p>
         </div>
 
         {/* Value prop */}
         <div style={{ borderTop: `1px solid ${T.border}`, borderBottom: `1px solid ${T.border}`, marginBottom: 24 }}>
-          {(FEATURES.insuranceFunnel ? HOME_FEATURES_WITH_INSURANCE : HOME_FEATURES_BASE).map(([n, h, s], i, arr) => (
+          {(FEATURES.insuranceFunnel ? HOME_FEATURES_WITH_INSURANCE : h.features).map(([n, headline, sub], i) => (
             <div key={n} style={{ display: 'flex', gap: 14, padding: '14px 0', alignItems: 'flex-start', borderTop: i > 0 ? `1px solid ${T.border}` : 'none' }}>
               <div style={{ fontSize: 13, fontWeight: 700, color: T.primary, minWidth: 22, paddingTop: 1 }}>{n}</div>
               <div>
-                <div style={{ fontSize: 13, fontWeight: 600, color: T.text, marginBottom: 2 }}>{h}</div>
-                <div style={{ fontSize: 12, color: T.muted }}>{s}</div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: T.text, marginBottom: 2 }}>{headline}</div>
+                <div style={{ fontSize: 12, color: T.muted }}>{sub}</div>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Primary CTA – dominant */}
+        {/* Primary CTA */}
         <button
           ref={el => { if (el) el.style.cssText = BTN.primary }}
-          onClick={() => { setAnswers({}); setSymptomId(''); go(pet ? 'P3' : 'P2') }}
+          onClick={() => { setAnswers({}); setSymptomId(''); setSelectedSymptoms([]); go(pet ? 'P3' : 'P2') }}
         >
-          Akut-Check starten →
+          {h.startCta}
         </button>
 
-        {/* Secondary – subordinate text link (insurance funnel only) */}
+        {/* Secondary – insurance funnel only */}
         {FEATURES.insuranceFunnel && (
           <button
             ref={el => { if (el) el.style.cssText = BTN.textLink }}
             onClick={() => go(pet ? 'P7' : 'P2')}
             style={{ marginTop: 6 } as React.CSSProperties}
           >
-            Schutzlücke erkennen
+            {h.schutzCta}
           </button>
         )}
       </AppShell>
@@ -359,12 +360,14 @@ export default function App() {
     if (!pet) { go('P2'); return null }
     return (
       <AppShell screen="P3" activeTab={tab} onTab={handleTab} onBack={handleBack} onSettings={() => setSettings(true)}>
-        <SymptomGrid pet={pet} onSelect={handleSymptom} />
+        <SymptomGrid pet={pet} onDone={handleMultiSymptom} />
       </AppShell>
     )
   }
 
   // ── Question screens ──────────────────────────────────────────────────
+  const cf = copy.checkFlow
+  const petName = pet?.name ?? ''
 
   // P4a – Safety questions
   if (screen === 'P4a') {
@@ -372,63 +375,74 @@ export default function App() {
     const urinQ: QuestionDef = {
       key: 'Q_URIN',
       required: true,
-      label: `Kann ${pet?.name ?? 'dein Tier'} Urin absetzen?`,
+      label: cf.q_urin_label(petName),
       options: [
-        { v: 'normal', label: 'Ja, normal' },
-        { v: 'troepfchen', label: 'Nur Tröpfchen' },
-        { v: 'gar_nicht', label: 'Gar nicht' },
+        { v: 'normal',     label: cf.q_urin_normal },
+        { v: 'troepfchen', label: cf.q_urin_troepfchen },
+        { v: 'gar_nicht',  label: cf.q_urin_gar_nicht },
       ],
     }
     const baseQs: QuestionDef[] = [
       {
         key: 'Q_ATEM', required: true,
-        label: `Wie atmet ${pet?.name ?? 'dein Tier'}?`,
+        label: cf.q_atem_label(petName),
         options: [
-          { v: 'unauffaellig', label: 'Unauffällig / normal' },
-          { v: 'leicht', label: 'Leicht auffällig' },
-          { v: 'stark', label: 'Stark auffällig' },
+          { v: 'unauffaellig', label: cf.q_atem_unauffaellig },
+          { v: 'leicht',       label: cf.q_atem_leicht },
+          { v: 'stark',        label: cf.q_atem_stark },
         ],
       },
       {
         key: 'Q_BLUT', required: true,
-        label: 'Ist Blut sichtbar?',
-        options: [{ v: 'nein', label: 'Nein' }, { v: 'wenig', label: 'Wenig' }, { v: 'viel', label: 'Viel' }],
+        label: cf.q_blut_label,
+        options: [
+          { v: 'nein',  label: cf.q_blut_nein },
+          { v: 'wenig', label: cf.q_blut_wenig },
+          { v: 'viel',  label: cf.q_blut_viel },
+        ],
       },
       {
         key: 'Q_UNFALL',
-        label: 'Gab es einen Unfall oder Sturz?',
-        options: [{ v: 'nein', label: 'Nein' }, { v: 'ja', label: 'Ja' }],
+        label: cf.q_unfall_label,
+        options: [
+          { v: 'nein', label: cf.q_unfall_nein },
+          { v: 'ja',   label: cf.q_unfall_ja },
+        ],
       },
       {
         key: 'Q_GIFT',
-        label: 'Verdacht auf Gift oder Fremdobjekt?',
-        options: [{ v: 'nein', label: 'Nein' }, { v: 'unklar', label: 'Unklar' }, { v: 'ja', label: 'Ja' }],
+        label: cf.q_gift_label,
+        options: [
+          { v: 'nein',   label: cf.q_gift_nein },
+          { v: 'unklar', label: cf.q_gift_unklar },
+          { v: 'ja',     label: cf.q_gift_ja },
+        ],
       },
     ]
     const qs = isUrinKatze ? [urinQ, ...baseQs] : baseQs
 
     return (
       <AppShell screen="P4a" activeTab={tab} onTab={handleTab} onBack={handleBack} onSettings={() => setSettings(true)}>
-        {showEmerg && <EmergencyModal petName={pet?.name ?? 'dein Tier'} onContinue={() => setShowEmerg(false)} />}
+        {showEmerg && <EmergencyModal petName={petName} onContinue={() => setShowEmerg(false)} />}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
           <QuestionGroup
-            title="Zuerst das Wichtigste"
-            subtitle="Damit wir nichts Dringendes übersehen."
+            title={cf.step1Title}
+            subtitle={cf.step1Sub}
             questions={qs}
             answers={answers}
             onChange={handleAnswer}
             step={1}
-            stepNames={STEP_NAMES}
+            stepNames={cf.stepNames}
           />
           <button
             ref={el => { if (el) el.style.cssText = canProceedP4a ? BTN.primary : BTN.primaryDisabled }}
             disabled={!canProceedP4a}
             onClick={canProceedP4a ? () => go('P4b') : undefined}
           >
-            Weiter →
+            {copy.common.next}
           </button>
           {!canProceedP4a && (
-            <p style={{ fontSize: 12, color: T.muted, textAlign: 'center' }}>Bitte alle Pflichtfragen beantworten</p>
+            <p style={{ fontSize: 12, color: T.muted, textAlign: 'center' }}>{cf.reqHint}</p>
           )}
         </div>
       </AppShell>
@@ -440,31 +454,39 @@ export default function App() {
     const qs: QuestionDef[] = [
       {
         key: 'Q_DAUER', required: true,
-        label: `Seit wann zeigt ${pet?.name ?? 'dein Tier'} das?`,
+        label: cf.q_dauer_label(petName),
         options: [
-          { v: 'lt12', label: 'Weniger als 12 Stunden' },
-          { v: 'h12_24', label: '12–24 Stunden' },
-          { v: 't1_3', label: '1–3 Tage' },
-          { v: 'laenger', label: 'Länger als 3 Tage' },
+          { v: 'lt12',    label: cf.q_dauer_lt12 },
+          { v: 'h12_24',  label: cf.q_dauer_h12_24 },
+          { v: 't1_3',    label: cf.q_dauer_t1_3 },
+          { v: 'laenger', label: cf.q_dauer_laenger },
         ],
       },
       {
         key: 'Q_STAERKE', required: true,
-        label: 'Wie stark ist es?',
-        options: [{ v: 'leicht', label: 'Leicht' }, { v: 'mittel', label: 'Mittel' }, { v: 'stark', label: 'Stark' }],
+        label: cf.q_staerke_label,
+        options: [
+          { v: 'leicht', label: cf.q_staerke_leicht },
+          { v: 'mittel', label: cf.q_staerke_mittel },
+          { v: 'stark',  label: cf.q_staerke_stark },
+        ],
       },
       {
         key: 'Q_HAEUFIG',
-        label: 'Wie oft tritt es auf?',
-        options: [{ v: 'einmalig', label: 'Einmalig' }, { v: 'mehrmals', label: 'Mehrmals' }, { v: 'anhaltend', label: 'Anhaltend / dauerhaft' }],
+        label: cf.q_haeufig_label,
+        options: [
+          { v: 'einmalig',  label: cf.q_haeufig_einmalig },
+          { v: 'mehrmals',  label: cf.q_haeufig_mehrmals },
+          { v: 'anhaltend', label: cf.q_haeufig_anhaltend },
+        ],
       },
       ...(symptomId === 'humpeln' ? [{
         key: 'Q_BELASTET' as keyof CheckAnswers,
-        label: `Belastet ${pet?.name ?? 'dein Tier'} das Bein noch?`,
+        label: cf.q_belastet_label(petName),
         options: [
-          { v: 'normal', label: 'Ja, normal' },
-          { v: 'teilweise', label: 'Nur teilweise' },
-          { v: 'gar_nicht', label: 'Gar nicht' },
+          { v: 'normal',    label: cf.q_belastet_normal },
+          { v: 'teilweise', label: cf.q_belastet_teilweise },
+          { v: 'gar_nicht', label: cf.q_belastet_gar_nicht },
         ],
       }] : []),
     ]
@@ -473,20 +495,20 @@ export default function App() {
       <AppShell screen="P4b" activeTab={tab} onTab={handleTab} onBack={handleBack} onSettings={() => setSettings(true)}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
           <QuestionGroup
-            title="Seit wann und wie stark?"
-            subtitle="Grobe Angaben reichen völlig aus."
+            title={cf.step2Title}
+            subtitle={cf.step2Sub}
             questions={qs}
             answers={answers}
             onChange={handleAnswer}
             step={2}
-            stepNames={STEP_NAMES}
+            stepNames={cf.stepNames}
           />
           <button
             ref={el => { if (el) el.style.cssText = canProceedP4b ? BTN.primary : BTN.primaryDisabled }}
             disabled={!canProceedP4b}
             onClick={canProceedP4b ? () => go('P4c') : undefined}
           >
-            Weiter →
+            {copy.common.next}
           </button>
         </div>
       </AppShell>
@@ -498,27 +520,39 @@ export default function App() {
     const qs: QuestionDef[] = [
       {
         key: 'Q_FRISST',
-        label: `Frisst ${pet?.name ?? 'dein Tier'}?`,
-        options: [{ v: 'normal', label: 'Normal' }, { v: 'weniger', label: 'Weniger als sonst' }, { v: 'gar_nicht', label: 'Gar nicht' }],
+        label: cf.q_frisst_label(petName),
+        options: [
+          { v: 'normal',    label: cf.q_frisst_normal },
+          { v: 'weniger',   label: cf.q_frisst_weniger },
+          { v: 'gar_nicht', label: cf.q_frisst_gar_nicht },
+        ],
       },
       {
         key: 'Q_TRINKT',
-        label: `Trinkt ${pet?.name ?? 'dein Tier'}?`,
-        options: [{ v: 'normal', label: 'Normal' }, { v: 'weniger', label: 'Weniger als sonst' }, { v: 'gar_nicht', label: 'Gar nicht' }],
+        label: cf.q_trinkt_label(petName),
+        options: [
+          { v: 'normal',    label: cf.q_trinkt_normal },
+          { v: 'weniger',   label: cf.q_trinkt_weniger },
+          { v: 'gar_nicht', label: cf.q_trinkt_gar_nicht },
+        ],
       },
       {
         key: 'Q_VERHALTEN',
-        label: 'Verhalten verändert?',
+        label: cf.q_verhalten_label,
         options: [
-          { v: 'nein', label: 'Nein, normal' },
-          { v: 'etwas', label: 'Etwas (schont sich, unruhig)' },
-          { v: 'deutlich', label: 'Deutlich (apathisch, sehr unruhig)' },
+          { v: 'nein',     label: cf.q_verhalten_nein },
+          { v: 'etwas',    label: cf.q_verhalten_etwas },
+          { v: 'deutlich', label: cf.q_verhalten_deutlich },
         ],
       },
       {
         key: 'Q_SCHMERZ',
-        label: `Wirkt ${pet?.name ?? 'dein Tier'} schmerzhaft?`,
-        options: [{ v: 'nein', label: 'Nein' }, { v: 'vielleicht', label: 'Vielleicht' }, { v: 'ja', label: 'Ja' }],
+        label: cf.q_schmerz_label(petName),
+        options: [
+          { v: 'nein',       label: cf.q_schmerz_nein },
+          { v: 'vielleicht', label: cf.q_schmerz_vielleicht },
+          { v: 'ja',         label: cf.q_schmerz_ja },
+        ],
       },
     ]
 
@@ -526,36 +560,35 @@ export default function App() {
       <AppShell screen="P4c" activeTab={tab} onTab={handleTab} onBack={handleBack} onSettings={() => setSettings(true)}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
           <QuestionGroup
-            title={`Wie geht es ${pet?.name ?? 'deinem Tier'} sonst?`}
-            subtitle="Letzte Fragen – dann hast du dein Ergebnis."
+            title={cf.step3Title(petName)}
+            subtitle={cf.step3Sub}
             questions={qs}
             answers={answers}
             onChange={handleAnswer}
             step={3}
-            stepNames={STEP_NAMES}
+            stepNames={cf.stepNames}
           />
           <button
             ref={el => { if (el) el.style.cssText = BTN.primary }}
             onClick={handleComputeResult}
           >
-            Ergebnis anzeigen →
+            {cf.btnResult}
           </button>
         </div>
       </AppShell>
     )
   }
 
-  // P6 – Result
+  // P6 – Result (EmergencyModal removed: ResultPage handles the red-case UI)
   if (screen === 'P6') {
     if (!session || !pet) { go('P3'); return null }
     return (
       <AppShell screen="P6" activeTab={tab} onTab={handleTab} onBack={handleBack} onSettings={() => setSettings(true)}>
-        {showEmerg && <EmergencyModal petName={pet.name} onContinue={() => setShowEmerg(false)} />}
         <ResultPage
           session={session}
           pet={pet}
           onSchutz={() => go('P7')}
-          onNewCheck={() => { setAnswers({}); setSymptomId(''); go('P3') }}
+          onNewCheck={() => { setAnswers({}); setSymptomId(''); setSelectedSymptoms([]); go('P3') }}
           onSave={handleSave}
           alreadySaved={sessSaved}
         />
@@ -575,7 +608,7 @@ export default function App() {
       <AppShell screen="P7" activeTab={tab} onTab={handleTab} onBack={handleBack} onSettings={() => setSettings(true)}>
         <InsuranceGapCheck
           pet={pet}
-          onDone={g => { setGapResult(calcGap(g)); go('P8') }}
+          onDone={(g: GapAnswers) => { setGapResult(calcGap(g)); go('P8') }}
           onSkip={goHome}
         />
       </AppShell>
@@ -585,16 +618,6 @@ export default function App() {
   // P8 – Gap result
   if (screen === 'P8') {
     const res = gapResult ?? { result: 'gelb' as const, gaps: [] }
-    const titles = {
-      gruen: 'Schutz wirkt grundsätzlich solide',
-      gelb:  'Mögliche Lücken – prüfen lassen',
-      rot:   'Erhöhtes Kostenrisiko',
-    }
-    const bodies = {
-      gruen: 'Deine Angaben deuten auf einen soliden Grundschutz hin.',
-      gelb:  'Deine Angaben zeigen mögliche Lücken. Eine unverbindliche Prüfung lohnt sich.',
-      rot:   `${pet?.name ?? 'Dein Tier'} ist möglicherweise nicht oder unzureichend abgesichert.`,
-    }
 
     return (
       <AppShell screen="P8" activeTab={tab} onTab={handleTab} onBack={handleBack} onSettings={() => setSettings(true)}>
@@ -621,7 +644,7 @@ export default function App() {
               Beratung per WhatsApp erhalten →
             </button>
             <button ref={el => { if (el) el.style.cssText = BTN.ghost }} onClick={goHome}>
-              Später
+              {copy.common.later}
             </button>
           </div>
         </div>
@@ -629,7 +652,7 @@ export default function App() {
     )
   }
 
-  // P9 – Lead form (pet may be null; LeadForm handles the full entry flow)
+  // P9 – Lead form
   if (screen === 'P9') {
     return (
       <AppShell screen="P9" activeTab={tab} onTab={handleTab} onBack={handleBack} onSettings={() => setSettings(true)}>
@@ -658,7 +681,7 @@ export default function App() {
             {leadConfirmation}
           </p>
           <button ref={el => { if (el) el.style.cssText = BTN.primary }} onClick={goHome} style={{ width: '100%' } as React.CSSProperties}>
-            Fertig
+            {copy.common.done}
           </button>
           <p style={{ fontSize: 11, color: T.muted, textAlign: 'center' }}>
             Einwilligung jederzeit widerrufbar · Keine Sofortentscheidung nötig
@@ -676,7 +699,7 @@ export default function App() {
         <MiniPetRecord
           pet={pet}
           sessions={petSessions}
-          onNewCheck={() => { setAnswers({}); setSymptomId(''); go(pet ? 'P3' : 'P2') }}
+          onNewCheck={() => { setAnswers({}); setSymptomId(''); setSelectedSymptoms([]); go(pet ? 'P3' : 'P2') }}
           onEdit={() => go('P2')}
           onSchutz={() => go('P7')}
         />
