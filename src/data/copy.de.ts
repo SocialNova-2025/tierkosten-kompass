@@ -135,7 +135,8 @@ export const DE: AppCopy = {
     minHint: 'Bitte mindestens 1 Beobachtung auswählen.',
     maxHint: 'Maximal 3 Beobachtungen möglich. Entferne eine Auswahl, um eine andere hinzuzufügen.',
     redFlagHint:
-      'Roter Punkt = mögliches Warnsignal. Diese Beobachtungen werden im Check besonders berücksichtigt. ' +
+      'Roter Punkt = mögliches Warnsignal. Diese Beobachtungen können sofortige Hilfe erfordern ' +
+      'und werden im Check besonders berücksichtigt. ' +
       'Das bedeutet nicht automatisch, dass ein Notfall vorliegt.',
   },
 

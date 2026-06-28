@@ -63,7 +63,8 @@ export const EN: AppCopy = {
     minHint: 'Please select at least 1 observation.',
     maxHint: 'Maximum 3 observations. Remove one to add another.',
     redFlagHint:
-      'Red dot = possible warning sign. These observations are given extra weight in the check. ' +
+      'Red dot = possible warning sign. These observations may require immediate help ' +
+      'and are weighted more strongly in the check. ' +
       'This does not automatically mean an emergency.',
   },
 
