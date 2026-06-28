@@ -306,7 +306,7 @@ export default function App() {
             Bevor dich die Tierarztrechnung überrascht.
           </p>
           <p style={{ fontSize: 11, color: '#8FA8A8', letterSpacing: '.04em', textTransform: 'uppercase' }}>
-            Schnellcheck in 60 Sekunden · Dringlichkeit · Kostenrisiko · Schutz
+            Schnellcheck in 60 Sekunden · Dringlichkeit · Kostenrisiko
           </p>
         </div>
 
