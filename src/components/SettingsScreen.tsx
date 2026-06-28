@@ -1,4 +1,5 @@
 import type { DemoCase } from '../types'
+import { FEATURES } from '../config/features'
 import { T } from '../styles/tokens'
 import { useLanguage } from '../lib/LanguageContext'
 import type { Lang } from '../lib/LanguageContext'
@@ -26,21 +27,24 @@ export function SettingsScreen({ demos, onLoadDemo, onClearAll }: SettingsScreen
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       <h2 style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-.03em', color: T.text }}>{c.title}</h2>
 
-      <div className="card">
-        <div className="flbl">{c.demosLabel}</div>
-        <p style={{ fontSize: 13, color: T.muted, margin: '0 0 12px', lineHeight: 1.5 }}>{c.demosDesc}</p>
-        {demos.map((d, i) => (
-          <button key={d.label} style={{
-            width: '100%', textAlign: 'left', padding: '11px 0', fontSize: 13, fontWeight: 500,
-            color: T.text, background: 'none', border: 'none',
-            borderBottom: i < demos.length - 1 ? `1px solid ${T.border}` : 'none',
-            cursor: 'pointer', fontFamily: 'inherit', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          }} onClick={() => onLoadDemo(i)}>
-            <span>{d.label}</span>
-            <span style={{ color: T.muted }}>→</span>
-          </button>
-        ))}
-      </div>
+      {/* Demo cases – hidden when showDemoCases flag is off */}
+      {FEATURES.showDemoCases && (
+        <div className="card">
+          <div className="flbl">{c.demosLabel}</div>
+          <p style={{ fontSize: 13, color: T.muted, margin: '0 0 12px', lineHeight: 1.5 }}>{c.demosDesc}</p>
+          {demos.map((d, i) => (
+            <button key={d.label} style={{
+              width: '100%', textAlign: 'left', padding: '11px 0', fontSize: 13, fontWeight: 500,
+              color: T.text, background: 'none', border: 'none',
+              borderBottom: i < demos.length - 1 ? `1px solid ${T.border}` : 'none',
+              cursor: 'pointer', fontFamily: 'inherit', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            }} onClick={() => onLoadDemo(i)}>
+              <span>{d.label}</span>
+              <span style={{ color: T.muted }}>→</span>
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className="card">
         <div className="flbl">{c.languageLabel}</div>
