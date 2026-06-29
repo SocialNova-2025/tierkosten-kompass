@@ -3,10 +3,10 @@ import type { CheckSession, Pet } from '../types'
 import { FEATURES } from '../config/features'
 import { T } from '../styles/tokens'
 import { getSymptomById } from '../data/symptoms'
-import { disclaimer } from '../data/copy'
+import { useCopy } from '../lib/LanguageContext'
 
 const DUR: Record<string, string> = {
-  lt12: '< 12 Std.', h12_24: '12–24 Std.', t1_3: '1–3 Tage', laenger: '> 3 Tage',
+  lt12: '< 12 Std.', h12_24: '12â24 Std.', t1_3: '1â3 Tage', laenger: '> 3 Tage',
 }
 const STM: Record<string, string> = { leicht: 'leicht', mittel: 'mittel', stark: 'stark' }
 const FN: Record<string, string>  = { normal: 'normal', weniger: 'weniger als sonst', gar_nicht: 'gar nicht' }
@@ -19,18 +19,22 @@ interface VetReportAccordionProps {
 
 export function VetReportAccordion({ session, pet }: VetReportAccordionProps) {
   const [open, setOpen] = useState(false)
-  const sym = getSymptomById(session.symptomId)
-  const a = session.answers
+  const copy = useCopy()
+  const sym  = getSymptomById(session.symptomId)
+  const a    = session.answers
+
+  /** Safe pet name fallback */
+  const petName = pet.name || copy.urgencyCard.petFallback
 
   const rows: [string, string][] = [
-    ['Tier', `${pet.name} · ${pet.species === 'hund' ? 'Hund' : 'Katze'} · ${pet.ageYears} J. · ${pet.weightKg} kg`],
+    ['Tier', `${petName} Â· ${pet.species === 'hund' ? 'Hund' : 'Katze'} Â· ${pet.ageYears} J. Â· ${pet.weightKg} kg`],
     // Versicherungszeile nur sichtbar wenn insuranceFunnel aktiv
     ...(FEATURES.insuranceFunnel
       ? [['Versicherung', pet.hasInsurance ? 'vorhanden' : 'nicht vorhanden'] as [string, string]]
       : []),
     ['Symptom', sym?.label ?? '-'],
     ...(a.Q_DAUER  ? [['Seit',     DUR[a.Q_DAUER] ?? ''] as [string, string]] : []),
-    ...(a.Q_STAERKE? [['Stärke',   STM[a.Q_STAERKE] ?? ''] as [string, string]] : []),
+    ...(a.Q_STAERKE? [['StÃ¤rke',   STM[a.Q_STAERKE] ?? ''] as [string, string]] : []),
     ...(a.Q_FRISST ? [['Fressen',  FN[a.Q_FRISST] ?? ''] as [string, string]] : []),
     ...(a.Q_TRINKT ? [['Trinken',  FN[a.Q_TRINKT] ?? ''] as [string, string]] : []),
     ...(a.Q_SCHMERZ? [['Schmerzen',SC[a.Q_SCHMERZ] ?? ''] as [string, string]] : []),
@@ -38,7 +42,7 @@ export function VetReportAccordion({ session, pet }: VetReportAccordionProps) {
 
   const questions = [
     'Welche Untersuchung empfehlen Sie zuerst?',
-    'Welche Kosten kommen ungefähr auf mich zu?',
+    'Welche Kosten kommen ungefÃ¤hr auf mich zu?',
     'Gibt es einen Kostenvoranschlag?',
     'Wann sollte ich mich melden, wenn es keine Besserung gibt?',
   ]
@@ -64,7 +68,7 @@ export function VetReportAccordion({ session, pet }: VetReportAccordionProps) {
         aria-expanded={open}
       >
         <span>Vorbereitungsbericht</span>
-        <span>{open ? '▲' : '▼'}</span>
+        <span>{open ? 'â²' : 'â¼'}</span>
       </button>
 
       {open && (
@@ -92,7 +96,7 @@ export function VetReportAccordion({ session, pet }: VetReportAccordionProps) {
 
           {/* Questions */}
           <div>
-            <div className="flbl">Fragen für den Tierarzt</div>
+            <div className="flbl">Fragen fÃ¼r den Tierarzt</div>
             <ul style={{ margin: 0, paddingLeft: 16, fontSize: 13, color: T.text, lineHeight: 1.7 }}>
               {questions.map(q => <li key={q}>{q}</li>)}
             </ul>
@@ -100,7 +104,7 @@ export function VetReportAccordion({ session, pet }: VetReportAccordionProps) {
 
           {/* Disclaimer */}
           <div style={{ background: '#F3F7F7', borderRadius: 10, padding: '10px 13px', fontSize: 12, lineHeight: 1.6, color: T.muted, fontStyle: 'italic' }}>
-            {disclaimer(pet.name)}
+            {copy.disclaimer(petName)}
           </div>
         </div>
       )}
