@@ -7,7 +7,7 @@ import { useCopy } from '../lib/LanguageContext'
 
 interface SymptomGridProps {
   pet: Pet
-  /** Called with the final selection when user confirms (≥1, ≤3 items). */
+  /** Called with the final selection when user confirms (â¥1, â¤3 items). */
   onDone: (selectedSymptoms: string[], primarySymptom: string) => void
 }
 
@@ -108,7 +108,7 @@ export function SymptomGrid({ pet, onDone }: SymptomGridProps) {
                 }
               }}
             >
-              {/* Per-card info icon – only for red-flag tiles */}
+              {/* Per-card info icon â only for red-flag tiles */}
               {isRedFlag && (
                 <button
                   onClick={e => { e.stopPropagation(); setInfoOpen(s.id) }}
@@ -140,7 +140,10 @@ export function SymptomGrid({ pet, onDone }: SymptomGridProps) {
                 </span>
               )}
 
-              <span style={{ fontSize: 22, lineHeight: 1 }}>{s.icon}</span>
+              <span
+                style={{ display: 'inline-flex', width: 26, height: 26, color: isSelected ? T.primary : T.muted }}
+                dangerouslySetInnerHTML={{ __html: s.icon }}
+              />
               <span style={{
                 fontSize: 11, fontWeight: 600,
                 color: isSelected ? T.primary : T.text,
@@ -150,7 +153,7 @@ export function SymptomGrid({ pet, onDone }: SymptomGridProps) {
               </span>
 
               {isSelected && (
-                <span style={{ position: 'absolute', bottom: 5, right: 6, fontSize: 10, color: T.primary, fontWeight: 700 }}>✓</span>
+                <span style={{ position: 'absolute', bottom: 5, right: 6, fontSize: 10, color: T.primary, fontWeight: 700 }}>â</span>
               )}
             </div>
           )
@@ -184,7 +187,7 @@ export function SymptomGrid({ pet, onDone }: SymptomGridProps) {
           <div
             role="dialog"
             aria-modal="true"
-            aria-label="Warnsignal: Erklärung"
+            aria-label="Warnsignal: ErklÃ¤rung"
             style={{
               position: 'fixed', bottom: 88, left: '50%', transform: 'translateX(-50%)',
               width: 'min(320px, calc(100vw - 32px))',
@@ -198,14 +201,14 @@ export function SymptomGrid({ pet, onDone }: SymptomGridProps) {
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
               <button
                 onClick={() => setInfoOpen(null)}
-                aria-label="Schließen"
+                aria-label="SchlieÃen"
                 style={{
                   background: 'transparent', border: 'none', cursor: 'pointer',
                   color: T.muted, fontSize: 15, lineHeight: 1, padding: '2px 4px',
                   fontFamily: 'inherit',
                 }}
               >
-                ✕
+                â
               </button>
             </div>
             {/* Hint text */}
