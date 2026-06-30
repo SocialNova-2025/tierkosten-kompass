@@ -1,86 +1,143 @@
 import type { NavTab, Screen } from '../types'
-import { BottomNav } from './BottomNav'
 import { useCopy } from '../lib/LanguageContext'
+import { SettingsScreen } from './SettingsScreen'
 
-interface AppShellProps {
-  screen: Screen
-  activeTab: NavTab
-  onTab: (tab: NavTab) => void
-  onBack?: () => void
-  onSettings: () => void
+interface Props {
   children: React.ReactNode
-  noNav?: boolean
+  activeTab: NavTab
+  screen: Screen
+  onTabChange: (t: NavTab) => void
+  onBack?: () => void
+  showBack?: boolean
 }
 
-/** TK monogram â inline SVG rounded square with white "TK" letters */
 function TKMonogram() {
   return (
-    <svg
-      width="30"
-      height="30"
-      viewBox="0 0 30 30"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-      style={{ flexShrink: 0 }}
-    >
+    <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
       <rect width="30" height="30" rx="7" fill="#0A7A73" />
       <text
         x="15"
         y="20"
         textAnchor="middle"
-        fill="white"
         fontSize="13"
         fontWeight="700"
-        fontFamily="system-ui, -apple-system, sans-serif"
-        letterSpacing="-0.5"
-      >
-        TK
-      </text>
+        fontFamily="system-ui, sans-serif"
+        fill="#ffffff"
+      >TK</text>
     </svg>
   )
 }
 
-export function AppShell({ screen, activeTab, onTab, onBack, onSettings, children, noNav = false }: AppShellProps) {
+export function AppShell({ children, activeTab, screen, onTabChange, onBack, showBack }: Props) {
+  const [showSettings, setShowSettings] = React.useState(false)
   const copy = useCopy()
-  const cs   = copy.appShell
 
-  const TITLES: Partial<Record<Screen, string>> = {
-    P2:  cs.screenPetProfile,
-    P3:  cs.screenSymptoms,
-    P4a: cs.screenStep(1, 3),
-    P4b: cs.screenStep(2, 3),
-    P4c: cs.screenStep(3, 3),
-    P6:  cs.screenResult,
-    P11: cs.screenRecord,
+  if (showSettings) {
+    return <SettingsScreen onBack={() => setShowSettings(false)} />
   }
 
-  const title = TITLES[screen]
+  const showHeader = screen !== 'select-symptom' && screen !== 'symptom-detail'
 
   return (
-    <div className="app-shell">
-      <header className="hdr">
-        <div style={{ width: 38, display: 'flex', alignItems: 'center' }}>
-          {onBack && <button className="hdr-back" onClick={onBack} aria-label="ZurÃ¼ck">â</button>}
-        </div>
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-          {title ? (
-            <span className="hdr-title">{title}</span>
+    <div style={{ minHeight: '100vh', background: '#f8fafc', display: 'flex', flexDirection: 'column' }}>
+      <header style={{
+        background: '#ffffff',
+        borderBottom: '1px solid #e2e8f0',
+        padding: '0px 16px',
+        height: '56px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        position: 'sticky',
+        top: '0',
+        zIndex: 100,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1 }}>
+          {showBack && onBack ? (
+            <button
+              onClick={onBack}
+              aria-label="Zurueck"
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                padding: '4px 8px 4px 4px',
+                fontSize: '16px',
+                color: '#64748b',
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              &lt;-
+            </button>
           ) : (
-            <>
-              <TKMonogram />
-              <span className="hdr-logo">TierKosten Kompass</span>
-            </>
+            <TKMonogram />
           )}
+          <span style={{ fontSize: '15px', fontWeight: '600', color: '#1e293b' }}>
+            {copy.appShell.appName}
+          </span>
         </div>
-        <div style={{ width: 38, display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-          <button className="hdr-gear" onClick={onSettings} aria-label="Einstellungen">
-            <i className="ti ti-settings" aria-hidden="true" style={{ fontSize: 16 }} />
-          </button>
-        </div>
+        <button
+          onClick={() => setShowSettings(true)}
+          aria-label="Einstellungen"
+          style={{
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            padding: '8px',
+            color: '#64748b',
+            display: 'flex',
+            alignItems: 'center',
+          }}
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 151.15 15.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
       </header>
-      <main className="main">{children}</main>
-      {!noNav && <BottomNav activeTab={activeTab} onTab={onTab} />}
+
+      <main style={{ flex: 1, overflowY: 'auto', paddingBottom: '72px' }}>
+        {children}
+      </main>
+
+      <nav style={{
+        position: 'fixed',
+        bottom: '0',
+        left: '0',
+        right: '0',
+        background: '#ffffff',
+        borderTop: '1px solid #e2e8f0',
+        display: 'flex',
+        height: '72px',
+      }}>
+        {(['check', 'results', 'profile'] as NavTab[]).map(tab => {
+          const active = tab === activeTab
+          const label = copy.appShell.nav[tab]
+          return (
+            <button
+              key={tab}
+              onClick={() => onTabChange(tab)}
+              style={{
+                flex: 1,
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '3px',
+                color: active ? '#0A7A73' : '#94a3b8',
+                fontSize: '11px',
+                fontWeight: active ? '600' : '400',
+              }}
+            >
+              {label}
+            </button>
+          )
+        })}
+      </nav>
     </div>
   )
 }
