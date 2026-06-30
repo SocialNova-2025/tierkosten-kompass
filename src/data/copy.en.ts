@@ -1,5 +1,5 @@
 /**
- * copy.en.ts â English UI copy
+ * copy.en.ts - English UI copy
  *
  * Mirrors the structure of copy.de.ts exactly.
  * Legal disclaimer: All texts comply with the same constraints as the German copy.
@@ -22,19 +22,19 @@ export const EN: AppCopy = {
     label: 'TierKosten Kompass',
     headline: "What's going on with your pet?",
     subline: 'Before the vet bill surprises you.',
-    tagline: '60-second check Â· Assess urgency Â· Understand costs',
+    tagline: '60-second check · Assess urgency · Understand costs',
     features: [
-      ['01', 'How urgent is it?', 'Clear guidance â green, yellow, or red.'],
+      ['01', 'How urgent is it?', 'Clear guidance – green, yellow, or red.'],
       ['02', 'What might it cost?', 'Three realistic cost scenarios.'],
       ['03', 'Find a vet or emergency service', 'Map opens near you instantly.'],
     ],
-    startCta: 'Start quick check â',
+    startCta: 'Start quick check ->',
     schutzCta: 'Check coverage gaps',
   },
 
   petProfile: {
     title: 'Your pet',
-    subtitle: 'Just 4 fields Â· under 30 seconds',
+    subtitle: 'Just 4 fields · under 30 seconds',
     speciesLabel: 'Species',
     dog: 'Dog',
     cat: 'Cat',
@@ -51,7 +51,7 @@ export const EN: AppCopy = {
     cityLabel: 'City or postcode',
     cityOptional: '(optional)',
     cityHint: 'Used only for finding nearby emergency vets.',
-    cta: 'Continue â',
+    cta: 'Continue ->',
   },
 
   symptomGrid: {
@@ -59,11 +59,11 @@ export const EN: AppCopy = {
     hint: 'Select up to 3 observations.',
     primaryBadge: 'Primary observation',
     selectedCount: (n: number) => `${n} / 3 selected`,
-    cta: 'Continue â',
+    cta: 'Continue ->',
     minHint: 'Please select at least 1 observation.',
     maxHint: 'Maximum 3 observations. Remove one to add another.',
     redFlagHint:
-      'This observation may be a possible warning sign. ' +
+      'Red dot: This observation may be a possible warning sign. ' +
       'It may require immediate help and is weighted more strongly in the check. ' +
       'This does not automatically mean it is an emergency.',
   },
@@ -76,8 +76,8 @@ export const EN: AppCopy = {
     step2Title: 'Since when and how severe?',
     step2Sub: 'Rough answers are perfectly fine.',
     step3Title: (petName: string) => `How is ${petName} doing otherwise?`,
-    step3Sub: 'Last questions â then you have your result.',
-    btnResult: 'Show result â',
+    step3Sub: 'Last questions – then you have your result.',
+    btnResult: 'Show result ->',
     q_urin_label: (petName: string) => `Can ${petName} urinate?`,
     q_urin_normal: 'Yes, normally',
     q_urin_troepfchen: 'Only drops',
@@ -99,8 +99,8 @@ export const EN: AppCopy = {
     q_gift_ja: 'Yes',
     q_dauer_label: (petName: string) => `How long has ${petName} been showing this?`,
     q_dauer_lt12: 'Less than 12 hours',
-    q_dauer_h12_24: '12â24 hours',
-    q_dauer_t1_3: '1â3 days',
+    q_dauer_h12_24: '12-24 hours',
+    q_dauer_t1_3: '1-3 days',
     q_dauer_laenger: 'More than 3 days',
     q_staerke_label: 'How severe is it?',
     q_staerke_leicht: 'Mild',
@@ -188,11 +188,11 @@ export const EN: AppCopy = {
     legalLabel: 'Legal',
     dataLabel: 'Data',
     clearAll: 'Delete all local data',
-    footer: 'TierKosten Kompass does not provide a diagnosis and does not replace a veterinarian.',
+    footer: 'TierKosten Kompass Beta · without guarantee · No medical advice. Does not provide a diagnosis and does not replace a veterinarian.',
   },
 
   common: {
-    next: 'Continue â',
+    next: 'Continue ->',
     later: 'Later',
     done: 'Done',
     langDe: 'Deutsch',
