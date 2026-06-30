@@ -1,16 +1,14 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react'
-import { lsGet, lsSet } from './storage'
+import { lsSet } from './storage'
 import { DE } from '../data/copy.de'
 import { EN } from '../data/copy.en'
 import type { AppCopy } from '../data/copy.de'
 
-// ── Types ─────────────────────────────────────────────────────────────────
 export type Lang = 'de' | 'en'
 export type { AppCopy }
 
 const LANG_STORAGE_KEY = 'tkk_lang'
 
-// ── Context ───────────────────────────────────────────────────────────────
 interface LanguageCtx {
   lang: Lang
   setLang: (l: Lang) => void
@@ -23,11 +21,9 @@ const LanguageContext = createContext<LanguageCtx>({
   copy: DE,
 })
 
-// ── Provider ──────────────────────────────────────────────────────────────
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Lang>(
-    () => lsGet<Lang>(LANG_STORAGE_KEY) ?? 'de',
-  )
+  // Locked to German for launch -- ignores any stored language preference
+  const [lang, setLangState] = useState<Lang>('de')
 
   const setLang = useCallback((l: Lang) => {
     lsSet(LANG_STORAGE_KEY, l)
@@ -43,13 +39,10 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   )
 }
 
-// ── Hooks ─────────────────────────────────────────────────────────────────
-/** Returns { lang, setLang, copy } */
 export function useLanguage(): LanguageCtx {
   return useContext(LanguageContext)
 }
 
-/** Convenience: returns just the copy object for current language */
 export function useCopy(): AppCopy {
   return useContext(LanguageContext).copy
 }
