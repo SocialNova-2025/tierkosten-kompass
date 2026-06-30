@@ -7,7 +7,6 @@ import { useCopy } from '../lib/LanguageContext'
 
 interface SymptomGridProps {
   pet: Pet
-  /** Called with the final selection when user confirms (â¥1, â¤3 items). */
   onDone: (selectedSymptoms: string[], primarySymptom: string) => void
 }
 
@@ -17,7 +16,6 @@ export function SymptomGrid({ pet, onDone }: SymptomGridProps) {
 
   const list = getSymptomsForSpecies(pet.species)
   const [selected, setSelected] = useState<string[]>([])
-  /** ID of the red-flag tile whose info popup is currently open, or null. */
   const [infoOpen, setInfoOpen] = useState<string | null>(null)
 
   const toggle = (id: string) => {
@@ -37,14 +35,15 @@ export function SymptomGrid({ pet, onDone }: SymptomGridProps) {
     onDone(selected, getPrimarySymptom(selected))
   }
 
+  /** Safe pet name for title */
+  const petDisplayName = pet.name || copy.urgencyCard.petFallback
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14, position: 'relative' }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        {/* Title */}
         <h2 style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-.03em', color: T.text, margin: 0 }}>
-          {c.title(pet.name)}
+          {c.title(petDisplayName)}
         </h2>
-
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <p style={{ fontSize: 13, color: T.muted, margin: 0 }}>{c.hint}</p>
           {selected.length > 0 && (
@@ -108,7 +107,7 @@ export function SymptomGrid({ pet, onDone }: SymptomGridProps) {
                 }
               }}
             >
-              {/* Per-card info icon â only for red-flag tiles */}
+              {/* Per-card reddish info icon - only for red-flag tiles */}
               {isRedFlag && (
                 <button
                   onClick={e => { e.stopPropagation(); setInfoOpen(s.id) }}
@@ -117,13 +116,12 @@ export function SymptomGrid({ pet, onDone }: SymptomGridProps) {
                   style={{
                     position: 'absolute', top: 5, right: 5,
                     width: 18, height: 18, borderRadius: '50%',
-                    background: 'transparent',
-                    border: `1.5px solid ${T.muted}`,
-                    color: T.muted, fontSize: 10, fontWeight: 700,
+                    background: 'rgba(220,38,38,0.06)',
+                    border: '1.5px solid #DC2626',
+                    color: '#B91C1C', fontSize: 10, fontWeight: 700,
                     cursor: 'pointer', fontFamily: 'inherit',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     lineHeight: 1, padding: 0, flexShrink: 0,
-                    opacity: 0.65,
                   }}
                 >
                   i
@@ -153,7 +151,7 @@ export function SymptomGrid({ pet, onDone }: SymptomGridProps) {
               </span>
 
               {isSelected && (
-                <span style={{ position: 'absolute', bottom: 5, right: 6, fontSize: 10, color: T.primary, fontWeight: 700 }}>â</span>
+                <span style={{ position: 'absolute', bottom: 5, right: 6, fontSize: 10, color: T.primary, fontWeight: 700 }}>v</span>
               )}
             </div>
           )
@@ -175,7 +173,6 @@ export function SymptomGrid({ pet, onDone }: SymptomGridProps) {
       {/* Per-card Red-Flag Info Popup */}
       {infoOpen && (
         <>
-          {/* Backdrop */}
           <div
             onClick={() => setInfoOpen(null)}
             style={{
@@ -183,11 +180,10 @@ export function SymptomGrid({ pet, onDone }: SymptomGridProps) {
               background: 'rgba(0,0,0,0.30)', zIndex: 50,
             }}
           />
-          {/* Card */}
           <div
             role="dialog"
             aria-modal="true"
-            aria-label="Warnsignal: ErklÃ¤rung"
+            aria-label="Warnsignal: Erklaerung"
             style={{
               position: 'fixed', bottom: 88, left: '50%', transform: 'translateX(-50%)',
               width: 'min(320px, calc(100vw - 32px))',
@@ -197,21 +193,19 @@ export function SymptomGrid({ pet, onDone }: SymptomGridProps) {
               display: 'flex', flexDirection: 'column', gap: 10,
             }}
           >
-            {/* Close row */}
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
               <button
                 onClick={() => setInfoOpen(null)}
-                aria-label="SchlieÃen"
+                aria-label="Schliessen"
                 style={{
                   background: 'transparent', border: 'none', cursor: 'pointer',
                   color: T.muted, fontSize: 15, lineHeight: 1, padding: '2px 4px',
                   fontFamily: 'inherit',
                 }}
               >
-                â
+                x
               </button>
             </div>
-            {/* Hint text */}
             <p style={{ fontSize: 13, color: T.text, lineHeight: 1.65, margin: '0 0 2px' }}>
               {c.redFlagHint}
             </p>
