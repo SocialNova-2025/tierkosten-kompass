@@ -1,14 +1,20 @@
+import React from 'react'
 import type { NavTab, Screen } from '../types'
-import { useCopy } from '../lib/LanguageContext'
-import { SettingsScreen } from './SettingsScreen'
 
 interface Props {
   children: React.ReactNode
-  activeTab: NavTab
   screen: Screen
-  onTabChange: (t: NavTab) => void
+  activeTab: NavTab
+  onTab: (t: NavTab) => void
   onBack?: () => void
-  showBack?: boolean
+  onSettings: () => void
+  noNav?: boolean
+}
+
+const NAV_LABELS: Record<NavTab, string> = {
+  start: 'Start',
+  check: 'Check',
+  akte: 'Akte',
 }
 
 function TKMonogram() {
@@ -28,16 +34,7 @@ function TKMonogram() {
   )
 }
 
-export function AppShell({ children, activeTab, screen, onTabChange, onBack, showBack }: Props) {
-  const [showSettings, setShowSettings] = React.useState(false)
-  const copy = useCopy()
-
-  if (showSettings) {
-    return <SettingsScreen onBack={() => setShowSettings(false)} />
-  }
-
-  const showHeader = screen !== 'select-symptom' && screen !== 'symptom-detail'
-
+export function AppShell({ children, activeTab, screen: _screen, onTab, onBack, onSettings, noNav }: Props) {
   return (
     <div style={{ minHeight: '100vh', background: '#f8fafc', display: 'flex', flexDirection: 'column' }}>
       <header style={{
@@ -53,7 +50,7 @@ export function AppShell({ children, activeTab, screen, onTabChange, onBack, sho
         zIndex: 100,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1 }}>
-          {showBack && onBack ? (
+          {onBack ? (
             <button
               onClick={onBack}
               aria-label="Zurueck"
@@ -74,11 +71,11 @@ export function AppShell({ children, activeTab, screen, onTabChange, onBack, sho
             <TKMonogram />
           )}
           <span style={{ fontSize: '15px', fontWeight: '600', color: '#1e293b' }}>
-            {copy.appShell.appName}
+            TierKosten Kompass
           </span>
         </div>
         <button
-          onClick={() => setShowSettings(true)}
+          onClick={onSettings}
           aria-label="Einstellungen"
           style={{
             background: 'none',
@@ -92,52 +89,54 @@ export function AppShell({ children, activeTab, screen, onTabChange, onBack, sho
         >
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="3"/>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 151.15 15.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
           </svg>
         </button>
       </header>
 
-      <main style={{ flex: 1, overflowY: 'auto', paddingBottom: '72px' }}>
+      <main style={{ flex: 1, overflowY: 'auto', paddingBottom: noNav ? '0' : '72px' }}>
         {children}
       </main>
 
-      <nav style={{
-        position: 'fixed',
-        bottom: '0',
-        left: '0',
-        right: '0',
-        background: '#ffffff',
-        borderTop: '1px solid #e2e8f0',
-        display: 'flex',
-        height: '72px',
-      }}>
-        {(['check', 'results', 'profile'] as NavTab[]).map(tab => {
-          const active = tab === activeTab
-          const label = copy.appShell.nav[tab]
-          return (
-            <button
-              key={tab}
-              onClick={() => onTabChange(tab)}
-              style={{
-                flex: 1,
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '3px',
-                color: active ? '#0A7A73' : '#94a3b8',
-                fontSize: '11px',
-                fontWeight: active ? '600' : '400',
-              }}
-            >
-              {label}
-            </button>
-          )
-        })}
-      </nav>
+      {!noNav && (
+        <nav style={{
+          position: 'fixed',
+          bottom: '0',
+          left: '0',
+          right: '0',
+          background: '#ffffff',
+          borderTop: '1px solid #e2e8f0',
+          display: 'flex',
+          height: '72px',
+        }}>
+          {(['start', 'check', 'akte'] as NavTab[]).map(tab => {
+            const active = tab === activeTab
+            const label = NAV_LABELS[tab]
+            return (
+              <button
+                key={tab}
+                onClick={() => onTab(tab)}
+                style={{
+                  flex: 1,
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '3px',
+                  color: active ? '#0A7A73' : '#94a3b8',
+                  fontSize: '11px',
+                  fontWeight: active ? '600' : '400',
+                }}
+              >
+                {label}
+              </button>
+            )
+          })}
+        </nav>
+      )}
     </div>
   )
 }
