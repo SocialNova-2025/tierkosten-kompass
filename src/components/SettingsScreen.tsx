@@ -1,80 +1,77 @@
 import type { DemoCase } from '../types'
+import { useCopy } from '../lib/LanguageContext'
 import { FEATURES } from '../config/features'
-import { T } from '../styles/tokens'
-import { useLanguage } from '../lib/LanguageContext'
-import type { Lang } from '../lib/LanguageContext'
 
-interface SettingsScreenProps {
-  demos: DemoCase[]
-  onLoadDemo: (index: number) => void
-  onClearAll: () => void
+interface Props {
+  onBack: () => void
+  onLoadDemo?: (d: DemoCase) => void
 }
 
-const LEGAL_LINKS = ['Datenschutzerklärung', 'Impressum', 'Haftungsausschluss', 'Nutzungsbedingungen']
-
-export function SettingsScreen({ demos, onLoadDemo, onClearAll }: SettingsScreenProps) {
-  const { lang, setLang, copy } = useLanguage()
-  const c = copy.settings
-
-  const langBtn = (l: Lang): React.CSSProperties => ({
-    padding: '9px 16px', borderRadius: 9, fontSize: 13, fontWeight: 600,
-    cursor: 'pointer', fontFamily: 'inherit',
-    border: `1.5px solid ${lang === l ? T.primary : T.border}`,
-    background: '#fff', color: lang === l ? T.primary : T.muted, flex: 1,
-  })
+export function SettingsScreen({ onBack, onLoadDemo }: Props) {
+  const copy = useCopy()
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-      <h2 style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-.03em', color: T.text }}>{c.title}</h2>
-
-      {/* Demo cases – hidden when showDemoCases flag is off */}
-      {FEATURES.showDemoCases && (
-        <div className="card">
-          <div className="flbl">{c.demosLabel}</div>
-          <p style={{ fontSize: 13, color: T.muted, margin: '0 0 12px', lineHeight: 1.5 }}>{c.demosDesc}</p>
-          {demos.map((d, i) => (
-            <button key={d.label} style={{
-              width: '100%', textAlign: 'left', padding: '11px 0', fontSize: 13, fontWeight: 500,
-              color: T.text, background: 'none', border: 'none',
-              borderBottom: i < demos.length - 1 ? `1px solid ${T.border}` : 'none',
-              cursor: 'pointer', fontFamily: 'inherit', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-            }} onClick={() => onLoadDemo(i)}>
-              <span>{d.label}</span>
-              <span style={{ color: T.muted }}>→</span>
-            </button>
-          ))}
-        </div>
-      )}
-
-      <div className="card">
-        <div className="flbl">{c.languageLabel}</div>
-        <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-          <button style={langBtn('de')} onClick={() => setLang('de')}>{copy.common.langDe}</button>
-          <button style={langBtn('en')} onClick={() => setLang('en')}>{copy.common.langEn}</button>
-        </div>
-      </div>
-
-      <div className="card">
-        <div className="flbl">{c.legalLabel}</div>
-        {LEGAL_LINKS.map((l, i) => (
-          <div key={l} style={{
-            padding: '10px 0', borderBottom: i < LEGAL_LINKS.length - 1 ? `1px solid ${T.border}` : 'none',
-            fontSize: 13, color: T.text, display: 'flex', justifyContent: 'space-between', cursor: 'pointer',
-          }}>
-            <span>{l}</span>
-            <span style={{ color: T.muted }}>→</span>
-          </div>
-        ))}
-      </div>
-
-      <div className="card">
-        <div className="flbl">{c.dataLabel}</div>
-        <button style={{ fontSize: 13, color: T.red, background: 'none', border: 'none', cursor: 'pointer', padding: '8px 0', fontFamily: 'inherit', fontWeight: 600 }} onClick={onClearAll}>
-          {c.clearAll}
+    <div style={{ minHeight: '100vh', background: '#f8fafc', display: 'flex', flexDirection: 'column' }}>
+      <header style={{
+        background: '#ffffff',
+        borderBottom: '1px solid #e2e8f0',
+        padding: '0 16px',
+        height: '56px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+      }}>
+        <button
+          onClick={onBack}
+          aria-label="Zalueck"
+          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', fontSize: '20px', color: '#64748b' }}>
+          &#1000;;
         </button>
-      </div>
+        <span style={{ fontSize: '16px', fontWeight: '600', color: '#1e293b' }}>
+          {copy.settings.title}
+        </span>
+      </header>
 
-      <p style={{ fontSize: 11, color: T.muted, textAlign: 'center' }}>{c.footer}</p>
+      <main style={{ flex: 1, padding: '24px 16px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        <section>
+          <h3 style={{ fontSize: '13px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>
+            {copy.settings.aboutTitle}
+          </h3>
+          <div style={{ background: '#ffffff', borderRadius: '12px', padding: '16px', border: '1px solid #e2e8f0' }}>
+            <p style={{ fontSize: '14px', color: '#475569', lineHeight: '1.6', margin: 0 }}>
+              {copy.settings.aboutText}
+            </p>
+          </div>
+        </section>
+
+        {FEATURES.showDemoCases && onLoadDemo && (
+          <section>
+            <h3 style={{ fontSize: '13px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>
+              {copy.settings.demoTitle}
+            </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {(['bruno', 'mimi', 'rocky', 'felix'] as DemoCase[]).map(d => (
+                <button
+                  key={d}
+                  onClick={() => onLoadDemo!(d)}
+                  style={{
+                    padding: '12px 16px',
+                    background: '#f8fafc',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    fontSize: '14px',
+                    color: '#1e293b',
+                  }}
+                >
+                  Demo: {d.charAt(0).toUpperCase() + d.slice(1)}
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
+      </main>
     </div>
   )
 }
