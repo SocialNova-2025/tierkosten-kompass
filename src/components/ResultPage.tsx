@@ -1,19 +1,22 @@
 import { useState } from 'react'
-import type { CheckSession, Pet } from '../types'
+import type { CheckSession, Pet, LeadIntent } from '../types'
+import { FEATURES } from '../config/features'
 import { T, BTN } from '../styles/tokens'
 import { UrgencyCard } from './UrgencyCard'
 import { CostDrivers } from './CostDrivers'
 import { VetReportAccordion } from './VetReportAccordion'
+import { InsuranceFlow } from './InsuranceFlow'
 import { getSymptomById } from '../data/symptoms'
+import { disclaimer } from '../data/copy'
 import { buildEmergencyVetMapsUrl, buildRegularVetMapsUrl } from '../lib/maps'
 import { useCopy } from '../lib/LanguageContext'
 import { calcCostTier } from '../lib/costTier'
-import { FEATURES } from '../config/features'
 
 interface ResultPageProps {
   session: CheckSession
   pet: Pet
-  onSchutz: () => void
+  /** Called when user selects "Ja + Formular" inside InsuranceFlow – App navigates to LeadForm */
+  onFormFlow: (intent: LeadIntent) => void
   onNewCheck: () => void
   onSave: () => void
   alreadySaved: boolean
@@ -21,7 +24,7 @@ interface ResultPageProps {
 
 const DISCLAIMER =
   'Die Werte sind eine Orientierung, keine Preisgarantie. ' +
-  'Die tatsaechlichen Kosten haengen u. a. von Praxis, Diagnostik, Notdienst, Medikamenten und Verlauf ab.'
+  'Die tatsächlichen Kosten hängen u. a. von Praxis, Diagnostik, Notdienst, Medikamenten und Verlauf ab.'
 
 function SectionHeader({ label }: { label: string }) {
   return (
@@ -35,55 +38,7 @@ function SectionHeader({ label }: { label: string }) {
   )
 }
 
-function SchutzCardGruen({ onSchutz }: { onSchutz: () => void }) {
-  return (
-    <div style={{ background: T.pLight, borderRadius: 13, border: '1px solid ' + T.border, padding: '16px 16px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-      <div style={{ fontWeight: 700, fontSize: 14, color: T.text }}>Fuer zukuenftige Faelle vorsorgen</div>
-      <p style={{ fontSize: 13, color: T.muted, margin: 0, lineHeight: 1.6 }}>
-        Auch kleinere Faelle koennen sich summieren. Wenn du moechtest, kannst du einordnen lassen, ob dein Tier grundsaetzlich passend abgesichert ist.
-      </p>
-      <button onClick={onSchutz} style={{ width: '100%', padding: '11px 0', borderRadius: 11, background: 'transparent', border: '1.5px solid ' + T.primary, color: T.primary, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
-        Schutz passend einordnen
-      </button>
-    </div>
-  )
-}
-
-function SchutzCardGelb({ onSchutz }: { onSchutz: () => void }) {
-  return (
-    <div style={{ background: T.pLight, borderRadius: 13, border: '1.5px solid ' + T.primary, padding: '16px 16px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-      <div style={{ fontWeight: 700, fontSize: 14, color: T.primary }}>Kostenrisiko erkannt</div>
-      <p style={{ fontSize: 13, color: T.text, margin: 0, lineHeight: 1.6 }}>
-        Dein Ergebnis zeigt, dass Diagnostik oder Behandlungskosten entstehen koennen. Eine kurze Schutzklaerung kann helfen, besser einzuordnen, ob dein Tier passend abgesichert ist.
-      </p>
-      <button ref={el => { if (el) el.style.cssText = BTN.primary }} onClick={onSchutz}>
-        Schutzklaerung per WhatsApp starten
-      </button>
-      <p style={{ fontSize: 11, color: T.muted, margin: 0, textAlign: 'center', lineHeight: 1.4 }}>
-        Keine Sofortentscheidung noetig - Beratung nur auf Wunsch.
-      </p>
-    </div>
-  )
-}
-
-function SchutzCardRot({ onSchutz }: { onSchutz: () => void }) {
-  return (
-    <div style={{ background: '#fff', borderRadius: 13, border: '1px solid ' + T.border, padding: '16px 16px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-      <div style={{ fontWeight: 700, fontSize: 14, color: T.text }}>Nach dem Notfall: Schutzlage einordnen</div>
-      <p style={{ fontSize: 13, color: T.muted, margin: 0, lineHeight: 1.6 }}>
-        Wenn die akute Versorgung geklaert ist, kann eine Schutzklaerung sinnvoll sein - besonders, wenn hohe Kosten entstehen koennen.
-      </p>
-      <button onClick={onSchutz} style={{ width: '100%', padding: '11px 0', borderRadius: 11, background: 'transparent', border: '1.5px solid ' + T.primary, color: T.primary, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
-        Nach dem Notfall Schutz einordnen
-      </button>
-      <p style={{ fontSize: 11, color: T.muted, margin: 0, textAlign: 'center', lineHeight: 1.4 }}>
-        Bitte kuemmere dich zuerst um die tieraerztliche Versorgung.
-      </p>
-    </div>
-  )
-}
-
-export function ResultPage({ session, pet, onSchutz, onNewCheck, onSave, alreadySaved }: ResultPageProps) {
+export function ResultPage({ session, pet, onFormFlow, onNewCheck, onSave, alreadySaved }: ResultPageProps) {
   const copy = useCopy()
   const sym                             = getSymptomById(session.symptomId)
   const [localCity, setLocalCity]       = useState('')
@@ -92,11 +47,11 @@ export function ResultPage({ session, pet, onSchutz, onNewCheck, onSave, already
   const isGrn = session.urgency === 'gruen'
   const isYel = session.urgency === 'gelb'
 
-  const petName = pet.name || copy.urgencyCard.petFallback
-
+  // Build label list for multi-symptom display
   const allSelected = session.selectedSymptoms ?? [session.symptomId]
   const showMulti   = allSelected.length > 1
 
+  // Derive cost tier from existing answers — pure presentation, no score/urgency change
   const costTier = calcCostTier(
     session.symptomId,
     session.answers,
@@ -107,17 +62,23 @@ export function ResultPage({ session, pet, onSchutz, onNewCheck, onSave, already
   const isEmergencyCost = costTier.tier === 'emergency'
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 22, paddingBottom: 16 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 18, paddingBottom: 16 }}>
 
+      {/* ROT: Notfallblock – dominanter Einstieg, einzige rote Ergebniskarte */}
       {isRed && (
-        <div style={{ borderRadius: 13, background: T.redLight, border: '1.5px solid ' + T.redBorder, padding: '16px 14px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <div style={{ fontWeight: 700, fontSize: 16, color: T.red }}>Das kann dringend sein</div>
-          <p style={{ fontSize: 13, color: T.text, margin: 0, lineHeight: 1.6 }}>
-            Deine Angaben koennen auf einen Notfall hindeuten. Bitte kontaktiere jetzt sofort einen tieraerztlichen Notdienst oder eine Tierklinik. Warte damit nicht.
+        <div style={{ borderRadius: 14, background: T.redLight, border: '1.5px solid ' + T.redBorder, padding: '18px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ width: 8, height: 8, borderRadius: '50%', background: T.red, flexShrink: 0 }} />
+            <div style={{ fontWeight: 700, fontSize: 16, color: T.red, lineHeight: 1.3 }}>
+              Das kann dringend sein
+            </div>
+          </div>
+          <p style={{ fontSize: 13, color: T.text, margin: 0, lineHeight: 1.65 }}>
+            Deine Angaben können auf einen Notfall hindeuten. Bitte kontaktiere jetzt sofort einen tierärztlichen Notdienst oder eine Tierklinik. Warte damit nicht.
           </p>
           {!pet.city && (
             <input
-              style={{ width: '100%', padding: '0 12px', height: 38, borderRadius: 9, fontSize: 13, border: '1.5px solid ' + T.border, background: '#fff', color: T.text, fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box' }}
+              style={{ width: '100%', padding: '0 13px', height: 40, borderRadius: 9, fontSize: 13, border: '1.5px solid ' + T.border, background: '#fff', color: T.text, fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box' }}
               placeholder="Stadt oder PLZ eingeben"
               value={localCity}
               onChange={e => setLocalCity(e.target.value)}
@@ -128,39 +89,62 @@ export function ResultPage({ session, pet, onSchutz, onNewCheck, onSave, already
               const city = pet.city || localCity.trim() || undefined
               window.open(buildEmergencyVetMapsUrl(city), '_blank', 'noopener,noreferrer')
             }}
-            style={{ width: '100%', padding: '13px 0', borderRadius: 11, background: T.red, color: '#fff', border: 'none', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
+            style={{ width: '100%', padding: '14px 0', borderRadius: 11, background: T.red, color: '#fff', border: 'none', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', letterSpacing: '-.01em' }}
           >
-            Jetzt Notdienst in der Naehe finden
+            Jetzt Notdienst in der Nähe finden
           </button>
           <p style={{ fontSize: 12, color: T.muted, margin: 0, textAlign: 'center', lineHeight: 1.5 }}>
-            Bitte rufe dort direkt an und pruefe, ob aktuell ein Notdienst verfuegbar ist.
+            Bitte ruf direkt an und prüfe, ob aktuell ein Notdienst verfügbar ist.
           </p>
         </div>
       )}
 
-      <div>
-        <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: T.muted, marginBottom: 3 }}>
-          {copy.results.resultFor}
+      {/* ROT: Vorbereitung – ruhiger, sekundär */}
+      {isRed && (
+        <div style={{ background: T.surface, borderRadius: 12, border: `1px solid ${T.border}`, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style={{ fontWeight: 600, fontSize: 13, color: T.text }}>Halte diese Infos bereit</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 5, marginTop: 2 }}>
+            {[
+              'Symptome und Zeitpunkt des Beginns',
+              'Alter, Gewicht und bekannte Vorerkrankungen',
+              'Medikamente, falls vorhanden',
+              'Fotos oder Videos vom Verhalten, falls möglich',
+            ].map(item => (
+              <div key={item} style={{ display: 'flex', gap: 8, fontSize: 13, color: T.muted, lineHeight: 1.5 }}>
+                <span style={{ color: T.primary, fontWeight: 700, flexShrink: 0 }}>·</span>
+                <span>{item}</span>
+              </div>
+            ))}
+          </div>
         </div>
-        <h2 style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-.03em', color: T.text }}>
-          {petName} - {sym?.label ?? session.symptomId}
+      )}
+
+      {/* Title */}
+      <div style={{ paddingTop: isRed ? 4 : 0 }}>
+        <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: T.muted, marginBottom: 4 }}>
+          Ergebnis für
+        </div>
+        <h2 style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-.03em', color: T.text, lineHeight: 1.2 }}>
+          {pet.name} · {sym?.label ?? session.symptomId}
         </h2>
         {showMulti && (
-          <p style={{ fontSize: 12, color: T.muted, margin: '4px 0 0', lineHeight: 1.5 }}>
+          <p style={{ fontSize: 12, color: T.muted, margin: '5px 0 0', lineHeight: 1.5 }}>
             <span style={{ fontWeight: 600 }}>{copy.results.selectedSymptomsLabel}:</span>{' '}
-            {allSelected.map(id => getSymptomById(id)?.label ?? id).join(' - ')}
+            {allSelected.map(id => getSymptomById(id)?.label ?? id).join(' · ')}
           </p>
         )}
       </div>
 
-      <SectionHeader label="1 - Dringlichkeit" />
-      <UrgencyCard level={session.urgency} petName={petName} />
+      {/* 1 - Dringlichkeit: bei Rot übernimmt der Notfallblock oben diese Rolle */}
+      {!isRed && <SectionHeader label="1 · Dringlichkeit" />}
+      {!isRed && <UrgencyCard level={session.urgency} petName={pet.name} />}
 
+      {/* GELB: Tierarzt-Maps-CTA */}
       {isYel && (
-        <div style={{ borderRadius: 12, background: T.amberLight, border: '1px solid ' + T.amberBorder, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div style={{ borderRadius: 12, background: T.amberLight, border: '1px solid ' + T.amberBorder, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
           {!pet.city && (
             <input
-              style={{ width: '100%', padding: '0 12px', height: 38, borderRadius: 9, fontSize: 13, border: '1.5px solid ' + T.border, background: '#fff', color: T.text, fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box' }}
+              style={{ width: '100%', padding: '0 13px', height: 40, borderRadius: 9, fontSize: 13, border: '1.5px solid ' + T.border, background: '#fff', color: T.text, fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box' }}
               placeholder="Stadt oder PLZ (optional)"
               value={localCityYel}
               onChange={e => setLocalCityYel(e.target.value)}
@@ -171,29 +155,32 @@ export function ResultPage({ session, pet, onSchutz, onNewCheck, onSave, already
               const city = pet.city || localCityYel.trim() || undefined
               window.open(buildRegularVetMapsUrl(city), '_blank', 'noopener,noreferrer')
             }}
-            style={{ width: '100%', padding: '13px 0', borderRadius: 11, background: T.amber, color: '#fff', border: 'none', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
+            style={{ width: '100%', padding: '13px 0', borderRadius: 11, background: T.amber, color: '#fff', border: 'none', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', letterSpacing: '-.01em' }}
           >
-            Gut bewertete Tieraerzte in deiner Umgebung finden
+            Gut bewertete Tierärzte in der Nähe finden
           </button>
           <p style={{ fontSize: 12, color: T.muted, margin: 0, textAlign: 'center', lineHeight: 1.5 }}>
-            Bitte pruefe in Maps die aktuellen Bewertungen, Oeffnungszeiten und rufe bei Bedarf vorher an.
+            Öffnungszeiten und Bewertungen bitte in Maps prüfen.
           </p>
         </div>
       )}
 
-      <div style={{ background: '#F3F7F7', borderRadius: 10, padding: '10px 13px', fontSize: 12, lineHeight: 1.65, color: T.muted, fontStyle: 'italic' }}>
-        {copy.disclaimer(petName)}
+      {/* Disclaimer – immer sichtbar, ruhig */}
+      <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 10, padding: '10px 14px', fontSize: 12, lineHeight: 1.65, color: T.muted }}>
+        {disclaimer(pet.name)}
       </div>
 
-      <SectionHeader label="2 - Kosten-Orientierung" />
+      {/* 2 - Kosten-Orientierung (costTier-basiert) */}
+      <SectionHeader label="2 · Kosten-Orientierung" />
 
       {isEmergencyCost ? (
+        /* EMERGENCY: keine falsche enge Spanne */
         <div style={{ borderRadius: 13, background: T.redLight, border: '1.5px solid ' + T.redBorder, padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 10 }}>
           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.10em', textTransform: 'uppercase', color: T.red }}>
             Notfall / Klinik
           </div>
           <div style={{ fontSize: 16, fontWeight: 700, color: T.red, lineHeight: 1.35 }}>
-            Haeufig deutlich hoeher - Kosten nicht eng vorhersehbar
+            Häufig deutlich höher — Kosten nicht eng vorhersehbar
           </div>
           <p style={{ fontSize: 13, color: T.text, margin: 0, lineHeight: 1.6 }}>
             {costTier.reasoning}
@@ -209,6 +196,7 @@ export function ResultPage({ session, pet, onSchutz, onNewCheck, onSave, already
           <CostDrivers drivers={costTier.drivers} />
         </div>
       ) : (
+        /* NON-EMERGENCY: wahrscheinlicher Bereich laut Angaben */
         <div style={{ borderRadius: 13, background: T.pLight, border: '1px solid ' + T.pMid, padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.10em', textTransform: 'uppercase', color: T.primary }}>
             Wahrscheinlicher Bereich laut deinen Angaben
@@ -220,57 +208,50 @@ export function ResultPage({ session, pet, onSchutz, onNewCheck, onSave, already
             {costTier.reasoning}
           </p>
           <div style={{ borderTop: '1px solid ' + T.pMid, paddingTop: 10 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: T.muted, marginBottom: 4, textTransform: 'uppercase', letterSpacing: '.06em' }}>
-              Kann hoeher werden, wenn ...
+            <div style={{ fontSize: 11, fontWeight: 700, color: T.primary, marginBottom: 5 }}>
+              Kann steigen durch:
             </div>
-            <p style={{ fontSize: 12, color: T.muted, margin: 0, lineHeight: 1.55 }}>
+            <p style={{ fontSize: 13, color: T.text, margin: 0, lineHeight: 1.5 }}>
               {costTier.escalation}
             </p>
           </div>
           <CostDrivers drivers={costTier.drivers} />
         </div>
       )}
-
-      <div style={{ background: '#F3F7F7', borderRadius: 10, padding: '10px 13px' }}>
-        <div style={{ fontSize: 11, fontWeight: 700, color: T.muted, textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6 }}>
-          Moegliche Massnahmen
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-          {session.cost.measures.map(m => (
-            <div key={m} style={{ display: 'flex', gap: 8, fontSize: 12, color: T.text }}>
-              <span style={{ color: T.primary, fontWeight: 700, flexShrink: 0 }}>-&gt;</span>
-              <span>{m}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div style={{ background: '#F3F7F7', borderRadius: 10, padding: '10px 13px', fontSize: 12, lineHeight: 1.65, color: T.muted, fontStyle: 'italic' }}>
-        {DISCLAIMER}
-      </div>
-
-      <div style={{ height: 1, background: T.border }} />
-      <VetReportAccordion session={session} pet={pet} />
-      <div style={{ height: 1, background: T.border }} />
-
-      {FEATURES.insuranceFunnel && isRed  && <SchutzCardRot  onSchutz={onSchutz} />}
-      {FEATURES.insuranceFunnel && !isRed && isGrn  && <SchutzCardGruen onSchutz={onSchutz} />}
-      {FEATURES.insuranceFunnel && !isRed && !isGrn && <SchutzCardGelb  onSchutz={onSchutz} />}
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {alreadySaved ? (
-          <p style={{ textAlign: 'center', fontSize: 13, fontWeight: 600, color: T.green, padding: '6px 0' }}>
-            In Tierakte gespeichert
-          </p>
-        ) : (
-          <button ref={el => { if (el) el.style.cssText = BTN.outline }} onClick={onSave}>
-            In Tierakte speichern
-          </button>
-        )}
-        <button ref={el => { if (el) el.style.cssText = BTN.ghost }} onClick={onNewCheck}>
-          Neuen Check starten
-        </button>
-      </div>
     </div>
-  )
-}
+
+    {/* 4 - Nächste Schritte */}
+    <SectionHeader label="4 · Nächste Schritte" />
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      {session.urgency === 'rot' && (
+        <div style={{ borderRadius: 12, background: '#fff5f5', border: '1px solid #ffcccc', padding: 16, fontSize: 13, color: '#7f1d1e', lineHeight: 1.6 }}>
+        <strong>Sofortmaßnahme:</strong> Rufe deinen Tierarzt an oder fahre direkt in die nächste Tierkosten oder Klinik.
+      </div>
+      )}
+      {session.urgency === 'gelb' && (
+        <div style={{ borderRadius: 12, background: '#fffbe6', border: '1px solid #fad377', padding: 16, fontSize: 13, color: '664500', lineHeight: 1.6 }}>
+        <strong>Empfehlung:</strong> Termin in den nächsten 24�'48 Stunden beim Tierarzt buchen.
+      </div>
+      )}
+      {session.urgency === 'gruen' && (
+        <div style={{ borderRadius: 12, background: '#f0fdf4', border: '1px solid #bbf7d0', padding: 16, fontSize: 13, color: '#14532d', lineHeight: 1.6 }}>
+        <strong>Tipp:</strong> Beobachte dein Tier in den nächsten 24 Stunden genau. Bei Veränderung des Zustands Tierarzt aufsuchen.
+      </div>
+      )}
+    </div>
+
+    {/* 5 - Schutzlage einordnen */}    <SectionHeader label="5 · Schutzlage einordnen" />
+    <div style={{ borderRadius: 13, background: T.card, border: '1px solid ' + T.border, padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <p style={{ fontSize: 13, color: T.text, margin: 0, lineHeight: 1.7 }}>
+        Eine Tierkrankenversicherung kann bei unerwarteten Tierarztkosten eine wichtige rolle spielen. Ob wie viel sie übernimmt, hängt von deinem Vertrag ab, nur dein Versicherer kann dir darüber verbindliche Auskunft geben.
+      </p>
+      <p style={{ fontSize: 12, color: T.subtext, margin: 0, lineHeight: 1.7 }}>
+        ✫ Dieser Hinweis darf nicht als Versicherungsberatung verstanden werden.
+      </p>
+    </div>
+
+    <div style={{ height: 40 }} />
+  </div>
+);
+
+export default ResultPage;
