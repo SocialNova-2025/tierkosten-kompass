@@ -13,7 +13,7 @@ interface Props {
 
 const NAV_LABELS: Record<NavTab, string> = {
   start: 'Start',
-  check: 'Check',
+  check: 'Akut',
   akte: 'Akte',
 }
 
@@ -97,7 +97,7 @@ export function AppShell({ children, activeTab, screen: _screen, onTab, onBack, 
         </button>
       </header>
 
-      <main style={{ flex: 1, overflowY: 'auto', paddingBottom: noNav ? '0' : '72px' }}>
+      <main style={{ flex: 1, overflowY: 'auto', paddingBottom: noNav ? '0' : '72px', paddingLeft: '20px', paddingRight: '20px' }}>
         {children}
       </main>
 
