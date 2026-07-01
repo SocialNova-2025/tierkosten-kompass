@@ -36,7 +36,10 @@ function TKMonogram() {
 
 export function AppShell({ children, activeTab, screen: _screen, onTab, onBack, onSettings, noNav }: Props) {
   return (
-    <div style={{ minHeight: '100vh', background: '#f8fafc', display: 'flex', flexDirection: 'column' }}>
+    // Desktop background layer — full viewport width, centers the app column
+    <div style={{ minHeight: '100vh', background: '#dce8e5', display: 'flex', justifyContent: 'center' }}>
+      {/* App container — max 440px on desktop, 100% on mobile */}
+      <div style={{ width: '100%', maxWidth: '440px', background: '#f8fafc', display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <header style={{
         background: '#ffffff',
         borderBottom: '1px solid #e2e8f0',
@@ -102,12 +105,15 @@ export function AppShell({ children, activeTab, screen: _screen, onTab, onBack, 
         <nav style={{
           position: 'fixed',
           bottom: '0',
-          left: '0',
-          right: '0',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '100%',
+          maxWidth: '440px',
           background: '#ffffff',
           borderTop: '1px solid #e2e8f0',
           display: 'flex',
           height: '72px',
+          zIndex: 100,
         }}>
           {(['start', 'check', 'akte'] as NavTab[]).map(tab => {
             const active = tab === activeTab
@@ -137,6 +143,7 @@ export function AppShell({ children, activeTab, screen: _screen, onTab, onBack, 
           })}
         </nav>
       )}
+      </div>
     </div>
   )
 }
