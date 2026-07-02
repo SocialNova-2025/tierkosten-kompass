@@ -32,7 +32,7 @@ export function VetReportAccordion({ session, pet }: VetReportAccordionProps) {
       : []),
     ['Symptom', sym?.label ?? '-'],
     ...(a.Q_DAUER  ? [['Seit',      DUR[a.Q_DAUER] ?? ''] as [string, string]] : []),
-    ...(a.Q_STAERKE? [['Staerke',   STM[a.Q_STAERKE] ?? ''] as [string, string]] : []),
+    ...(a.Q_STAERKE? [['Stärke',   STM[a.Q_STAERKE] ?? ''] as [string, string]] : []),
     ...(a.Q_FRISST ? [['Fressen',   FN[a.Q_FRISST] ?? ''] as [string, string]] : []),
     ...(a.Q_TRINKT ? [['Trinken',   FN[a.Q_TRINKT] ?? ''] as [string, string]] : []),
     ...(a.Q_SCHMERZ? [['Schmerzen', SC[a.Q_SCHMERZ] ?? ''] as [string, string]] : []),
@@ -40,7 +40,7 @@ export function VetReportAccordion({ session, pet }: VetReportAccordionProps) {
 
   const questions = [
     'Welche Untersuchung empfehlen Sie zuerst?',
-    'Welche Kosten kommen ungefaehr auf mich zu?',
+    'Welche Kosten kommen ungefähr auf mich zu?',
     'Gibt es einen Kostenvoranschlag?',
     'Wann sollte ich mich melden, wenn es keine Besserung gibt?',
   ]
@@ -75,7 +75,7 @@ export function VetReportAccordion({ session, pet }: VetReportAccordionProps) {
           </div>
           <div style={{ height: 1, background: T.border }} />
           <div>
-            <div className="flbl">Fragen fuer den Tierarzt</div>
+            <div className="flbl">Fragen für den Tierarzt</div>
             <ul style={{ margin: 0, paddingLeft: 16, fontSize: 13, color: T.text, lineHeight: 1.7 }}>
               {questions.map(q => <li key={q}>{q}</li>)}
             </ul>
