@@ -56,7 +56,7 @@ export function AppShell({ children, activeTab, screen: _screen, onTab, onBack, 
           {onBack ? (
             <button
               onClick={onBack}
-              aria-label="Zurueck"
+              aria-label="Zurück"
               style={{
                 background: 'none',
                 border: 'none',
