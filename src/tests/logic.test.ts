@@ -140,7 +140,6 @@ describe('WhatsApp link builder', () => {
 
 
 // ── Maps URL builder ────────────────────────────────────────────────
-
 describe('Maps URL builder (Notdienst-Suche)', () => {
   it('returns google.com/maps/search URL', () => {
     expect(buildMapsUrl('München')).toContain('google.com/maps/search/')
@@ -700,17 +699,18 @@ describe('Copy DE/EN: Soft-Launch-Texte', () => {
     expect(tagline).toContain('Dringlichkeit')
     expect(tagline).toContain('Kosten')
   })
-  it('DE footer enthält "Beta" statt "Demo-Prototyp"', () => {
-    expect(DE.settings.footer).toContain('Beta')
+  it('DE footer enthält keinen Beta-Hinweis mehr', () => {
+    expect(DE.settings.footer).not.toContain('Beta')
     expect(DE.settings.footer).not.toContain('Demo-Prototyp')
+    expect(DE.settings.footer).toContain('Diagnose')
   })
-  it('DE footer enthält "ohne Gewähr" und "Kein medizinischer Rat"', () => {
-    expect(DE.settings.footer).toContain('ohne Gewähr')
-    expect(DE.settings.footer).toContain('Kein medizinischer Rat')
+  it('DE footer enthält Tierarzt-Disclaimer und Notfallhinweis', () => {
+    expect(DE.settings.footer).toContain('Tierarzt')
+    expect(DE.settings.footer).toContain('Notfall')
   })
   it('DE symptomGrid.redFlagHint ist definiert und enthält Erklärung', () => {
     expect(DE.symptomGrid.redFlagHint).toBeTruthy()
-    expect(DE.symptomGrid.redFlagHint).toContain('Roter Punkt')
+    expect(DE.symptomGrid.redFlagHint).not.toContain('Roter Punkt')
     expect(DE.symptomGrid.redFlagHint).toContain('Warnsignal')
   })
   it('DE symptomGrid.redFlagHint beruhigt (kein "Notfall" ohne Relativierung)', () => {
@@ -750,9 +750,9 @@ describe('Brand- und PWA-Konstanten (Soft-Launch)', () => {
     expect(THEME_COLOR).toBe('#0A7A73')
   })
 
-  it('DE footer enthält kein "Demo-Prototyp" mehr', () => {
+  it('DE footer enthält kein "Demo-Prototyp" und kein "Beta" mehr', () => {
     expect(DE.settings.footer).not.toContain('Demo-Prototyp')
-    expect(DE.settings.footer).toContain('Beta')
+    expect(DE.settings.footer).not.toContain('Beta')
   })
 
   it('insuranceFunnel ist false – kein Schutz/Insurance-Bereich sichtbar', () => {
