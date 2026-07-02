@@ -5,7 +5,6 @@ import { T, BTN } from '../styles/tokens'
 import { UrgencyCard } from './UrgencyCard'
 import { CostDrivers } from './CostDrivers'
 import { VetReportAccordion } from './VetReportAccordion'
-import { InsuranceFlow } from './InsuranceFlow'
 import { getSymptomById } from '../data/symptoms'
 import { disclaimer } from '../data/copy'
 import { buildEmergencyVetMapsUrl, buildRegularVetMapsUrl } from '../lib/maps'
@@ -44,7 +43,6 @@ export function ResultPage({ session, pet, onFormFlow, onNewCheck, onSave, alrea
   const [localCity, setLocalCity]       = useState('')
   const [localCityYel, setLocalCityYel] = useState('')
   const isRed = session.urgency === 'rot'
-  const isGrn = session.urgency === 'gruen'
   const isYel = session.urgency === 'gelb'
 
   // Build label list for multi-symptom display
@@ -250,17 +248,9 @@ export function ResultPage({ session, pet, onFormFlow, onNewCheck, onSave, alrea
 
       <VetReportAccordion session={session} pet={pet} />
 
-      {/* 3 · Schutzlage einordnen – InsuranceFlow (nur wenn Feature Flag aktiv) */}
+      {/* 3 · Schutzlage einordnen – InsuranceFlow hinter Feature Flag (aktuell deaktiviert) */}
       {FEATURES.insuranceFunnel && (
-        <>
-          <SectionHeader label="3 · Schutzlage einordnen" />
-          <InsuranceFlow
-            session={session}
-            pet={pet}
-            urgency={session.urgency}
-            onFormFlow={onFormFlow}
-          />
-        </>
+        <SectionHeader label="3 · Schutzlage einordnen" />
       )}
 
       {/* Secondary actions */}
