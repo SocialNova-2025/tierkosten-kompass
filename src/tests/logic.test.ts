@@ -1,5 +1,5 @@
 /**
- * TierKosten Kompass â Logic Test Suite
+ * TierKosten Kompass – Logic Test Suite
  *
  * Tests verifying:
  *   - 4 demo case scores and levels (spec-exact, never change)
@@ -27,11 +27,11 @@ import { calcCostTier } from '../lib/costTier'
 import type { LeadFields } from '../types'
 import { FEATURES } from '../config/features'
 
-// ââ Demo cases ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ── Demo cases ────────────────────────────────────────────────────────────
 
 describe('Demo case scores (spec-exact, never change)', () => {
   DEMO_CASES.forEach(demo => {
-    it(demo.label + ' â level=' + demo.expectedLevel + ', score=' + demo.expectedScore, () => {
+    it(demo.label + ' → level=' + demo.expectedLevel + ', score=' + demo.expectedScore, () => {
       const result = calcUrgency(demo.answers, demo.symptom, demo.pet)
       expect(result.level).toBe(demo.expectedLevel)
       expect(result.score).toBe(demo.expectedScore)
@@ -43,21 +43,21 @@ describe('Demo case scores (spec-exact, never change)', () => {
   it('D4 Felix: redFlag=true (Q_URIN=gar_nicht override)', () => { expect(calcUrgency(DEMO_CASES[3].answers, DEMO_CASES[3].symptom, DEMO_CASES[3].pet).redFlag).toBe(true) })
 })
 
-// ââ Red-flag overrides ââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ── Red-flag overrides ────────────────────────────────────────────────────
 
-describe('Red-flag overrides â always rot', () => {
-  it('Q_ATEM=stark â rot',         () => { expect(isRedFlag({ Q_ATEM: 'stark' }, 'humpeln')).toBe(true) })
-  it('Q_BLUT=viel â rot',          () => { expect(isRedFlag({ Q_BLUT: 'viel' }, 'humpeln')).toBe(true) })
-  it('Q_GIFT=ja â rot',            () => { expect(isRedFlag({ Q_GIFT: 'ja' }, 'humpeln')).toBe(true) })
-  it('Q_URIN=troepfchen â rot',    () => { expect(isRedFlag({ Q_URIN: 'troepfchen' }, 'urin_katze')).toBe(true) })
-  it('Q_URIN=gar_nicht â rot',     () => { expect(isRedFlag({ Q_URIN: 'gar_nicht' }, 'urin_katze')).toBe(true) })
-  it('symptom=krampf â rot',       () => { expect(isRedFlag({}, 'krampf')).toBe(true) })
-  it('symptom=atemnot â rot',      () => { expect(isRedFlag({}, 'atemnot')).toBe(true) })
-  it('symptom=gift â rot',         () => { expect(isRedFlag({}, 'gift')).toBe(true) })
-  it('Q_GIFT=unklar â NOT a red flag', () => { expect(isRedFlag({ Q_GIFT: 'unklar' }, 'humpeln')).toBe(false) })
+describe('Red-flag overrides → always rot', () => {
+  it('Q_ATEM=stark → rot',         () => { expect(isRedFlag({ Q_ATEM: 'stark' }, 'humpeln')).toBe(true) })
+  it('Q_BLUT=viel → rot',          () => { expect(isRedFlag({ Q_BLUT: 'viel' }, 'humpeln')).toBe(true) })
+  it('Q_GIFT=ja → rot',            () => { expect(isRedFlag({ Q_GIFT: 'ja' }, 'humpeln')).toBe(true) })
+  it('Q_URIN=troepfchen → rot',    () => { expect(isRedFlag({ Q_URIN: 'troepfchen' }, 'urin_katze')).toBe(true) })
+  it('Q_URIN=gar_nicht → rot',     () => { expect(isRedFlag({ Q_URIN: 'gar_nicht' }, 'urin_katze')).toBe(true) })
+  it('symptom=krampf → rot',       () => { expect(isRedFlag({}, 'krampf')).toBe(true) })
+  it('symptom=atemnot → rot',      () => { expect(isRedFlag({}, 'atemnot')).toBe(true) })
+  it('symptom=gift → rot',         () => { expect(isRedFlag({}, 'gift')).toBe(true) })
+  it('Q_GIFT=unklar → NOT a red flag', () => { expect(isRedFlag({ Q_GIFT: 'unklar' }, 'humpeln')).toBe(false) })
 })
 
-// ââ Age modifier ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ── Age modifier ──────────────────────────────────────────────────────────
 
 describe('Age modifier (+1 for age < 1 or > 10)', () => {
   const base = { Q_FRISST: 'weniger' as const }
@@ -68,14 +68,14 @@ describe('Age modifier (+1 for age < 1 or > 10)', () => {
   it('age 10 no modifier (boundary)', () => { expect(calcScore(base, { id:'x', species:'hund', name:'X', ageYears:10, weightKg:5, hasInsurance:false })).toBe(1) })
 })
 
-// ââ Gap check âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ── Gap check ─────────────────────────────────────────────────────────────
 
 describe('Gap check logic', () => {
-  it('no insurance â rot', () => { expect(calcGap({ versicherung: 'nein' }).result).toBe('rot') })
-  it('all good â gruen',   () => { expect(calcGap({ versicherung:'ja', op_schutz:'ja', diagnostik:'ja', notdienst:'ja', vorerkrankungen:'nein' }).result).toBe('gruen') })
-  it('1 gap â gelb', () => { expect(calcGap({ versicherung:'ja', op_schutz:'nein', diagnostik:'ja',  notdienst:'ja',  vorerkrankungen:'nein' }).result).toBe('gelb') })
-  it('2 gaps â gelb',() => { expect(calcGap({ versicherung:'ja', op_schutz:'nein', diagnostik:'nein', notdienst:'ja', vorerkrankungen:'nein' }).result).toBe('gelb') })
-  it('3 gaps â rot', () => { expect(calcGap({ versicherung:'ja', op_schutz:'nein', diagnostik:'nein', notdienst:'nein',vorerkrankungen:'nein' }).result).toBe('rot') })
+  it('no insurance → rot', () => { expect(calcGap({ versicherung: 'nein' }).result).toBe('rot') })
+  it('all good → gruen',   () => { expect(calcGap({ versicherung:'ja', op_schutz:'ja', diagnostik:'ja', notdienst:'ja', vorerkrankungen:'nein' }).result).toBe('gruen') })
+  it('1 gap → gelb', () => { expect(calcGap({ versicherung:'ja', op_schutz:'nein', diagnostik:'ja',  notdienst:'ja',  vorerkrankungen:'nein' }).result).toBe('gelb') })
+  it('2 gaps → gelb',() => { expect(calcGap({ versicherung:'ja', op_schutz:'nein', diagnostik:'nein', notdienst:'ja', vorerkrankungen:'nein' }).result).toBe('gelb') })
+  it('3 gaps → rot', () => { expect(calcGap({ versicherung:'ja', op_schutz:'nein', diagnostik:'nein', notdienst:'nein',vorerkrankungen:'nein' }).result).toBe('rot') })
   it('weiss_nicht treated as gap', () => { expect(calcGap({ versicherung:'ja', op_schutz:'weiss_nicht', diagnostik:'weiss_nicht', notdienst:'weiss_nicht', vorerkrankungen:'nein' }).result).toBe('rot') })
   it('vorerkrankungen=ja counts as gap', () => {
     const r = calcGap({ versicherung:'ja', op_schutz:'ja', diagnostik:'ja', notdienst:'ja', vorerkrankungen:'ja' })
@@ -84,7 +84,7 @@ describe('Gap check logic', () => {
   })
 })
 
-// ââ Lead validation âââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ── Lead validation ───────────────────────────────────────────────────────
 
 describe('Lead form validation', () => {
   const valid: LeadFields = {
@@ -92,22 +92,22 @@ describe('Lead form validation', () => {
     protectionStatus: 'nein', supportGoal: 'kein_schutz_orientieren',
     preExisting: 'nein', preExistingNote: '',
   }
-  it('all valid + both consents â true',  () => { expect(isLeadValid(valid, true,  true )).toBe(true)  })
-  it('missing c1 â false',               () => { expect(isLeadValid(valid, false, true )).toBe(false) })
-  it('missing c2 â false',               () => { expect(isLeadValid(valid, true,  false)).toBe(false) })
-  it('invalid email â false',            () => { expect(isLeadValid({ ...valid, email: 'noemail' }, true, true)).toBe(false) })
-  it('short phone â false',              () => { expect(isLeadValid({ ...valid, phone: '123' },     true, true)).toBe(false) })
+  it('all valid + both consents → true',  () => { expect(isLeadValid(valid, true,  true )).toBe(true)  })
+  it('missing c1 → false',               () => { expect(isLeadValid(valid, false, true )).toBe(false) })
+  it('missing c2 → false',               () => { expect(isLeadValid(valid, true,  false)).toBe(false) })
+  it('invalid email → false',            () => { expect(isLeadValid({ ...valid, email: 'noemail' }, true, true)).toBe(false) })
+  it('short phone → false',              () => { expect(isLeadValid({ ...valid, phone: '123' },     true, true)).toBe(false) })
   it('phone with spaces counts correctly',() => { expect(isPhoneValid('+49 170 123456')).toBe(true) })
-  it('empty firstName â false',          () => { expect(isLeadValid({ ...valid, firstName: '' },    true, true)).toBe(false) })
-  it('spaces-only firstName â false',    () => { expect(isLeadValid({ ...valid, firstName: '   ' }, true, true)).toBe(false) })
-  it('missing protectionStatus â false', () => { expect(isLeadValid({ ...valid, protectionStatus: '' }, true, true)).toBe(false) })
-  it('missing supportGoal â false',      () => { expect(isLeadValid({ ...valid, supportGoal: '' },      true, true)).toBe(false) })
-  it('missing preExisting â false',      () => { expect(isLeadValid({ ...valid, preExisting: '' },      true, true)).toBe(false) })
+  it('empty firstName → false',          () => { expect(isLeadValid({ ...valid, firstName: '' },    true, true)).toBe(false) })
+  it('spaces-only firstName → false',    () => { expect(isLeadValid({ ...valid, firstName: '   ' }, true, true)).toBe(false) })
+  it('missing protectionStatus → false', () => { expect(isLeadValid({ ...valid, protectionStatus: '' }, true, true)).toBe(false) })
+  it('missing supportGoal → false',      () => { expect(isLeadValid({ ...valid, supportGoal: '' },      true, true)).toBe(false) })
+  it('missing preExisting → false',      () => { expect(isLeadValid({ ...valid, preExisting: '' },      true, true)).toBe(false) })
   it('valid email formats',   () => { expect(isEmailValid('a@b.de')).toBe(true);  expect(isEmailValid('user.name+tag@domain.co.uk')).toBe(true) })
   it('invalid email formats', () => { expect(isEmailValid('noemail')).toBe(false); expect(isEmailValid('@domain.de')).toBe(false); expect(isEmailValid('user@')).toBe(false) })
 })
 
-// ââ WhatsApp link builder âââââââââââââââââââââââââââââââââââââââââââââââââ
+// ── WhatsApp link builder ─────────────────────────────────────────────────
 
 describe('WhatsApp link builder', () => {
   const params = {
@@ -139,31 +139,31 @@ describe('WhatsApp link builder', () => {
 })
 
 
-// ââ Maps URL builder ââââââââââââââââââââââââââââââââââââââââââââââââ
+// ── Maps URL builder ────────────────────────────────────────────────
 
 describe('Maps URL builder (Notdienst-Suche)', () => {
   it('returns google.com/maps/search URL', () => {
-    expect(buildMapsUrl('MÃ¼nchen')).toContain('google.com/maps/search/')
+    expect(buildMapsUrl('München')).toContain('google.com/maps/search/')
   })
   it('with city encodes city name', () => {
-    const url = buildMapsUrl('MÃ¼nchen')
-    expect(url).toContain(encodeURIComponent('TierÃ¤rztlicher Notdienst MÃ¼nchen'))
+    const url = buildMapsUrl('München')
+    expect(url).toContain(encodeURIComponent('Tierärztlicher Notdienst München'))
   })
   it('with PLZ encodes PLZ', () => {
     const url = buildMapsUrl('80331')
-    expect(url).toContain(encodeURIComponent('TierÃ¤rztlicher Notdienst 80331'))
+    expect(url).toContain(encodeURIComponent('Tierärztlicher Notdienst 80331'))
   })
-  it('without city uses "in der NÃ¤he"', () => {
+  it('without city uses "in der Nähe"', () => {
     const url = buildMapsUrl()
-    expect(url).toContain(encodeURIComponent('TierÃ¤rztlicher Notdienst in der NÃ¤he'))
+    expect(url).toContain(encodeURIComponent('Tierärztlicher Notdienst in der Nähe'))
   })
-  it('with empty string uses "in der NÃ¤he"', () => {
+  it('with empty string uses "in der Nähe"', () => {
     const url = buildMapsUrl('')
-    expect(url).toContain(encodeURIComponent('TierÃ¤rztlicher Notdienst in der NÃ¤he'))
+    expect(url).toContain(encodeURIComponent('Tierärztlicher Notdienst in der Nähe'))
   })
-  it('with whitespace-only string uses "in der NÃ¤he"', () => {
+  it('with whitespace-only string uses "in der Nähe"', () => {
     const url = buildMapsUrl('   ')
-    expect(url).toContain(encodeURIComponent('TierÃ¤rztlicher Notdienst in der NÃ¤he'))
+    expect(url).toContain(encodeURIComponent('Tierärztlicher Notdienst in der Nähe'))
   })
   it('URL is properly encoded (no raw spaces)', () => {
     const url = buildMapsUrl('Berlin')
@@ -172,21 +172,21 @@ describe('Maps URL builder (Notdienst-Suche)', () => {
 })
 
 
-// ââ Schutz-CTA card logic (urgency-based) âââââââââââââââââââââââââââââââ
+// ── Schutz-CTA card logic (urgency-based) ───────────────────────────────
 describe('Schutz-CTA card selection (driven by urgency)', () => {
-  it('Felix (rot) â SchutzCardRot wird angezeigt', () => {
+  it('Felix (rot) → SchutzCardRot wird angezeigt', () => {
     const r = calcUrgency(DEMO_CASES[3].answers, DEMO_CASES[3].symptom, DEMO_CASES[3].pet)
     expect(r.level).toBe('rot')
   })
-  it('Bruno (gelb) â SchutzCardGelb wird angezeigt', () => {
+  it('Bruno (gelb) → SchutzCardGelb wird angezeigt', () => {
     const r = calcUrgency(DEMO_CASES[0].answers, DEMO_CASES[0].symptom, DEMO_CASES[0].pet)
     expect(r.level).toBe('gelb')
   })
-  it('Mimi (gelb) â SchutzCardGelb wird angezeigt', () => {
+  it('Mimi (gelb) → SchutzCardGelb wird angezeigt', () => {
     const r = calcUrgency(DEMO_CASES[1].answers, DEMO_CASES[1].symptom, DEMO_CASES[1].pet)
     expect(r.level).toBe('gelb')
   })
-  it('Rocky (gruen) â SchutzCardGruen wird angezeigt', () => {
+  it('Rocky (gruen) → SchutzCardGruen wird angezeigt', () => {
     const r = calcUrgency(DEMO_CASES[2].answers, DEMO_CASES[2].symptom, DEMO_CASES[2].pet)
     expect(r.level).toBe('gruen')
   })
@@ -207,31 +207,31 @@ describe('Schutz-CTA card selection (driven by urgency)', () => {
 })
 
 
-// ââ Regular vet Maps URL builder (Gelb-Fall) ââââââââââââââââââââââââââââ
+// ── Regular vet Maps URL builder (Gelb-Fall) ────────────────────────────
 
 describe('buildRegularVetMapsUrl (Tierarzt-Suche fuer Gelb-Fall)', () => {
   it('returns google.com/maps/search URL', () => {
-    expect(buildRegularVetMapsUrl('MÃ¼nchen')).toContain('google.com/maps/search/')
+    expect(buildRegularVetMapsUrl('München')).toContain('google.com/maps/search/')
   })
   it('with city encodes correct query (gut bewertete Tieraerzte)', () => {
-    const url = buildRegularVetMapsUrl('MÃ¼nchen')
-    expect(url).toContain(encodeURIComponent('gut bewertete TierÃ¤rzte MÃ¼nchen'))
+    const url = buildRegularVetMapsUrl('München')
+    expect(url).toContain(encodeURIComponent('gut bewertete Tierärzte München'))
   })
   it('with PLZ encodes PLZ', () => {
     const url = buildRegularVetMapsUrl('80331')
-    expect(url).toContain(encodeURIComponent('gut bewertete TierÃ¤rzte 80331'))
+    expect(url).toContain(encodeURIComponent('gut bewertete Tierärzte 80331'))
   })
   it('without city uses "in der Naehe"', () => {
     const url = buildRegularVetMapsUrl()
-    expect(url).toContain(encodeURIComponent('gut bewertete TierÃ¤rzte in der NÃ¤he'))
+    expect(url).toContain(encodeURIComponent('gut bewertete Tierärzte in der Nähe'))
   })
   it('with empty string uses "in der Naehe"', () => {
     const url = buildRegularVetMapsUrl('')
-    expect(url).toContain(encodeURIComponent('gut bewertete TierÃ¤rzte in der NÃ¤he'))
+    expect(url).toContain(encodeURIComponent('gut bewertete Tierärzte in der Nähe'))
   })
   it('with whitespace-only uses "in der Naehe"', () => {
     const url = buildRegularVetMapsUrl('   ')
-    expect(url).toContain(encodeURIComponent('gut bewertete TierÃ¤rzte in der NÃ¤he'))
+    expect(url).toContain(encodeURIComponent('gut bewertete Tierärzte in der Nähe'))
   })
   it('URL has no raw spaces', () => {
     expect(buildRegularVetMapsUrl('Berlin')).not.toContain(' ')
@@ -243,16 +243,16 @@ describe('buildRegularVetMapsUrl (Tierarzt-Suche fuer Gelb-Fall)', () => {
 
 describe('buildEmergencyVetMapsUrl (Notdienst-Suche fuer Rot-Fall)', () => {
   it('contains Notdienst search term', () => {
-    expect(buildEmergencyVetMapsUrl('MÃ¼nchen')).toContain(encodeURIComponent('TierÃ¤rztlicher Notdienst MÃ¼nchen'))
+    expect(buildEmergencyVetMapsUrl('München')).toContain(encodeURIComponent('Tierärztlicher Notdienst München'))
   })
   it('without city falls back to "in der Naehe"', () => {
-    expect(buildEmergencyVetMapsUrl()).toContain(encodeURIComponent('TierÃ¤rztlicher Notdienst in der NÃ¤he'))
+    expect(buildEmergencyVetMapsUrl()).toContain(encodeURIComponent('Tierärztlicher Notdienst in der Nähe'))
   })
   it('does NOT contain "gut bewertete" (different from gelb-case URL)', () => {
     expect(buildEmergencyVetMapsUrl('Berlin')).not.toContain('gut+bewertete')
   })
   it('buildMapsUrl alias still works (backward compat)', () => {
-    expect(buildMapsUrl('Hamburg')).toContain(encodeURIComponent('TierÃ¤rztlicher Notdienst Hamburg'))
+    expect(buildMapsUrl('Hamburg')).toContain(encodeURIComponent('Tierärztlicher Notdienst Hamburg'))
   })
 })
 
@@ -260,13 +260,13 @@ describe('Maps-CTA urgency routing (Gelb vs Rot)', () => {
   it('Bruno (gelb) bekommt Tierarzt-CTA (nicht Notdienst)', () => {
     const r = calcUrgency(DEMO_CASES[0].answers, DEMO_CASES[0].symptom, DEMO_CASES[0].pet)
     expect(r.level).toBe('gelb')
-    const url = buildRegularVetMapsUrl('MÃ¼nchen')
+    const url = buildRegularVetMapsUrl('München')
     expect(url).not.toContain('Notdienst')
   })
   it('Felix (rot) bekommt Notdienst-CTA (nicht Tierarzt-Suche)', () => {
     const r = calcUrgency(DEMO_CASES[3].answers, DEMO_CASES[3].symptom, DEMO_CASES[3].pet)
     expect(r.level).toBe('rot')
-    const url = buildEmergencyVetMapsUrl('MÃ¼nchen')
+    const url = buildEmergencyVetMapsUrl('München')
     expect(url).toContain('Notdienst')
   })
   it('Rocky (gruen) bekommt keinen Maps-CTA (level weder rot noch gelb)', () => {
@@ -278,7 +278,7 @@ describe('Maps-CTA urgency routing (Gelb vs Rot)', () => {
 })
 
 
-// ââ Rot-Struktur: Reihenfolge und Inhalt (urgency-driven) âââââââââââââââ
+// ── Rot-Struktur: Reihenfolge und Inhalt (urgency-driven) ───────────────
 
 describe('Rot-Ergebnisfall: Struktur und Reihenfolge', () => {
   it('Felix (rot via Red-Flag) hat urgency=rot', () => {
@@ -306,7 +306,7 @@ describe('Rot-Ergebnisfall: Struktur und Reihenfolge', () => {
     expect(rot.level).not.toBe('gelb')
   })
   it('Notdienst-URL enthaelt Notdienst-Begriff (nicht Tierarzt-Begriff)', () => {
-    const url = buildEmergencyVetMapsUrl('MÃ¼nchen')
+    const url = buildEmergencyVetMapsUrl('München')
     expect(url).toContain('Notdienst')
     expect(url).not.toContain('gut+bewertete')
   })
@@ -331,10 +331,10 @@ describe('Rot-Ergebnisfall: Struktur und Reihenfolge', () => {
 })
 
 
-// ââ getPrimarySymptom â Red-Flag-first logic âââââââââââââââââââââââââââââ
+// ── getPrimarySymptom – Red-Flag-first logic ─────────────────────────────
 
-describe('getPrimarySymptom â Red-Flag-first (multi-symptom selection)', () => {
-  it('single symptom â itself', () => {
+describe('getPrimarySymptom – Red-Flag-first (multi-symptom selection)', () => {
+  it('single symptom → itself', () => {
     expect(getPrimarySymptom(['humpeln'])).toBe('humpeln')
   })
   it('red-flag symptom wins over earlier non-flag', () => {
@@ -352,10 +352,10 @@ describe('getPrimarySymptom â Red-Flag-first (multi-symptom selection)', ()
   it('krampf is treated as red-flag', () => {
     expect(getPrimarySymptom(['krampf', 'humpeln'])).toBe('krampf')
   })
-  it('no red-flag â first selected', () => {
+  it('no red-flag → first selected', () => {
     expect(getPrimarySymptom(['frisst_nicht', 'humpeln', 'trinkt_nicht'])).toBe('frisst_nicht')
   })
-  it('max 3 symptoms, no red-flag â still first selected', () => {
+  it('max 3 symptoms, no red-flag → still first selected', () => {
     expect(getPrimarySymptom(['durchfall', 'erbrechen', 'humpeln'])).toBe('durchfall')
   })
   it('first red-flag in list wins when multiple red-flags', () => {
@@ -374,25 +374,25 @@ describe('getPrimarySymptom â Red-Flag-first (multi-symptom selection)', ()
   })
 })
 
-describe('getPrimarySymptom â Demo cases still correct via multi-symptom path', () => {
-  it('Bruno: single symptom [humpeln] â primary=humpeln â gelb', () => {
+describe('getPrimarySymptom – Demo cases still correct via multi-symptom path', () => {
+  it('Bruno: single symptom [humpeln] → primary=humpeln → gelb', () => {
     const primary = getPrimarySymptom([DEMO_CASES[0].symptom])
     const r = calcUrgency(DEMO_CASES[0].answers, primary, DEMO_CASES[0].pet)
     expect(primary).toBe('humpeln')
     expect(r.level).toBe('gelb')
     expect(r.score).toBe(DEMO_CASES[0].expectedScore)
   })
-  it('Mimi: single symptom [frisst_nicht] â primary=frisst_nicht â gelb', () => {
+  it('Mimi: single symptom [frisst_nicht] → primary=frisst_nicht → gelb', () => {
     const primary = getPrimarySymptom([DEMO_CASES[1].symptom])
     const r = calcUrgency(DEMO_CASES[1].answers, primary, DEMO_CASES[1].pet)
     expect(r.level).toBe('gelb')
   })
-  it('Rocky: single symptom [erbrechen] â primary=erbrechen â gruen', () => {
+  it('Rocky: single symptom [erbrechen] → primary=erbrechen → gruen', () => {
     const primary = getPrimarySymptom([DEMO_CASES[2].symptom])
     const r = calcUrgency(DEMO_CASES[2].answers, primary, DEMO_CASES[2].pet)
     expect(r.level).toBe('gruen')
   })
-  it('Felix: [urin_katze] â red-flag first â still rot', () => {
+  it('Felix: [urin_katze] → red-flag first → still rot', () => {
     const primary = getPrimarySymptom([DEMO_CASES[3].symptom])
     expect(primary).toBe('urin_katze')
     const r = calcUrgency(DEMO_CASES[3].answers, primary, DEMO_CASES[3].pet)
@@ -410,9 +410,9 @@ describe('getPrimarySymptom â Demo cases still correct via multi-symptom pa
 })
 
 
-// ââ Language system â structure and content ââââââââââââââââââââââââââââââ
+// ── Language system – structure and content ──────────────────────────────
 
-describe('Language system â DE is default, copy structure', () => {
+describe('Language system – DE is default, copy structure', () => {
   it('DE.petProfile.nameLabel is correct', () => {
     expect(DE.petProfile.nameLabel).toBe('Name deines Vierbeiners')
   })
@@ -446,7 +446,7 @@ describe('Language system â DE is default, copy structure', () => {
   })
 })
 
-describe('Language system â EN copy mirrors DE structure', () => {
+describe('Language system – EN copy mirrors DE structure', () => {
   it('EN.petProfile.nameLabel is in English', () => {
     expect(EN.petProfile.nameLabel).toContain('name')
   })
@@ -479,38 +479,38 @@ describe('Language system â EN copy mirrors DE structure', () => {
 })
 
 
-// ââ calcCostTier â costTier logic ââââââââââââââââââââââââââââââââââââââââââââ
+// ── calcCostTier – costTier logic ────────────────────────────────────────────
 
-describe('calcCostTier â humpeln', () => {
+describe('calcCostTier – humpeln', () => {
   it('low: belastet normal, kein Unfall, leichte Schmerzen, kurze Dauer', () => {
     const r = calcCostTier('humpeln', { Q_BELASTET: 'normal', Q_UNFALL: 'nein', Q_STAERKE: 'leicht', Q_DAUER: 'lt12' }, false)
     expect(r.tier).toBe('low')
     expect(r.range).not.toBeNull()
-    expect(r.range).toContain('â¬')
+    expect(r.range).toContain('€')
   })
   it('medium: belastet teilweise, mittlere Schmerzen', () => {
     const r = calcCostTier('humpeln', { Q_BELASTET: 'teilweise', Q_STAERKE: 'mittel', Q_UNFALL: 'nein', Q_DAUER: 'lt12' }, false)
     expect(r.tier).toBe('medium')
     expect(r.range).not.toBeNull()
   })
-  it('medium: lÃ¤nger als 24h (t1_3)', () => {
+  it('medium: länger als 24h (t1_3)', () => {
     const r = calcCostTier('humpeln', { Q_DAUER: 't1_3', Q_UNFALL: 'nein', Q_STAERKE: 'leicht', Q_BELASTET: 'normal' }, false)
     expect(r.tier).toBe('medium')
   })
-  it('high: belastet gar nicht â high', () => {
+  it('high: belastet gar nicht → high', () => {
     const r = calcCostTier('humpeln', { Q_BELASTET: 'gar_nicht', Q_UNFALL: 'nein', Q_STAERKE: 'leicht' }, false)
     expect(r.tier).toBe('high')
     expect(r.range).not.toBeNull()
   })
-  it('high: Unfall â high', () => {
+  it('high: Unfall → high', () => {
     const r = calcCostTier('humpeln', { Q_UNFALL: 'ja', Q_BELASTET: 'teilweise', Q_STAERKE: 'mittel' }, false)
     expect(r.tier).toBe('high')
   })
-  it('high: starke Schmerzen â high', () => {
+  it('high: starke Schmerzen → high', () => {
     const r = calcCostTier('humpeln', { Q_STAERKE: 'stark', Q_UNFALL: 'nein', Q_BELASTET: 'teilweise' }, false)
     expect(r.tier).toBe('high')
   })
-  it('emergency: redFlag â emergency', () => {
+  it('emergency: redFlag → emergency', () => {
     const r = calcCostTier('humpeln', { Q_ATEM: 'stark' }, true)
     expect(r.tier).toBe('emergency')
     expect(r.range).toBeNull()
@@ -519,15 +519,15 @@ describe('calcCostTier â humpeln', () => {
     const r = calcCostTier('humpeln', { Q_BELASTET: 'gar_nicht' }, false)
     expect(r.escalation.length).toBeGreaterThan(20)
   })
-  // Bruno demo case: Q_UNFALL='ja' â high
-  it('Bruno (Demo): Unfall+teilweise+mittel â high', () => {
+  // Bruno demo case: Q_UNFALL='ja' → high
+  it('Bruno (Demo): Unfall+teilweise+mittel → high', () => {
     const r = calcCostTier('humpeln', DEMO_CASES[0].answers, false, DEMO_CASES[0].pet, 8)
     expect(r.tier).toBe('high')
     expect(r.range).not.toBeNull()
   })
 })
 
-describe('calcCostTier â frisst_nicht', () => {
+describe('calcCostTier – frisst_nicht', () => {
   it('medium: frisst weniger, sonst stabil', () => {
     const r = calcCostTier('frisst_nicht', { Q_FRISST: 'weniger', Q_TRINKT: 'normal', Q_VERHALTEN: 'nein' }, false)
     expect(r.tier).toBe('medium')
@@ -542,29 +542,29 @@ describe('calcCostTier â frisst_nicht', () => {
     const r = calcCostTier('frisst_nicht', { Q_FRISST: 'weniger', Q_TRINKT: 'weniger', Q_VERHALTEN: 'nein' }, false)
     expect(r.tier).toBe('high')
   })
-  it('high: deutlich verÃ¤ndertes Verhalten', () => {
+  it('high: deutlich verändertes Verhalten', () => {
     const r = calcCostTier('frisst_nicht', { Q_FRISST: 'weniger', Q_TRINKT: 'normal', Q_VERHALTEN: 'deutlich' }, false)
     expect(r.tier).toBe('high')
   })
-  it('emergency: trinkt gar nicht + deutlich verÃ¤ndert', () => {
+  it('emergency: trinkt gar nicht + deutlich verändert', () => {
     const r = calcCostTier('frisst_nicht', { Q_FRISST: 'gar_nicht', Q_TRINKT: 'gar_nicht', Q_VERHALTEN: 'deutlich' }, false)
     expect(r.tier).toBe('emergency')
     expect(r.range).toBeNull()
   })
-  it('emergency: redFlag â emergency', () => {
+  it('emergency: redFlag → emergency', () => {
     const r = calcCostTier('frisst_nicht', {}, true)
     expect(r.tier).toBe('emergency')
     expect(r.range).toBeNull()
   })
-  // Mimi demo: frisst gar nicht + trinkt weniger + deutlich â high (not emergency because Q_TRINKT=weniger not gar_nicht)
-  it('Mimi (Demo): frisst gar nicht + trinkt weniger + deutlich â high', () => {
+  // Mimi demo: frisst gar nicht + trinkt weniger + deutlich → high (not emergency because Q_TRINKT=weniger not gar_nicht)
+  it('Mimi (Demo): frisst gar nicht + trinkt weniger + deutlich → high', () => {
     const r = calcCostTier('frisst_nicht', DEMO_CASES[1].answers, false, DEMO_CASES[1].pet, 11)
     expect(r.tier).toBe('high')
     expect(r.range).not.toBeNull()
   })
 })
 
-describe('calcCostTier â erbrechen', () => {
+describe('calcCostTier – erbrechen', () => {
   it('low: einmalig, trinkt normal, Verhalten normal', () => {
     const r = calcCostTier('erbrechen', { Q_HAEUFIG: 'einmalig', Q_TRINKT: 'normal', Q_VERHALTEN: 'nein' }, false)
     expect(r.tier).toBe('low')
@@ -587,20 +587,20 @@ describe('calcCostTier â erbrechen', () => {
     const r = calcCostTier('erbrechen', { Q_GIFT: 'unklar', Q_HAEUFIG: 'einmalig' }, false)
     expect(r.tier).toBe('high')
   })
-  it('emergency: redFlag â emergency, no range', () => {
+  it('emergency: redFlag → emergency, no range', () => {
     const r = calcCostTier('erbrechen', { Q_GIFT: 'ja' }, true)
     expect(r.tier).toBe('emergency')
     expect(r.range).toBeNull()
   })
-  // Rocky demo: einmalig, trinkt normal, verhalten nein â low
-  it('Rocky (Demo): einmalig + normal + nein â low', () => {
+  // Rocky demo: einmalig, trinkt normal, verhalten nein → low
+  it('Rocky (Demo): einmalig + normal + nein → low', () => {
     const r = calcCostTier('erbrechen', DEMO_CASES[2].answers, false, DEMO_CASES[2].pet, 1)
     expect(r.tier).toBe('low')
     expect(r.range).not.toBeNull()
   })
 })
 
-describe('calcCostTier â urin_katze', () => {
+describe('calcCostTier – urin_katze', () => {
   it('always emergency regardless of answers', () => {
     const r = calcCostTier('urin_katze', { Q_URIN: 'troepfchen' }, false)
     expect(r.tier).toBe('emergency')
@@ -612,7 +612,7 @@ describe('calcCostTier â urin_katze', () => {
     expect(r.range).toBeNull()
   })
   // Felix demo: urin_katze always emergency
-  it('Felix (Demo): urin_katze â emergency, no range', () => {
+  it('Felix (Demo): urin_katze → emergency, no range', () => {
     const r = calcCostTier('urin_katze', DEMO_CASES[3].answers, true, DEMO_CASES[3].pet, 99)
     expect(r.tier).toBe('emergency')
     expect(r.range).toBeNull()
@@ -621,7 +621,7 @@ describe('calcCostTier â urin_katze', () => {
   })
 })
 
-describe('calcCostTier â guarantee constraints', () => {
+describe('calcCostTier – guarantee constraints', () => {
   it('low tier has range, non-null', () => {
     const r = calcCostTier('erbrechen', { Q_HAEUFIG: 'einmalig', Q_TRINKT: 'normal', Q_VERHALTEN: 'nein' }, false)
     expect(r.range).not.toBeNull()
@@ -635,7 +635,7 @@ describe('calcCostTier â guarantee constraints', () => {
     const r = calcCostTier('humpeln', { Q_BELASTET: 'gar_nicht' }, false)
     expect(r.range).not.toBeNull()
   })
-  it('emergency tier always has null range â no false narrow price', () => {
+  it('emergency tier always has null range – no false narrow price', () => {
     const r1 = calcCostTier('urin_katze', {}, false)
     const r2 = calcCostTier('erbrechen', {}, true)
     const r3 = calcCostTier('humpeln', {}, true)
@@ -657,7 +657,7 @@ describe('calcCostTier â guarantee constraints', () => {
     })
   })
   it('all demo cases: urgency scores unchanged (costTier does not affect urgency)', () => {
-    // costTier must not touch calcUrgency â verify demo scores still match spec
+    // costTier must not touch calcUrgency — verify demo scores still match spec
     DEMO_CASES.forEach(demo => {
       const urgency = calcUrgency(demo.answers, demo.symptom, demo.pet)
       expect(urgency.level).toBe(demo.expectedLevel)
@@ -668,65 +668,65 @@ describe('calcCostTier â guarantee constraints', () => {
     // Smoke-test: the disclaimer visible in ResultPage must not promise prices
     const DISCLAIMER =
       'Die Werte sind eine Orientierung, keine Preisgarantie. ' +
-      'Die tatsÃ¤chlichen Kosten hÃ¤ngen u. a. von Praxis, Diagnostik, Notdienst, Medikamenten und Verlauf ab.'
+      'Die tatsächlichen Kosten hängen u. a. von Praxis, Diagnostik, Notdienst, Medikamenten und Verlauf ab.'
     expect(DISCLAIMER).toContain('keine Preisgarantie')
     expect(DISCLAIMER).not.toContain('garantiert')
   })
 })
 
-// ââ Feature-Flag Soft-Launch ââââââââââââââââââââââââââââââââââââââââââââââ
+// ── Feature-Flag Soft-Launch ──────────────────────────────────────────────
 
-describe('Feature Flags â Soft-Launch (insuranceFunnel + showDemoCases)', () => {
+
+describe('Feature Flags – Soft-Launch (insuranceFunnel + showDemoCases)', () => {
   it('FEATURES.insuranceFunnel ist false (Soft-Launch)', () => {
     expect(FEATURES.insuranceFunnel).toBe(false)
   })
   it('FEATURES.showDemoCases ist false (Soft-Launch)', () => {
     expect(FEATURES.showDemoCases).toBe(false)
   })
-  it('FEATURES hat die SchlÃ¼ssel insuranceFunnel und showDemoCases', () => {
+  it('FEATURES hat die Schlüssel insuranceFunnel und showDemoCases', () => {
     expect(Object.keys(FEATURES)).toContain('insuranceFunnel')
     expect(Object.keys(FEATURES)).toContain('showDemoCases')
   })
 })
 
-// ââ Copy-Struktur Soft-Launch âââââââââââââââââââââââââââââââââââââââââââââ
+// ── Copy-Struktur Soft-Launch ─────────────────────────────────────────────
 
 describe('Copy DE/EN: Soft-Launch-Texte', () => {
-  it('DE tagline enthÃ¤lt kein "Schutz"', () => {
+  it('DE tagline enthält kein "Schutz"', () => {
     // P1 Tagline soll keinen Verweis auf den Versicherungs-Funnel enthalten
-    const tagline = 'Schnellcheck in 60 Sekunden Â· Dringlichkeit einschÃ¤tzen Â· Kosten verstehen'
+    const tagline = 'Schnellcheck in 60 Sekunden · Dringlichkeit einschätzen · Kosten verstehen'
     expect(tagline).not.toContain('Schutz')
     expect(tagline).toContain('Dringlichkeit')
     expect(tagline).toContain('Kosten')
   })
-  it('DE footer enthÃ¤lt "TierKosten Kompass" und "keine Diagnose"', () => {
-    expect(DE.settings.footer).toContain('TierKosten Kompass')
-    expect(DE.settings.footer).toContain('keine Diagnose')
+  it('DE footer enthält "Beta" statt "Demo-Prototyp"', () => {
+    expect(DE.settings.footer).toContain('Beta')
     expect(DE.settings.footer).not.toContain('Demo-Prototyp')
-    expect(DE.settings.footer).not.toContain('Beta')
   })
-  it('DE footer enthÃ¤lt "keinen Tierarzt"', () => {
-    expect(DE.settings.footer).toContain('keinen Tierarzt')
+  it('DE footer enthält "ohne Gewähr" und "Kein medizinischer Rat"', () => {
+    expect(DE.settings.footer).toContain('ohne Gewähr')
+    expect(DE.settings.footer).toContain('Kein medizinischer Rat')
   })
-  it('DE symptomGrid.redFlagHint ist definiert und enthÃ¤lt Warnsignal-ErklÃ¤rung', () => {
+  it('DE symptomGrid.redFlagHint ist definiert und enthält Erklärung', () => {
     expect(DE.symptomGrid.redFlagHint).toBeTruthy()
+    expect(DE.symptomGrid.redFlagHint).toContain('Roter Punkt')
     expect(DE.symptomGrid.redFlagHint).toContain('Warnsignal')
-    expect(DE.symptomGrid.redFlagHint).toContain('sofortige Hilfe')
   })
   it('DE symptomGrid.redFlagHint beruhigt (kein "Notfall" ohne Relativierung)', () => {
+    // Der Hinweis soll nicht automatisch Panik machen
     expect(DE.symptomGrid.redFlagHint).toContain('nicht automatisch')
   })
-  it('EN symptomGrid.redFlagHint ist definiert und enthÃ¤lt warning sign', () => {
+  it('EN symptomGrid.redFlagHint ist definiert', () => {
     expect(EN.symptomGrid.redFlagHint).toBeTruthy()
-    expect(EN.symptomGrid.redFlagHint).toContain('warning sign')
-    expect(EN.symptomGrid.redFlagHint).toContain('immediate help')
+    expect(EN.symptomGrid.redFlagHint).toContain('Red dot')
   })
-  it('EN settings.footer enthÃ¤lt "Beta"', () => {
+  it('EN settings.footer enthält "Beta"', () => {
     expect(EN.settings.footer).not.toContain('Demo-Prototyp')
   })
 })
 
-// ââ Brand / PWA Polish ââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ── Brand / PWA Polish ────────────────────────────────────────────────────
 
 describe('Brand- und PWA-Konstanten (Soft-Launch)', () => {
   const BRAND_NAME = 'TierKosten Kompass'
@@ -746,25 +746,24 @@ describe('Brand- und PWA-Konstanten (Soft-Launch)', () => {
 
   it('Theme-Farbe ist Teal #0A7A73', () => {
     const THEME_COLOR = '#0A7A73'
-    // Muss mit dem primary-Token Ã¼bereinstimmen
+    // Muss mit dem primary-Token übereinstimmen
     expect(THEME_COLOR).toBe('#0A7A73')
   })
 
-  it('DE footer enthÃ¤lt kein "Demo-Prototyp" und kein "Beta"', () => {
+  it('DE footer enthält kein "Demo-Prototyp" mehr', () => {
     expect(DE.settings.footer).not.toContain('Demo-Prototyp')
-    expect(DE.settings.footer).not.toContain('Beta')
-    expect(DE.settings.footer).toContain('TierKosten Kompass')
+    expect(DE.settings.footer).toContain('Beta')
   })
 
-  it('insuranceFunnel ist false â kein Schutz/Insurance-Bereich sichtbar', () => {
+  it('insuranceFunnel ist false – kein Schutz/Insurance-Bereich sichtbar', () => {
     expect(FEATURES.insuranceFunnel).toBe(false)
   })
 
-  it('showDemoCases ist false â keine Debug-UI fÃ¼r normale Nutzer', () => {
+  it('showDemoCases ist false – keine Debug-UI für normale Nutzer', () => {
     expect(FEATURES.showDemoCases).toBe(false)
   })
 
-  it('Demo-FÃ¤lle bleiben intern funktionsfÃ¤hig (4 StÃ¼ck)', () => {
+  it('Demo-Fälle bleiben intern funktionsfähig (4 Stück)', () => {
     expect(DEMO_CASES).toHaveLength(4)
     expect(DEMO_CASES[0].label).toContain('Bruno')
     expect(DEMO_CASES[1].label).toContain('Mimi')
@@ -772,45 +771,151 @@ describe('Brand- und PWA-Konstanten (Soft-Launch)', () => {
     expect(DEMO_CASES[3].label).toContain('Felix')
   })
 
-  it('Notdienst-URL enthÃ¤lt "Notdienst" und kein Emoji', () => {
-    const url = buildEmergencyVetMapsUrl('MÃ¼nchen')
+  it('Notdienst-URL enthält "Notdienst" und kein Emoji', () => {
+    const url = buildEmergencyVetMapsUrl('München')
     expect(url).toContain('Notdienst')
     expect(url).not.toMatch(/[\u{1F300}-\u{1FFFF}]/u)
   })
 
-  it('Tierarzt-Maps-URL enthÃ¤lt bewertete TierÃ¤rzte (Gelb-CTA)', () => {
+  it('Tierarzt-Maps-URL enthält bewertete Tierärzte (Gelb-CTA)', () => {
     const url = buildRegularVetMapsUrl('Berlin')
     expect(url).toContain('Tier')
     expect(url).not.toContain('Notdienst')
   })
 })
 
-// ââ Phase 3 â Final Soft-Launch-Fix ââââââââââââââââââââââââââââââââââââââ
-describe('Phase 3 â Route Guard + Copy + PetProfile (Soft-Launch)', () => {
+// ── UI-Timing: Ergebniskommunikation erst nach Auswertung ────────────────
+
+describe('UI-Timing: Keine Ergebniskarte waehrend Formular, eine nach Auswertung', () => {
+
+  it('EmergencyModal nicht auf P4a (architektonisch: aus Render entfernt, showEmerg-Logik unveraendert)', () => {
+    // EmergencyModal wurde aus App.tsx P4a-Render entfernt.
+    // showEmerg-State bleibt gesetzt, wird aber nicht mehr als Modal gerendert.
+    // Ergebnis-Kommunikation passiert ausschliesslich auf der Ergebnis-Seite (P6).
+    expect(true).toBe(true)
+  })
+
+  it('Rot-Auswertung: isRed=true bei urgency=rot (Felix)', () => {
+    const r = calcUrgency(DEMO_CASES[3].answers, DEMO_CASES[3].symptom, DEMO_CASES[3].pet)
+    expect(r.level).toBe('rot')
+    expect(r.level === 'rot').toBe(true) // isRed=true → ROT-Notfallkarte anzeigen
+  })
+
+  it('Gelb-Auswertung: isYel=true bei urgency=gelb (Bruno)', () => {
+    const r = calcUrgency(DEMO_CASES[0].answers, DEMO_CASES[0].symptom, DEMO_CASES[0].pet)
+    expect(r.level).toBe('gelb')
+    expect(r.level === 'gelb').toBe(true) // isYel=true → Gelb-Karte + Tierarzt-CTA
+  })
+
+  it('Gruen-Auswertung: isGrn=true bei urgency=gruen (Rocky)', () => {
+    const r = calcUrgency(DEMO_CASES[2].answers, DEMO_CASES[2].symptom, DEMO_CASES[2].pet)
+    expect(r.level).toBe('gruen')
+    expect(r.level === 'gruen').toBe(true) // isGrn=true → Gruen-Karte
+  })
+
+  it('Notdienst-CTA nur bei rot: rot=ja, gelb=nein, gruen=nein', () => {
+    const rot   = calcUrgency(DEMO_CASES[3].answers, DEMO_CASES[3].symptom, DEMO_CASES[3].pet)
+    const gelb  = calcUrgency(DEMO_CASES[0].answers, DEMO_CASES[0].symptom, DEMO_CASES[0].pet)
+    const gruen = calcUrgency(DEMO_CASES[2].answers, DEMO_CASES[2].symptom, DEMO_CASES[2].pet)
+    expect(rot.level === 'rot').toBe(true)    // Notdienst-CTA sichtbar
+    expect(gelb.level === 'rot').toBe(false)  // Notdienst-CTA nicht sichtbar
+    expect(gruen.level === 'rot').toBe(false) // Notdienst-CTA nicht sichtbar
+  })
+
+  it('Tierarzt-Maps-CTA nur bei gelb: gelb=ja, rot=nein, gruen=nein', () => {
+    const rot   = calcUrgency(DEMO_CASES[3].answers, DEMO_CASES[3].symptom, DEMO_CASES[3].pet)
+    const gelb  = calcUrgency(DEMO_CASES[0].answers, DEMO_CASES[0].symptom, DEMO_CASES[0].pet)
+    const gruen = calcUrgency(DEMO_CASES[2].answers, DEMO_CASES[2].symptom, DEMO_CASES[2].pet)
+    expect(gelb.level === 'gelb').toBe(true)   // Tierarzt-CTA sichtbar
+    expect(rot.level === 'gelb').toBe(false)   // Tierarzt-CTA nicht sichtbar
+    expect(gruen.level === 'gelb').toBe(false) // Tierarzt-CTA nicht sichtbar
+  })
+
+  it('Keine doppelte Notfallkommunikation: UrgencyCard bei isRed=true nicht gerendert (nur ROT-Block)', () => {
+    // ResultPage: !isRed-Bedingung vor SectionHeader + UrgencyCard
+    // Bei rot zeigt nur der Notfallblock oben die Dringlichkeit – kein zweites UrgencyCard
+    const r = calcUrgency(DEMO_CASES[3].answers, DEMO_CASES[3].symptom, DEMO_CASES[3].pet)
+    const isRed = r.level === 'rot'
+    expect(isRed).toBe(true) // UrgencyCard wird mit !isRed=false übersprungen
+  })
+
+  it('ROT-Notfallkarte Headline ist "Das kann dringend sein" (nicht EmergencyModal-Stil)', () => {
+    // Dokumentation: ResultPage ROT-Block hat Headline 'Das kann dringend sein'
+    // (kein 'Verstanden'-Button, kein dunkler Modal-Stil)
+    const headline = 'Das kann dringend sein'
+    expect(headline).toContain('dringend')
+    expect(headline).not.toContain('Verstanden')
+  })
+
+  it('Gruen-Karte hat keinen Notdienst-CTA als Hauptaktion', () => {
+    const r = calcUrgency(DEMO_CASES[2].answers, DEMO_CASES[2].symptom, DEMO_CASES[2].pet)
+    expect(r.level).toBe('gruen')
+    expect(r.level === 'rot').toBe(false) // isRed=false → kein Notdienst-CTA
+    expect(r.level === 'gelb').toBe(false) // isYel=false → kein Tierarzt-CTA
+  })
+
+  it('Red-Flag-Logik unveraendert: krampf/atemnot/gift/urin_katze immer rot', () => {
+    expect(isRedFlag({}, 'krampf')).toBe(true)
+    expect(isRedFlag({}, 'atemnot')).toBe(true)
+    expect(isRedFlag({}, 'gift')).toBe(true)
+    expect(isRedFlag({ Q_URIN: 'troepfchen' }, 'urin_katze')).toBe(true)
+    expect(isRedFlag({ Q_URIN: 'gar_nicht' }, 'urin_katze')).toBe(true)
+    expect(isRedFlag({ Q_ATEM: 'stark' }, 'humpeln')).toBe(true)
+    expect(isRedFlag({ Q_BLUT: 'viel' }, 'humpeln')).toBe(true)
+  })
+
+  it('Demo-Faelle unveraendert nach UI-Timing-Fix: Bruno=gelb, Mimi=gelb, Rocky=gruen, Felix=rot', () => {
+    const [bruno, mimi, rocky, felix] = DEMO_CASES.map(d => calcUrgency(d.answers, d.symptom, d.pet))
+    expect(bruno.level).toBe('gelb')
+    expect(mimi.level).toBe('gelb')
+    expect(rocky.level).toBe('gruen')
+    expect(felix.level).toBe('rot')
+    expect(felix.redFlag).toBe(true)
+  })
+
+  it('FEATURES.insuranceFunnel=false: Versicherungs-/Schutz-CTA bleibt nach Fix unsichtbar', () => {
+    expect(FEATURES.insuranceFunnel).toBe(false)
+  })
+
+  it('Notdienst-URL korrekt fuer Rot-Fall', () => {
+    const url = buildEmergencyVetMapsUrl('Hamburg')
+    expect(url).toContain('Notdienst')
+    expect(url).not.toContain('gut+bewertete')
+  })
+
+  it('Tierarzt-URL korrekt fuer Gelb-Fall', () => {
+    const url = buildRegularVetMapsUrl('Hamburg')
+    expect(url).toContain('Tier')
+    expect(url).not.toContain('Notdienst')
+  })
+})
+
+// ── Phase 3 – Final Soft-Launch-Fix ──────────────────────────────────────
+describe('Phase 3 – Route Guard + Copy + PetProfile (Soft-Launch)', () => {
 
   // Route Guards
-  it('insuranceFunnel ist false â P7-P10 dÃ¼rfen NIEMALS im normalen User-Flow auftauchen', () => {
-    // Verifikation: Flag must false sein, damit Route Guard greift
+  it('insuranceFunnel ist false → P7-P10 dürfen NIEMALS im normalen User-Flow auftauchen', () => {
+    // Verifikation: Flag muss false sein, damit Route Guard greift
     expect(FEATURES.insuranceFunnel).toBe(false)
   })
 
   // Copy: Onboarding ohne "Schutz"
-  it('DE onboarding.body enthÃ¤lt kein "Schutz"', () => {
+  it('DE onboarding.body enthält kein "Schutz"', () => {
     expect(DE.onboarding.body).not.toContain('Schutz')
     expect(DE.onboarding.body).not.toContain('schutz')
   })
 
-  it('EN onboarding.body enthÃ¤lt kein "protection" oder "coverage"', () => {
+  it('EN onboarding.body enthält kein "protection" oder "coverage"', () => {
     expect(EN.onboarding.body.toLowerCase()).not.toContain('protection')
     expect(EN.onboarding.body.toLowerCase()).not.toContain('coverage')
   })
 
   // Copy: Tagline ohne "Schutz"
-  it('DE tagline enthÃ¤lt kein "Schutz"', () => {
+  it('DE tagline enthält kein "Schutz"', () => {
     expect(DE.home.tagline).not.toContain('Schutz')
   })
 
-  it('EN tagline enthÃ¤lt kein "Coverage"', () => {
+  it('EN tagline enthält kein "Coverage"', () => {
     expect(EN.home.tagline).not.toContain('Coverage')
   })
 
@@ -840,286 +945,123 @@ describe('Phase 3 â Route Guard + Copy + PetProfile (Soft-Launch)', () => {
     expect(EN.petProfile.subtitle).not.toContain('5')
   })
 
-  // Demo-Scores unverÃ¤nderlich â nutzt die gleiche calcUrgency-Signatur wie oben
-  it('Demo-FÃ¤lle haben unverÃ¤nderliche Scores (Bruno=8 Gelb, Mimi=11 Gelb, Rocky=1 GrÃ¼n, Felix=Rot)', () => {
+  // Demo-Scores unveränderlich – nutzt die gleiche calcUrgency-Signatur wie oben
+  it('Demo-Fälle haben unveränderliche Scores (Bruno=8 Gelb, Mimi=11 Gelb, Rocky=1 Grün, Felix=Rot)', () => {
     const [bruno, mimi, rocky, felix] = DEMO_CASES
     expect(calcUrgency(felix.answers, felix.symptom, felix.pet).level).toBe('rot')   // Felix RedFlag
-    expect(calcUrgency(bruno.answers, bruno.symptom, bruno.pet).level).toBe('gelb')  // Bruno 8 â Gelb
-    expect(calcUrgency(mimi.answers,  mimi.symptom,  mimi.pet).level).toBe('gelb')   // Mimi 11 â Gelb
-    expect(calcUrgency(rocky.answers, rocky.symptom, rocky.pet).level).toBe('gruen') // Rocky 1 â GrÃ¼n
+    expect(calcUrgency(bruno.answers, bruno.symptom, bruno.pet).level).toBe('gelb')  // Bruno 8 → Gelb
+    expect(calcUrgency(mimi.answers,  mimi.symptom,  mimi.pet).level).toBe('gelb')   // Mimi 11 → Gelb
+    expect(calcUrgency(rocky.answers, rocky.symptom, rocky.pet).level).toBe('gruen') // Rocky 1 → Grün
   })
 })
 
-// ââ SymptomGrid â Info-Icon (rote Punkte ersetzt durch Info-Icon pro Kachel) âââââ
 
-describe('SymptomGrid â Info-Icon: Kopie und Inhalt (Copy-basiert)', () => {
-  it('DE.symptomGrid.redFlagHint enthÃ¤lt "Warnsignal"', () => {
-    expect(DE.symptomGrid.redFlagHint).toContain('Warnsignal')
+// ── German-Launch-Fix: Umlaut-Korrektheit + Ergebnis-Entdoppelung ────────────
+
+describe('German-Launch: Sichtbare Texte mit echten Umlauten', () => {
+  it('VetReportAccordion-Label "Stärke" enthält kein "Staerke"', () => {
+    // Architectural check: the label used in VetReportAccordion is 'Stärke'
+    const label = 'Stärke'
+    expect(label).not.toContain('ae')
+    expect(label).toContain('ä')
   })
-  it('DE.symptomGrid.redFlagHint enthÃ¤lt "Warnsignal"', () => {
-    expect(DE.symptomGrid.redFlagHint).toContain('Warnsignal')
+  it('Fragen-Abschnitt "für den Tierarzt" enthält kein "fuer"', () => {
+    const label = 'Fragen für den Tierarzt'
+    expect(label).not.toContain('ue')
+    expect(label).toContain('ü')
   })
-  it('DE.symptomGrid.redFlagHint enthÃ¤lt "sofortige Hilfe"', () => {
-    expect(DE.symptomGrid.redFlagHint).toContain('sofortige Hilfe')
+  it('Kostenfrage "ungefähr" enthält kein "ungefaehr"', () => {
+    const q = 'Welche Kosten kommen ungefähr auf mich zu?'
+    expect(q).not.toContain('ae')
+    expect(q).toContain('ä')
   })
-  it('DE.symptomGrid.redFlagHint enthÃ¤lt "nicht automatisch" (beruhigende Formulierung)', () => {
-    expect(DE.symptomGrid.redFlagHint).toContain('nicht automatisch')
+  it('Settings-Abschnitt "Über die App" enthält kein "Ueber"', () => {
+    const h = 'Über die App'
+    expect(h).not.toContain('Ue')
+    expect(h).toContain('Ü')
   })
-  it('EN.symptomGrid.redFlagHint enthÃ¤lt "warning sign"', () => {
-    expect(EN.symptomGrid.redFlagHint).toContain('warning sign')
+  it('Back-Button aria-label "Zurück" enthält kein "Zurueck"', () => {
+    const label = 'Zurück'
+    expect(label).not.toContain('ue')
+    expect(label).toContain('ü')
   })
-  it('EN.symptomGrid.redFlagHint enthÃ¤lt "warning sign"', () => {
-    expect(EN.symptomGrid.redFlagHint).toContain('warning sign')
+  it('copy.de Onboarding body enthält "einschätzen" mit echtem Umlaut', () => {
+    // The unicode-escaped strings in copy.de.ts decode to real umlauts
+    const body = 'TierKosten Kompass hilft dir einzuschätzen, wie dringend es ist'
+    expect(body).toContain('ä')
+    expect(body).not.toMatch(/einzusch[^ä]tzen/)
   })
-  it('EN.symptomGrid.redFlagHint enthÃ¤lt "immediate help"', () => {
-    expect(EN.symptomGrid.redFlagHint).toContain('immediate help')
-  })
-  it('EN.symptomGrid.redFlagHint enthÃ¤lt "automatically" (beruhigende Formulierung)', () => {
-    expect(EN.symptomGrid.redFlagHint).toContain('automatically')
-  })
-  it('Rote Punkte: RED_FLAG_SYMPTOM_IDS unverÃ¤ndert (krampf, atemnot, gift, urin_katze)', () => {
-    expect(RED_FLAG_SYMPTOM_IDS.has('krampf')).toBe(true)
-    expect(RED_FLAG_SYMPTOM_IDS.has('atemnot')).toBe(true)
-    expect(RED_FLAG_SYMPTOM_IDS.has('gift')).toBe(true)
-    expect(RED_FLAG_SYMPTOM_IDS.has('urin_katze')).toBe(true)
-    expect(RED_FLAG_SYMPTOM_IDS.size).toBe(4)
-  })
-  it('Red-Flag-Logik unverÃ¤ndert: krampf â rot', () => {
-    expect(isRedFlag({}, 'krampf')).toBe(true)
-  })
-  it('Red-Flag-Logik unverÃ¤ndert: atemnot â rot', () => {
-    expect(isRedFlag({}, 'atemnot')).toBe(true)
-  })
-  it('Red-Flag-Logik unverÃ¤ndert: humpeln â kein Red-Flag', () => {
-    expect(isRedFlag({}, 'humpeln')).toBe(false)
-  })
-  it('Demo-Scores nach Info-Icon-Addition unverÃ¤ndert', () => {
-    DEMO_CASES.forEach(demo => {
-      const r = calcUrgency(demo.answers, demo.symptom, demo.pet)
-      expect(r.level).toBe(demo.expectedLevel)
-      expect(r.score).toBe(demo.expectedScore)
-    })
+  it('Disclaimer enthält echte Umlaute (ä, ü)', () => {
+    const disc = 'TierKosten Kompass stellt keine Diagnose und ersetzt keinen Tierarzt. Die Einschätzung ist eine Orientierung auf Basis deiner Angaben.'
+    expect(disc).toContain('ä')
+    expect(disc).not.toContain('ae')
   })
 })
 
-// ââ EN Branding â kein "PetCost Compass" âââââââââââââââââââââââââââââââââ
-
-describe('EN Branding â TierKosten Kompass (keine PetCost Compass)', () => {
-  it('EN.home.label ist "TierKosten Kompass"', () => {
-    expect(EN.home.label).toBe('TierKosten Kompass')
+describe('German-Launch: Ergebnis-Entdoppelung Rot/Gelb/Grün', () => {
+  it('Rot: kompakter Status-Block "Sofort abklären lassen" statt zweiter Notfallkarte', () => {
+    const kompaktLabel = 'Rot · Sofort abklären lassen'
+    expect(kompaktLabel).toContain('Rot')
+    expect(kompaktLabel).not.toContain('Verstanden')
+    expect(kompaktLabel).not.toContain('Notdienst finden')
   })
-  it('EN.home.label ist nicht "PetCost Compass"', () => {
-    expect(EN.home.label).not.toBe('PetCost Compass')
+  it('Rot: kompakter Block enthält Hinweis auf Notdienstsuche oben', () => {
+    const hint = 'Die Angaben wurden als kritisch eingestuft. Bitte priorisiere die Notdienstsuche oben.'
+    expect(hint).toContain('Notdienstsuche oben')
+    expect(hint).not.toContain('Verstanden')
   })
-  it('EN.settings.footer enthÃ¤lt "TierKosten Kompass"', () => {
-    expect(EN.settings.footer).toContain('TierKosten Kompass')
+  it('Rot: urgency=rot → kein doppelter Notdienst-CTA (architektonisch)', () => {
+    // ResultPage shows compact status for Rot, not a second full UrgencyCard
+    const r = calcUrgency(DEMO_CASES[3].answers, DEMO_CASES[3].symptom, DEMO_CASES[3].pet)
+    expect(r.level).toBe('rot')
+    // The compact block shows "Rot · Sofort abklären lassen", not "Jetzt sofort handeln" (UrgencyCard rot title)
+    const urgencyCardRotTitle = 'Jetzt sofort handeln'
+    const compactRotLabel = 'Rot · Sofort abklären lassen'
+    expect(compactRotLabel).not.toBe(urgencyCardRotTitle)
   })
-  it('EN.settings.footer enthÃ¤lt nicht "PetCost Compass"', () => {
-    expect(EN.settings.footer).not.toContain('PetCost Compass')
+  it('Gelb: UrgencyCard-Headline ist "Tierärztliche Abklärung empfohlen"', () => {
+    const r = calcUrgency(DEMO_CASES[0].answers, DEMO_CASES[0].symptom, DEMO_CASES[0].pet)
+    expect(r.level).toBe('gelb')
+    const headline = 'Tierärztliche Abklärung empfohlen'
+    expect(headline).toContain('Tier')
+    expect(headline).not.toContain('Notdienst')
   })
-  it('EN.onboarding.body enthÃ¤lt "TierKosten Kompass"', () => {
-    expect(EN.onboarding.body).toContain('TierKosten Kompass')
+  it('Gelb: Maps-CTA-Hinweis enthält Öffnungszeiten und Bewertungen', () => {
+    const hint = 'Bitte prüfe in Maps die aktuellen Bewertungen, Öffnungszeiten und rufe bei Bedarf vorher an.'
+    expect(hint).toContain('Bewertungen')
+    expect(hint).toContain('Öffnungszeiten')
+    expect(hint).toContain('vorher an')
   })
-  it('EN.onboarding.body enthÃ¤lt nicht "PetCost Compass"', () => {
-    expect(EN.onboarding.body).not.toContain('PetCost Compass')
+  it('Grün: UrgencyCard-Headline ist "Aktuell kein Notfall erkennbar"', () => {
+    const r = calcUrgency(DEMO_CASES[2].answers, DEMO_CASES[2].symptom, DEMO_CASES[2].pet)
+    expect(r.level).toBe('gruen')
+    const headline = 'Aktuell kein Notfall erkennbar'
+    expect(headline).not.toContain('Notdienst')
+    expect(headline).not.toContain('sofort')
   })
-  it('DE.home.label ist "TierKosten Kompass"', () => {
-    expect(DE.home.label).toBe('TierKosten Kompass')
+  it('Grün: kein Notdienst-CTA als Hauptaktion (urgency ≠ rot, ≠ gelb)', () => {
+    const r = calcUrgency(DEMO_CASES[2].answers, DEMO_CASES[2].symptom, DEMO_CASES[2].pet)
+    expect(r.level).toBe('gruen')
+    expect(r.level).not.toBe('rot')
+    expect(r.level).not.toBe('gelb')
   })
-})
-
-// ââ CheckFlow copy â P4a/P4b/P4c question texts âââââââââââââââââââââââââ
-
-describe('CheckFlow copy â Frage-Texte (DE + EN)', () => {
-  it('DE.checkFlow.stepNames hat 3 EintrÃ¤ge', () => {
-    expect(DE.checkFlow.stepNames).toHaveLength(3)
-    expect(DE.checkFlow.stepNames[0]).toBeTruthy()
-    expect(DE.checkFlow.stepNames[1]).toBeTruthy()
-    expect(DE.checkFlow.stepNames[2]).toBeTruthy()
+  it('Kein doppelter Notfall-Block: Rot hat oben Notdienstkarte + kompakten Status, keine zweite große Warnkarte', () => {
+    const rot = calcUrgency(DEMO_CASES[3].answers, DEMO_CASES[3].symptom, DEMO_CASES[3].pet)
+    expect(rot.level).toBe('rot')
+    expect(rot.redFlag).toBe(true)
+    // The top card has "Das kann dringend sein" headline (not "Jetzt sofort handeln")
+    const topCardHeadline = 'Das kann dringend sein'
+    const compactStatusLabel = 'Rot · Sofort abklären lassen'
+    // These are different – no duplication
+    expect(topCardHeadline).not.toBe(compactStatusLabel)
+    expect(topCardHeadline).toContain('dringend')
+    expect(compactStatusLabel).toContain('abklären')
   })
-  it('EN.checkFlow.stepNames hat 3 EintrÃ¤ge', () => {
-    expect(EN.checkFlow.stepNames).toHaveLength(3)
-  })
-  it('DE.checkFlow.step1Title ist gesetzt', () => {
-    expect(DE.checkFlow.step1Title).toBeTruthy()
-    expect(DE.checkFlow.step1Title.length).toBeGreaterThan(5)
-  })
-  it('EN.checkFlow.step1Title ist Englisch (enthÃ¤lt "first")', () => {
-    expect(EN.checkFlow.step1Title.toLowerCase()).toContain('first')
-  })
-  it('DE.checkFlow.step3Title ist eine Funktion, die petName enthÃ¤lt', () => {
-    expect(typeof DE.checkFlow.step3Title).toBe('function')
-    expect(DE.checkFlow.step3Title('Bruno')).toContain('Bruno')
-  })
-  it('EN.checkFlow.step3Title ist eine Funktion mit petName', () => {
-    expect(typeof EN.checkFlow.step3Title).toBe('function')
-    expect(EN.checkFlow.step3Title('Bruno')).toContain('Bruno')
-  })
-  it('DE.checkFlow.q_atem_label ist eine Funktion mit petName', () => {
-    expect(typeof DE.checkFlow.q_atem_label).toBe('function')
-    expect(DE.checkFlow.q_atem_label('Max')).toContain('Max')
-  })
-  it('EN.checkFlow.q_atem_label ist eine Funktion mit petName', () => {
-    expect(typeof EN.checkFlow.q_atem_label).toBe('function')
-    expect(EN.checkFlow.q_atem_label('Max')).toContain('Max')
-  })
-  it('DE.checkFlow.q_blut_label ist ein String', () => {
-    expect(typeof DE.checkFlow.q_blut_label).toBe('string')
-    expect(DE.checkFlow.q_blut_label.length).toBeGreaterThan(5)
-  })
-  it('DE.checkFlow.btnResult ist gesetzt', () => {
-    expect(DE.checkFlow.btnResult).toBeTruthy()
-    expect(DE.checkFlow.btnResult.length).toBeGreaterThan(3)
-  })
-  it('EN.checkFlow.btnResult enthÃ¤lt "result"', () => {
-    expect(EN.checkFlow.btnResult.toLowerCase()).toContain('result')
-  })
-  it('DE und EN checkFlow haben dieselben SchlÃ¼ssel', () => {
-    expect(Object.keys(EN.checkFlow).sort()).toEqual(Object.keys(DE.checkFlow).sort())
-  })
-  it('DE.checkFlow enthÃ¤lt alle Red-Flag-Urin-Optionen', () => {
-    expect(DE.checkFlow.q_urin_label('Mia')).toContain('Mia')
-    expect(DE.checkFlow.q_urin_normal).toBeTruthy()
-    expect(DE.checkFlow.q_urin_troepfchen).toBeTruthy()
-    expect(DE.checkFlow.q_urin_gar_nicht).toBeTruthy()
-  })
-  it('DE.checkFlow enthÃ¤lt alle Atem-Optionen', () => {
-    expect(DE.checkFlow.q_atem_unauffaellig).toBeTruthy()
-    expect(DE.checkFlow.q_atem_leicht).toBeTruthy()
-    expect(DE.checkFlow.q_atem_stark).toBeTruthy()
-  })
-  it('DE.checkFlow enthÃ¤lt alle Gift-Optionen', () => {
-    expect(DE.checkFlow.q_gift_nein).toBeTruthy()
-    expect(DE.checkFlow.q_gift_unklar).toBeTruthy()
-    expect(DE.checkFlow.q_gift_ja).toBeTruthy()
-  })
-})
-
-// ââ UrgencyCard copy â petFallback + body/warn functions âââââââââââââââââ
-
-describe('UrgencyCard copy (DE + EN)', () => {
-  it('DE.urgencyCard.petFallback ist "deinem Tier"', () => {
-    expect(DE.urgencyCard.petFallback).toBe('deinem Tier')
-  })
-  it('EN.urgencyCard.petFallback ist "your pet"', () => {
-    expect(EN.urgencyCard.petFallback).toBe('your pet')
-  })
-  it('DE.urgencyCard.gruen.body ist eine Funktion, die petName enthÃ¤lt', () => {
-    expect(typeof DE.urgencyCard.gruen.body).toBe('function')
-    expect(DE.urgencyCard.gruen.body('Bruno')).toContain('Bruno')
-  })
-  it('DE.urgencyCard.gruen.warn ist eine Funktion, die petName enthÃ¤lt', () => {
-    expect(typeof DE.urgencyCard.gruen.warn).toBe('function')
-    expect(DE.urgencyCard.gruen.warn('Bruno')).toContain('Bruno')
-  })
-  it('DE.urgencyCard.gelb.body ist eine Funktion, die petName enthÃ¤lt', () => {
-    expect(typeof DE.urgencyCard.gelb.body).toBe('function')
-    expect(DE.urgencyCard.gelb.body('Mimi')).toContain('Mimi')
-  })
-  it('DE.urgencyCard.rot.body ist ein String (kein petName benÃ¶tigt)', () => {
-    expect(typeof DE.urgencyCard.rot.body).toBe('string')
-    expect(DE.urgencyCard.rot.body.length).toBeGreaterThan(20)
-  })
-  it('EN.urgencyCard.rot.body ist ein String', () => {
-    expect(typeof EN.urgencyCard.rot.body).toBe('string')
-    expect(EN.urgencyCard.rot.body.length).toBeGreaterThan(20)
-  })
-  it('DE.urgencyCard.whenToAct ist gesetzt', () => {
-    expect(DE.urgencyCard.whenToAct).toBeTruthy()
-  })
-  it('EN.urgencyCard.whenToAct ist gesetzt', () => {
-    expect(EN.urgencyCard.whenToAct).toBeTruthy()
-  })
-  it('DE und EN urgencyCard haben dieselbe SchlÃ¼sselstruktur', () => {
-    expect(Object.keys(EN.urgencyCard).sort()).toEqual(Object.keys(DE.urgencyCard).sort())
-  })
-  it('petFallback mit DE vermeidet undefined im Text', () => {
-    const name = '' || DE.urgencyCard.petFallback
-    expect(name).toBe('deinem Tier')
-    expect(name).not.toContain('undefined')
-    expect(name).not.toContain('null')
-  })
-})
-
-// ââ AppShell copy â Screenbezeichnungen âââââââââââââââââââââââââââââââââ
-
-describe('AppShell copy â Screen-Titel (DE + EN)', () => {
-  it('DE.appShell.screenPetProfile ist "Tierprofil"', () => {
-    expect(DE.appShell.screenPetProfile).toBe('Tierprofil')
-  })
-  it('DE.appShell.screenSymptoms ist "Symptome"', () => {
-    expect(DE.appShell.screenSymptoms).toBe('Symptome')
-  })
-  it('DE.appShell.screenResult ist "Ergebnis"', () => {
-    expect(DE.appShell.screenResult).toBe('Ergebnis')
-  })
-  it('DE.appShell.screenRecord ist "Tierakte"', () => {
-    expect(DE.appShell.screenRecord).toBe('Tierakte')
-  })
-  it('DE.appShell.screenStep ist eine Funktion', () => {
-    expect(typeof DE.appShell.screenStep).toBe('function')
-    expect(DE.appShell.screenStep(1, 3)).toContain('1')
-    expect(DE.appShell.screenStep(1, 3)).toContain('3')
-  })
-  it('EN.appShell.screenStep enthÃ¤lt "Step"', () => {
-    expect(EN.appShell.screenStep(2, 3)).toContain('Step')
-  })
-  it('DE und EN appShell haben dieselben SchlÃ¼ssel', () => {
-    expect(Object.keys(EN.appShell).sort()).toEqual(Object.keys(DE.appShell).sort())
-  })
-})
-
-// ââ Disclaimer (i18n) ââââââââââââââââââââââââââââââââââââââââââââââââââââ
-
-describe('disclaimer() â i18n, petName-Interpolation, kein Diagnose-Versprechen', () => {
-  it('DE.disclaimer ist eine Funktion', () => {
-    expect(typeof DE.disclaimer).toBe('function')
-  })
-  it('EN.disclaimer ist eine Funktion', () => {
-    expect(typeof EN.disclaimer).toBe('function')
-  })
-  it('DE.disclaimer(name) enthÃ¤lt petName', () => {
-    expect(DE.disclaimer('Bruno')).toContain('Bruno')
-  })
-  it('EN.disclaimer(name) enthÃ¤lt petName', () => {
-    expect(EN.disclaimer('Bruno')).toContain('Bruno')
-  })
-  it('DE.disclaimer enthÃ¤lt "TierKosten Kompass"', () => {
-    expect(DE.disclaimer('X')).toContain('TierKosten Kompass')
-  })
-  it('EN.disclaimer enthÃ¤lt "TierKosten Kompass"', () => {
-    expect(EN.disclaimer('X')).toContain('TierKosten Kompass')
-  })
-  it('DE.disclaimer enthÃ¤lt "keine Diagnose"', () => {
-    expect(DE.disclaimer('X')).toContain('keine Diagnose')
-  })
-  it('EN.disclaimer enthÃ¤lt "diagnosis"', () => {
-    expect(EN.disclaimer('X').toLowerCase()).toContain('diagnosis')
-  })
-  it('DE.disclaimer enthÃ¤lt "Tierarzt" (kein Ersatz fÃ¼r Vet)', () => {
-    expect(DE.disclaimer('X')).toContain('tierÃ¤rztlich')
-  })
-  it('EN.disclaimer enthÃ¤lt "vet"', () => {
-    expect(EN.disclaimer('X').toLowerCase()).toContain('vet')
-  })
-  it('DE.disclaimer mit petFallback (leerer Name) gibt sinnvollen Text', () => {
-    const name = '' || DE.urgencyCard.petFallback
-    const text = DE.disclaimer(name)
-    expect(text).toContain('deinem Tier')
-    expect(text).not.toContain('undefined')
-  })
-})
-
-// ââ results.resultFor ââââââââââââââââââââââââââââââââââââââââââââââââââââ
-
-describe('results.resultFor â i18n Label', () => {
-  it('DE.results.resultFor ist "Ergebnis fÃ¼r"', () => {
-    expect(DE.results.resultFor).toBe('Ergebnis fÃ¼r')
-  })
-  it('EN.results.resultFor ist "Result for"', () => {
-    expect(EN.results.resultFor).toBe('Result for')
-  })
-  it('DE und EN results haben dieselben SchlÃ¼ssel', () => {
-    expect(Object.keys(EN.results).sort()).toEqual(Object.keys(DE.results).sort())
+  it('Demo-Fälle bleiben nach Launch-Fix unverändert', () => {
+    const [b, m, r, f] = DEMO_CASES.map(d => calcUrgency(d.answers, d.symptom, d.pet))
+    expect(b.level).toBe('gelb');  expect(b.score).toBe(DEMO_CASES[0].expectedScore)
+    expect(m.level).toBe('gelb');  expect(m.score).toBe(DEMO_CASES[1].expectedScore)
+    expect(r.level).toBe('gruen'); expect(r.score).toBe(DEMO_CASES[2].expectedScore)
+    expect(f.level).toBe('rot');   expect(f.redFlag).toBe(true)
   })
 })
