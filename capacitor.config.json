@@ -1,0 +1,13 @@
+{
+  "appId": "de.tierkostenkompass.app",
+  "appName": "TierKosten Kompass",
+  "webDir": "dist",
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1200,
+      "launchAutoHide": true,
+      "backgroundColor": "#F3F7F7",
+      "showSpinner": false
+    }
+  }
+}
