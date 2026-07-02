@@ -135,9 +135,20 @@ export function ResultPage({ session, pet, onFormFlow, onNewCheck, onSave, alrea
         )}
       </div>
 
-      {/* 1 - Dringlichkeit: bei Rot übernimmt der Notfallblock oben diese Rolle */}
-      {!isRed && <SectionHeader label="1 · Dringlichkeit" />}
-      {!isRed && <UrgencyCard level={session.urgency} petName={pet.name} />}
+      {/* 1 - Dringlichkeit */}
+      <SectionHeader label="1 · Dringlichkeit" />
+      {isRed ? (
+        /* ROT: kompakter Status – dominante Einschätzung steht bereits oben */
+        <div style={{ borderRadius: 12, background: '#fff1f2', border: '1px solid #fecdd3', padding: '12px 15px', display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#dc2626', flexShrink: 0 }} />
+          <div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: '#dc2626', textTransform: 'uppercase', letterSpacing: '.08em', lineHeight: 1.3 }}>Rot · Sofort abklären lassen</div>
+            <div style={{ fontSize: 12, color: '#64748b', marginTop: 3, lineHeight: 1.5 }}>Die Angaben wurden als kritisch eingestuft. Bitte priorisiere die Notdienstsuche oben.</div>
+          </div>
+        </div>
+      ) : (
+        <UrgencyCard level={session.urgency} petName={pet.name} />
+      )}
 
       {/* GELB: Tierarzt-Maps-CTA */}
       {isYel && (
@@ -160,7 +171,7 @@ export function ResultPage({ session, pet, onFormFlow, onNewCheck, onSave, alrea
             Gut bewertete Tierärzte in der Nähe finden
           </button>
           <p style={{ fontSize: 12, color: T.muted, margin: 0, textAlign: 'center', lineHeight: 1.5 }}>
-            Öffnungszeiten und Bewertungen bitte in Maps prüfen.
+            Bitte prüfe in Maps die aktuellen Bewertungen, Öffnungszeiten und rufe bei Bedarf vorher an.
           </p>
         </div>
       )}
@@ -208,50 +219,66 @@ export function ResultPage({ session, pet, onFormFlow, onNewCheck, onSave, alrea
             {costTier.reasoning}
           </p>
           <div style={{ borderTop: '1px solid ' + T.pMid, paddingTop: 10 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: T.primary, marginBottom: 5 }}>
-              Kann steigen durch:
+            <div style={{ fontSize: 11, fontWeight: 700, color: T.muted, marginBottom: 4, textTransform: 'uppercase', letterSpacing: '.06em' }}>
+              Kann höher werden, wenn …
             </div>
-            <p style={{ fontSize: 13, color: T.text, margin: 0, lineHeight: 1.5 }}>
+            <p style={{ fontSize: 12, color: T.muted, margin: 0, lineHeight: 1.55 }}>
               {costTier.escalation}
             </p>
           </div>
           <CostDrivers drivers={costTier.drivers} />
         </div>
       )}
-    </div>
 
-    {/* 4 - Nächste Schritte */}
-    <SectionHeader label="4 · Nächste Schritte" />
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-      {session.urgency === 'rot' && (
-        <div style={{ borderRadius: 12, background: '#fff5f5', border: '1px solid #ffcccc', padding: 16, fontSize: 13, color: '#7f1d1e', lineHeight: 1.6 }}>
-        <strong>Sofortmaßnahme:</strong> Rufe deinen Tierarzt an oder fahre direkt in die nächste Tierkosten oder Klinik.
+      {/* Mögliche Maßnahmen */}
+      <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: '14px 16px' }}>
+        <div className="flbl">Mögliche Maßnahmen beim Tierarzt</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {session.cost.measures.map(m => (
+            <div key={m} style={{ display: 'flex', gap: 10, fontSize: 13, color: T.text, lineHeight: 1.5 }}>
+              <span style={{ color: T.primary, fontWeight: 700, flexShrink: 0, marginTop: 1 }}>→</span>
+              <span>{m}</span>
+            </div>
+          ))}
+        </div>
       </div>
-      )}
-      {session.urgency === 'gelb' && (
-        <div style={{ borderRadius: 12, background: '#fffbe6', border: '1px solid #fad377', padding: 16, fontSize: 13, color: '664500', lineHeight: 1.6 }}>
-        <strong>Empfehlung:</strong> Termin in den nächsten 24�'48 Stunden beim Tierarzt buchen.
+
+      {/* Dauerhafter Kostenhinweis */}
+      <div style={{ borderRadius: 10, padding: '10px 14px', fontSize: 12, lineHeight: 1.65, color: T.muted }}>
+        {DISCLAIMER}
       </div>
+
+      <VetReportAccordion session={session} pet={pet} />
+
+      {/* 3 · Schutzlage einordnen – InsuranceFlow (nur wenn Feature Flag aktiv) */}
+      {FEATURES.insuranceFunnel && (
+        <>
+          <SectionHeader label="3 · Schutzlage einordnen" />
+          <InsuranceFlow
+            session={session}
+            pet={pet}
+            urgency={session.urgency}
+            onFormFlow={onFormFlow}
+          />
+        </>
       )}
-      {session.urgency === 'gruen' && (
-        <div style={{ borderRadius: 12, background: '#f0fdf4', border: '1px solid #bbf7d0', padding: 16, fontSize: 13, color: '#14532d', lineHeight: 1.6 }}>
-        <strong>Tipp:</strong> Beobachte dein Tier in den nächsten 24 Stunden genau. Bei Veränderung des Zustands Tierarzt aufsuchen.
+
+      {/* Secondary actions */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, paddingTop: 4 }}>
+        {alreadySaved ? (
+          <div style={{ textAlign: 'center', fontSize: 13, fontWeight: 600, color: T.green, padding: '8px 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+            <i className="ti ti-circle-check" aria-hidden="true" style={{ fontSize: 16 }} />
+            In Tierakte gespeichert
+          </div>
+        ) : (
+          <button ref={el => { if (el) el.style.cssText = BTN.outline }} onClick={onSave}>
+            In Tierakte speichern
+          </button>
+        )}
+        <button ref={el => { if (el) el.style.cssText = BTN.ghost }} onClick={onNewCheck}>
+          Neuen Check starten
+        </button>
       </div>
-      )}
     </div>
-
-    {/* 5 - Schutzlage einordnen */}    <SectionHeader label="5 · Schutzlage einordnen" />
-    <div style={{ borderRadius: 13, background: T.card, border: '1px solid ' + T.border, padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-      <p style={{ fontSize: 13, color: T.text, margin: 0, lineHeight: 1.7 }}>
-        Eine Tierkrankenversicherung kann bei unerwarteten Tierarztkosten eine wichtige rolle spielen. Ob wie viel sie übernimmt, hängt von deinem Vertrag ab, nur dein Versicherer kann dir darüber verbindliche Auskunft geben.
-      </p>
-      <p style={{ fontSize: 12, color: T.subtext, margin: 0, lineHeight: 1.7 }}>
-        ✫ Dieser Hinweis darf nicht als Versicherungsberatung verstanden werden.
-      </p>
-    </div>
-
-    <div style={{ height: 40 }} />
-  </div>
-);
-
-export default ResultPage;
+  )
+}
