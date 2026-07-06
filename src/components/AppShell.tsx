@@ -43,15 +43,18 @@ export function AppShell({ children, activeTab, screen: _screen, onTab, onBack, 
       <header style={{
         background: '#ffffff',
         borderBottom: '1px solid #e2e8f0',
-        padding: '0px 16px',
-        height: '56px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
         position: 'sticky',
         top: '0',
         zIndex: 100,
       }}>
+        <div style={{ height: 'env(safe-area-inset-top, 0px)', background: '#ffffff' }} />
+        <div style={{
+          padding: '0px 16px',
+          height: '56px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1 }}>
           {onBack ? (
             <button
@@ -95,9 +98,10 @@ export function AppShell({ children, activeTab, screen: _screen, onTab, onBack, 
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
           </svg>
         </button>
+        </div>
       </header>
 
-      <main style={{ flex: 1, overflowY: 'auto', paddingBottom: noNav ? '0' : '72px', paddingLeft: '20px', paddingRight: '20px' }}>
+      <main style={{ flex: 1, overflowY: 'auto', paddingBottom: noNav ? '0' : 'calc(72px + env(safe-area-inset-bottom, 0px))', paddingLeft: '20px', paddingRight: '20px' }}>
         {children}
       </main>
 
@@ -112,9 +116,10 @@ export function AppShell({ children, activeTab, screen: _screen, onTab, onBack, 
           background: '#ffffff',
           borderTop: '1px solid #e2e8f0',
           display: 'flex',
-          height: '72px',
+          flexDirection: 'column',
           zIndex: 100,
         }}>
+          <div style={{ display: 'flex', height: '72px' }}>
           {(['start', 'check', 'akte'] as NavTab[]).map(tab => {
             const active = tab === activeTab
             const label = NAV_LABELS[tab]
@@ -141,6 +146,8 @@ export function AppShell({ children, activeTab, screen: _screen, onTab, onBack, 
               </button>
             )
           })}
+          </div>
+          <div style={{ height: 'env(safe-area-inset-bottom, 0px)', background: '#ffffff' }} />
         </nav>
       )}
       </div>
