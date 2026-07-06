@@ -8,6 +8,7 @@ import { VetReportAccordion } from './VetReportAccordion'
 import { getSymptomById } from '../data/symptoms'
 import { disclaimer } from '../data/copy'
 import { buildEmergencyVetMapsUrl, buildRegularVetMapsUrl } from '../lib/maps'
+import { openExternal } from '../lib/openExternal'
 import { useCopy } from '../lib/LanguageContext'
 import { calcCostTier } from '../lib/costTier'
 
@@ -85,7 +86,7 @@ export function ResultPage({ session, pet, onFormFlow, onNewCheck, onSave, alrea
           <button
             onClick={() => {
               const city = pet.city || localCity.trim() || undefined
-              window.open(buildEmergencyVetMapsUrl(city), '_blank', 'noopener,noreferrer')
+              void openExternal(buildEmergencyVetMapsUrl(city))
             }}
             style={{ width: '100%', padding: '14px 0', borderRadius: 11, background: T.red, color: '#fff', border: 'none', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', letterSpacing: '-.01em' }}
           >
@@ -162,7 +163,7 @@ export function ResultPage({ session, pet, onFormFlow, onNewCheck, onSave, alrea
           <button
             onClick={() => {
               const city = pet.city || localCityYel.trim() || undefined
-              window.open(buildRegularVetMapsUrl(city), '_blank', 'noopener,noreferrer')
+              void openExternal(buildRegularVetMapsUrl(city))
             }}
             style={{ width: '100%', padding: '13px 0', borderRadius: 11, background: T.amber, color: '#fff', border: 'none', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', letterSpacing: '-.01em' }}
           >
