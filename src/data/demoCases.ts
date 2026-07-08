@@ -18,7 +18,7 @@ import type { DemoCase } from '../types'
 
 export const DEMO_CASES: DemoCase[] = [
   {
-    label: 'Hund humpelt → Gelb',
+    label: 'Bruno · Hund humpelt → Gelb',
     pet: {
       id: 'd1',
       species: 'hund',
@@ -47,7 +47,7 @@ export const DEMO_CASES: DemoCase[] = [
   },
 
   {
-    label: 'Katze frisst nicht → Gelb',
+    label: 'Mimi · Katze frisst nicht → Gelb',
     pet: {
       id: 'd2',
       species: 'katze',
@@ -75,7 +75,7 @@ export const DEMO_CASES: DemoCase[] = [
   },
 
   {
-    label: 'Hund erbricht → Grün',
+    label: 'Rocky · Hund erbricht → Grün',
     pet: {
       id: 'd3',
       species: 'hund',
@@ -104,7 +104,7 @@ export const DEMO_CASES: DemoCase[] = [
   },
 
   {
-    label: 'Katze kann nicht urinieren → Rot',
+    label: 'Felix · Katze kann nicht urinieren → Rot',
     pet: {
       id: 'd4',
       species: 'katze',
