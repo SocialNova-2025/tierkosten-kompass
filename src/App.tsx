@@ -648,7 +648,6 @@ export default function App() {
         <LeadForm
           pet={pet}
           session={session}
-          leadIntent={leadIntent}
           onSubmit={() => go('P10')}
           onCancel={() => go(p9CancelTarget)}
         />
