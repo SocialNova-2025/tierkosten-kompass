@@ -94,6 +94,12 @@ export interface GapResult {
   gaps: string[]
 }
 
+// ── Lead intent (used by LeadForm flow + App routing) ─────────────────────
+export type LeadIntent =
+  | 'existing_insurance_manual_review'
+  | 'new_insurance_interest'
+  | 'gap_check_followup'
+
 // ── Lead form – protection context ────────────────────────────────────────
 export type ProtectionStatus = 'ja' | 'nein' | 'nicht_sicher'
 
